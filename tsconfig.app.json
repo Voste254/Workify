@@ -21,7 +21,14 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    /* Add alias */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@/Components/*": ["src/Components/*"]
+    }
   },
   "include": ["src"]
 }

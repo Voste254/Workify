@@ -1,8 +1,18 @@
+import About from "./Components/pages/About";
+import Home from "./Components/pages/Home";
+import Navbar from "./Components/pages/Navbar";
+import Services from "./Components/pages/Services";
+
+
 function App() {
   return (
-    <h1 className="text-3xl font-bold underline">
-      Hello world!
-    </h1>
+    <div>
+    <Navbar/>
+    <Home/>
+    <About/>
+    <Services/>
+    </div>
+
   );
 }
 
