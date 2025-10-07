@@ -1,7 +1,7 @@
-import React from "react";
+
 import { Link } from "react-router-dom";
 
-function Footer() {
+export default function Footer() {
   return (
     <div className="bg-[#242424] pl-24 pt-16 pb-8 flex flex-row justify-center items-center text-white font-sans">
  <section>
@@ -98,4 +98,3 @@ function Footer() {
   );
 }
 
-export default Footer;
