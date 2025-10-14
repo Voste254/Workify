@@ -32,7 +32,7 @@ const WorkifyLanding = () => {
       <div className="relative z-10 max-w-6xl w-full px-4 sm:px-6 md:px-12 lg:px-16 py-20 md:py-32">
         {/* Heading */}
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight tracking-tight">
-          Find The Job That <br className="hidden sm:inline" /> Fits Your Life
+          Your Job search <br className="hidden sm:inline" /> Ends here
         </h1>
 
         {/* Subtext */}
