@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, X } from "lucide-react"; // hamburger and close icons
+import { Menu, X, ChevronDown } from "lucide-react";
 
 const Navbar = () => {
   const [openMenu, setOpenMenu] = useState<number | null>(null);
@@ -15,7 +15,7 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white shadow-md z-50 overflow-x-hidden">
+    <nav className="fixed top-0 left-0 right-0 bg-white shadow-md z-[100]">
       <div className="max-w-[100vw] flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 py-4">
         {/* Logo */}
         <div className="flex items-center space-x-2">
@@ -31,15 +31,24 @@ const Navbar = () => {
               key={index}
               className="relative group"
               onMouseEnter={() => setOpenMenu(index)}
-              onMouseLeave={() => setOpenMenu(null)}
+              onMouseLeave={() => setOpenMenu(index)}
             >
-              <button className="text-gray-700 hover:text-green-600 font-medium transition">
+              <button className="flex items-center gap-1 text-gray-700 hover:text-green-600 font-medium transition">
                 {menu.name}
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform duration-200 ${
+                    openMenu === index ? "rotate-180 text-green-600" : ""
+                  }`}
+                />
               </button>
 
               {/* Dropdown */}
               {openMenu === index && (
-                <div className="absolute left-0 top-8 mt-2 w-48 bg-white border shadow-lg rounded-lg p-2 z-50 animate-fadeIn">
+                <div
+                  className="absolute left-0 top-full mt-2 w-48 bg-white border shadow-lg rounded-lg p-2 z-[200] transition-all duration-300"
+                  onMouseEnter={() => setOpenMenu(index)}
+                  onMouseLeave={() => setOpenMenu(null)}
+                >
                   {menu.items.map((item, i) => (
                     <a
                       key={i}
@@ -78,7 +87,7 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="lg:hidden bg-white border-t shadow-md overflow-x-hidden">
+        <div className="lg:hidden bg-white border-t shadow-md">
           {menus.map((menu, index) => (
             <div key={index} className="border-b">
               <button
@@ -88,12 +97,16 @@ const Navbar = () => {
                 className="w-full text-left px-4 py-3 text-gray-700 font-medium hover:bg-green-50 hover:text-green-600 flex justify-between items-center"
               >
                 <span>{menu.name}</span>
-                <span>{openMenu === index ? "-" : "+"}</span>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform duration-200 ${
+                    openMenu === index ? "rotate-180 text-green-600" : ""
+                  }`}
+                />
               </button>
 
               {/* Dropdown for Mobile */}
               {openMenu === index && (
-                <div className="pl-6 pb-2 animate-slideDown">
+                <div className="pl-6 pb-2 transition-all duration-300">
                   {menu.items.map((item, i) => (
                     <a
                       key={i}
