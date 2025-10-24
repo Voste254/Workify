@@ -15,7 +15,7 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white shadow-md z-[100]">
+    <nav className="fixed top-0 left-0 right-0 bg-white shadow-md z-[100]" onMouseLeave={() => setOpenMenu(null)}>
       <div className="max-w-[100vw] flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 py-4">
         {/* Logo */}
         <div className="flex items-center space-x-2">
