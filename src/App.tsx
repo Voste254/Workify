@@ -1,4 +1,5 @@
 import About from "./Components/pages/About";
+import FeaturedJobs from "./Components/pages/Featured";
 import Footer from "./Components/pages/Footer";
 import Home from "./Components/pages/Home";
 import Navbar from "./Components/pages/Navbar";
@@ -16,6 +17,7 @@ function Landing() {
     <Home/>
     <About/>
     <Services/>
+    <FeaturedJobs/>
     <Offer/>
     <Partners/>
     <Footer/>
