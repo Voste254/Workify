@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const jobs = [
   {
     id: 1,
-    company: "Rockstar Games New York",
+    company: "Flutter Int'l",
     title: "Senior UI/UX Designer",
     logo: "https://upload.wikimedia.org/wikipedia/commons/4/44/Google-flutter-logo.svg",
     location: "Las Vegas, NV 89107, USA",
@@ -26,7 +26,7 @@ const jobs = [
   },
   {
     id: 3,
-    company: "Rockstar Games New York",
+    company: "IBM Inclusive",
     title: "Senior UI/UX Designer",
     logo: "https://upload.wikimedia.org/wikipedia/commons/5/51/IBM_logo.svg",
     location: "Las Vegas, NV 89107, USA",
@@ -37,7 +37,7 @@ const jobs = [
   },
   {
     id: 4,
-    company: "Rockstar Games New York",
+    company: "NETFLIX",
     title: "Full Stack Development",
     logo: "https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg",
     location: "Las Vegas, NV 89107, USA",
@@ -126,7 +126,7 @@ export default function FeaturedJobs() {
               ))}
             </div>
 
-            {/* Salary & Deadline */}
+            
             <div className="flex justify-between items-center mt-4 pt-4 border-t">
               <div className="flex items-center text-gray-800 font-medium">
                 <DollarSign size={16} className="mr-1" />
@@ -147,9 +147,12 @@ export default function FeaturedJobs() {
 
       {/* Button */}
       <div className="flex justify-center mt-12">
-        <button className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg text-lg font-semibold transition">
+        <Link to='/jobs'>
+        <button className="px-8 py-3  border border-green-800 bg-white hover:bg-green-700 text-green-600 hover:text-white rounded-lg text-lg font-semibold transition">
           See More Jobs
         </button>
+        </Link>
+ 
       </div>
     </section>
   );
