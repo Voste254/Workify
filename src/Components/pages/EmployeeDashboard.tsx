@@ -1,49 +1,74 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Bell,
   MapPin,
-  DollarSign,
   Calendar,
   Filter,
+  DollarSign,
   ChevronLeft,
   ChevronRight,
+  Heart,
+  Star,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+
+p
 
 export default function EmployeeDashboard() {
   const [filterOpen, setFilterOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState("All Locations");
+  const [avatarOpen, setAvatarOpen] = useState(false);
+  const [bookmarks, setBookmarks] = useState({});
+  const [selectedLocation, setSelectedLocation] = useState("All Location");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+
+  const toggleBookmark = (id) =>
+    setBookmarks((prev) => ({ ...prev, [id]: !prev[id] }));
 
   const jobs = [
     {
       id: 1,
-      title: "Senior UI/UX Designer",
       company: "Rockstar Games New York",
-      logo: "https://i.ibb.co/Y7nsyhj/kisspng-coders-programming-language-computer-programming-logo-5ac20c5075a2c7-2421946715226578721598.png",
+      title: "Senior UI/UX Designer",
+      logo: "https://upload.wikimedia.org/wikipedia/commons/6/65/Font_Awesome_5_brands_github.svg", // reliable svg
       location: "Las Vegas, NV 89107, USA",
       tags: ["Accounting", "Sales & Marketing"],
-      salary: "$1,000 – $2,000 /year",
+      salary: "$1,000 - $2,000 /year",
       posted: "2 days ago",
+      left: "2 days left to apply",
     },
     {
       id: 2,
-      title: "Project Manager",
       company: "Rockstar Games New York",
-      logo: "https://i.ibb.co/tL2Rqmx/icons8-up-arrow-96.png",
-      location: "Los Angeles, CA",
-      tags: ["UI/UX Design", "Accounting"],
-      salary: "$1,000 – $1,300 /year",
-      posted: "3 days ago",
+      title: "Project Manager",
+      logo: "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg",
+      location: "Las Vegas, NV 89107, USA",
+      tags: ["UI UX Design", "Accounting"],
+      salary: "$1,000 - $1,300 /year",
+      posted: "2 days ago",
+      left: "5 days left to apply",
     },
     {
       id: 3,
-      title: "Full Stack Developer",
       company: "Rockstar Games New York",
-      logo: "https://i.ibb.co/GFGMqRQ/icons8-bars-96.png",
-      location: "New York, USA",
-      tags: ["Frontend", "Backend"],
-      salary: "$1,200 – $1,600 /year",
-      posted: "4 days ago",
+      title: "Senior UI/UX Designer",
+      logo: "https://upload.wikimedia.org/wikipedia/commons/5/51/IBM_logo.svg",
+      location: "Las Vegas, NV 89107, USA",
+      tags: ["UI UX Design", "Project Manager", "Accounting"],
+      salary: "$2,000 - $2,400 /year",
+      posted: "2 days ago",
+      left: "6 days left to apply",
+    },
+    {
+      id: 4,
+      company: "Rockstar Games New York",
+      title: "Full Stack Development",
+      logo: "https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg",
+      location: "Las Vegas, NV 89107, USA",
+      tags: ["UI UX Design", "Project Manager"],
+      salary: "$1,100 - $1,500 /year",
+      posted: "2 days ago",
+      left: "7 days left to apply",
     },
   ];
 
@@ -53,173 +78,279 @@ export default function EmployeeDashboard() {
       options: ["All Job Types", "On-site", "Remote", "Hybrid"],
     },
     {
-      title: "Job Categories",
-      options: ["All Categories", "Full-time", "Part-time", "Contract", "Internship", "Temporary"],
+      title: "All Job Categories",
+      options: ["All Job Categories", "Full-time", "Part-time", "Contract", "Internship", "Temporary"],
     },
     {
-      title: "Salary",
+      title: "All Salary",
       options: ["All Salaries", "$1000 - $1500", "$1500 - $2000", "$2000 - $5000"],
     },
     {
       title: "Posted Anytime",
-      options: ["Anytime", "Last 3 days", "Last 7 days"],
+      options: ["Posted Anytime", "Last 3 days", "Last 7 days"],
     },
     {
       title: "Seniority Levels",
-      options: ["All", "Entry Level", "Mid Level", "Executive"],
+      options: ["Seniority Levels", "Entry Level", "Mid Level", "Executive"],
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Top Bar */}
-      <div className="w-full bg-white shadow-sm py-3 px-6 flex justify-end items-center space-x-6 sticky top-0 z-50">
-        <button className="relative">
-          <Bell size={22} className="text-gray-600" />
-          <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
-        </button>
-        <div className="relative">
-          <img
-            src="https://i.ibb.co/Dz7WgxV/user-avatar.png"
-            alt="User"
-            className="w-10 h-10 rounded-full cursor-pointer border border-gray-300"
-          />
-        </div>
-      </div>
-
-      {/* Filter Bar */}
-      <div className="bg-white p-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="flex items-center space-x-3 w-full sm:w-auto">
-          <input
-            type="text"
-            placeholder="Job title, keywords, or company"
-            className="w-full sm:w-80 px-4 py-2 border rounded-lg focus:outline-none"
-          />
-          <div className="relative">
-            <select
-              className="px-4 py-2 border rounded-lg bg-white focus:outline-none"
-              value={selectedLocation}
-              onChange={(e) => setSelectedLocation(e.target.value)}
+    <div className="min-h-screen bg-gray-50">
+      {/* Top bar (only notification + avatar) */}
+      <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-end items-center h-14">
+            <button
+              aria-label="notifications"
+              className="relative p-2 rounded-md hover:bg-gray-100"
             >
-              <option>All Locations</option>
-              <option>Las Vegas</option>
-              <option>Los Angeles</option>
-              <option>New York</option>
-            </select>
+              <Bell className="text-gray-600" size={20} />
+              <span className="absolute -top-0.5 -right-0.5 inline-block w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+
+            <div className="relative ml-4">
+              <button
+                onClick={() => setAvatarOpen((s) => !s)}
+                className="flex items-center gap-2 p-1 rounded-md hover:bg-gray-100"
+              >
+                <img
+                  src="https://i.pravatar.cc/150?img=32"
+                  alt="avatar"
+                  className="w-10 h-10 rounded-full border border-gray-200"
+                />
+              </button>
+
+              {avatarOpen && (
+                <div className="absolute right-0 mt-2 w-44 bg-white border rounded-md shadow-lg">
+                  <button className="block w-full text-left px-4 py-2 hover:bg-green-50">Profile</button>
+                  <button className="block w-full text-left px-4 py-2 hover:bg-green-50">Settings</button>
+                  <button className="block w-full text-left px-4 py-2 hover:bg-green-50">Logout</button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
+      </header>
 
-        <button
-          onClick={() => setFilterOpen(true)}
-          className="flex items-center px-4 py-2 border rounded-lg bg-white hover:bg-gray-100 transition"
-        >
-          <Filter size={18} className="mr-2" /> Filter More
-        </button>
+      {/* Filter row (search input, location, Filter More, Find Jobs) */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+        <div className="bg-white border rounded-md shadow-sm p-4">
+          <div className="flex flex-col lg:flex-row lg:items-center gap-3">
+            {/* Search / title input */}
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="flex items-center px-3 border-r">
+                <svg className="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none">
+                  <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
+                  <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="1.5"></circle>
+                </svg>
+              </div>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Job title, key words or company"
+                className="w-full px-3 py-3 text-gray-700 focus:outline-none"
+              />
+            </div>
+
+            {/* Location select */}
+            <div className="flex items-center border-l pl-4">
+              <MapPin className="text-gray-500 mr-2" size={18} />
+              <select
+                value={selectedLocation}
+                onChange={(e) => setSelectedLocation(e.target.value)}
+                className="py-2 pr-4 pl-1 focus:outline-none"
+              >
+                <option>All Location</option>
+                <option>Las Vegas</option>
+                <option>New York</option>
+                <option>Los Angeles</option>
+              </select>
+            </div>
+
+            {/* Filter More + Find Jobs */}
+            <div className="ml-auto flex items-center gap-3">
+              <button
+                onClick={() => setFilterOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 border rounded-md hover:bg-gray-50"
+              >
+                <Filter size={16} /> Filter More
+              </button>
+
+              <button className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-md">
+                Find Jobs
+              </button>
+            </div>
+          </div>
+
+          {/* Filter More inline preview (like in screenshot) - small hint area; actual modal opens on button */}
+          {/* We'll not render tallies or the distance column per instructions */}
+        </div>
       </div>
 
-      {/* Job List */}
-      <div className="p-6 space-y-4">
-        <p className="text-gray-600 font-medium">{jobs.length} Results Found</p>
+      {/* Job list */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+        <div className="bg-white border rounded-md">
+          <div className="px-6 py-4 border-b">
+            <div className="flex items-center gap-3">
+              <button className="p-2 rounded-md bg-green-600 text-white">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v2H4zM4 11h16v2H4zM4 18h16v2H4z" fill="currentColor"/></svg>
+              </button>
+              <div className="text-sm text-gray-700">9 Result(s) Found</div>
+            </div>
+          </div>
 
-        {jobs.map((job) => (
-          <Link
-            to="/login"
-            key={job.id}
-            className="bg-white flex flex-col md:flex-row justify-between items-start md:items-center p-5 rounded-lg border hover:border-green-500 transition"
-          >
-            <div className="flex items-start space-x-4">
-              <img src={job.logo} alt={job.company} className="w-16 h-16 object-contain" />
-              <div>
-                <h4 className="text-green-600 text-sm font-semibold">{job.company}</h4>
-                <h3 className="text-lg font-bold text-gray-900">{job.title}</h3>
-                <div className="flex items-center text-gray-500 text-sm mt-1 space-x-3">
-                  <span className="flex items-center">
-                    <MapPin size={14} className="mr-1" /> {job.location}
-                  </span>
-                  <span className="flex items-center">
-                    <Calendar size={14} className="mr-1" /> {job.posted}
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {job.tags.map((tag, i) => (
-                    <span
-                      key={i}
-                      className="px-3 py-1 bg-gray-100 rounded-full text-gray-700 text-sm font-medium"
-                    >
-                      {tag}
-                    </span>
+          {/* Rows */}
+          <div>
+            {jobs.map((job) => (
+              <div key={job.id} className="px-6 py-5 border-b last:border-b-0">
+                <Link
+                  to="/login"
+                  className="flex items-center gap-6 w-full"
+                >
+                  {/* Left: logo + title/company */}
+                  <div className="flex items-center gap-4 min-w-0">
+                    <img
+                      src={job.logo}
+                      alt={job.company}
+                      className="w-16 h-16 object-contain"
+                    />
+                    <div className="min-w-0">
+                      <div className="text-green-600 text-sm font-medium">{job.company}</div>
+                      <div className="text-lg font-semibold text-gray-900 truncate">{job.title}</div>
+
+                      <div className="flex items-center gap-3 text-sm text-gray-500 mt-2 flex-wrap">
+                        <span className="flex items-center gap-1">
+                          <MapPin size={14} /> {job.location}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Calendar size={14} /> {job.left}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Middle: tags - distributed center */}
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="flex flex-wrap gap-2">
+                      {job.tags.map((t, i) => (
+                        <span
+                          key={i}
+                          className="px-3 py-1 bg-gray-100 rounded-full text-gray-700 text-sm font-medium"
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Right: salary + actions */}
+                  <div className="flex items-center gap-4 min-w-[240px] justify-end">
+                    <div className="flex items-center gap-2 text-gray-800 font-medium">
+                      <DollarSign size={18} /> <span>{job.salary}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          toggleBookmark(job.id);
+                        }}
+                        className={`p-2 rounded-full border hover:bg-gray-50 ${bookmarks[job.id] ? "text-green-600 border-green-200 bg-green-50" : "text-gray-500 border-gray-100"}`}
+                        aria-label="bookmark"
+                      >
+                        {/* heart-style bookmark */}
+                        <Heart size={18} fill={bookmarks[job.id] ? "currentColor" : "none"} />
+                      </button>
+
+                      <button
+                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md"
+                        onClick={(e) => e.preventDefault()}
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          <div className="px-6 py-4 flex justify-between items-center">
+            <div className="text-sm text-gray-600">Showing {(page-1)*4+1} - {Math.min(page*4, jobs.length)} of {jobs.length}</div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                className="p-2 rounded border hover:bg-gray-50"
+              >
+                <ChevronLeft size={18} />
+              </button>
+
+              {[1,2,3].map((n) => (
+                <button
+                  key={n}
+                  onClick={() => setPage(n)}
+                  className={`px-3 py-1 rounded border ${n===page ? "bg-green-600 text-white" : "hover:bg-gray-50"}`}
+                >
+                  {n}
+                </button>
+              ))}
+
+              <button
+                onClick={() => setPage((p) => p + 1)}
+                className="p-2 rounded border hover:bg-gray-50"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* FILTER MORE - CENTERED MODAL */}
+      {filterOpen && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/40 z-40"
+            onClick={() => setFilterOpen(false)}
+          />
+
+          <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4">
+            <div className="bg-white w-full max-w-6xl rounded-lg shadow-xl border overflow-hidden">
+              <div className="p-6 border-b flex items-center justify-between">
+                <h3 className="text-xl font-semibold">Filter More</h3>
+                <button
+                  onClick={() => setFilterOpen(false)}
+                  className="px-3 py-1 rounded hover:bg-gray-100"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+                  {filterCategories.map((cat, idx) => (
+                    <div key={idx}>
+                      <h4 className="font-medium mb-3">{cat.title}</h4>
+                      <div className="space-y-3">
+                        {cat.options.map((opt, j) => (
+                          <label key={j} className="flex items-center gap-2 text-gray-700">
+                            <input type="radio" name={`filter-${idx}`} className="accent-green-600" />
+                            <span>{opt}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
-            </div>
 
-            <div className="mt-4 md:mt-0 flex items-center space-x-4">
-              <div className="flex items-center text-gray-800 font-medium">
-                <DollarSign size={16} className="mr-1" /> {job.salary}
+              <div className="p-6 border-t flex justify-end gap-3">
+                <button onClick={() => setFilterOpen(false)} className="px-4 py-2 rounded border hover:bg-gray-50">Cancel</button>
+                <button onClick={() => setFilterOpen(false)} className="px-5 py-2 rounded bg-green-600 text-white hover:bg-green-700">Apply Filters</button>
               </div>
-              <button className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">
-                Apply
-              </button>
-            </div>
-          </Link>
-        ))}
-      </div>
-
-      {/* Pagination */}
-      <div className="flex justify-center items-center space-x-3 py-6">
-        <button className="p-2 border rounded hover:bg-gray-100">
-          <ChevronLeft size={18} />
-        </button>
-        {[1, 2, 3].map((num) => (
-          <button
-            key={num}
-            className={`px-3 py-1 border rounded ${
-              num === 1 ? "bg-green-600 text-white" : "hover:bg-gray-100"
-            }`}
-          >
-            {num}
-          </button>
-        ))}
-        <button className="p-2 border rounded hover:bg-gray-100">
-          <ChevronRight size={18} />
-        </button>
-      </div>
-
-      {/* Filter More Panel */}
-      {filterOpen && (
-        <>
-          {/* Background overlay */}
-          <div
-            className="fixed inset-0 bg-black bg-opacity-40 z-40"
-            onClick={() => setFilterOpen(false)}
-          ></div>
-
-          {/* Drawer for small screens / floating for large */}
-          <div className="fixed z-50 bg-white rounded-lg shadow-lg p-6 w-full sm:w-[500px] sm:right-8 sm:top-32 sm:rounded-xl max-h-[90vh] overflow-y-auto sm:overflow-visible sm:max-h-none transition">
-            <h3 className="text-xl font-semibold mb-4">Filter More</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {filterCategories.map((cat, i) => (
-                <div key={i}>
-                  <h4 className="font-medium mb-2">{cat.title}</h4>
-                  <div className="space-y-2">
-                    {cat.options.map((opt, j) => (
-                      <label key={j} className="flex items-center space-x-2 text-gray-600">
-                        <input type="checkbox" className="accent-green-600" />
-                        <span>{opt}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex justify-end mt-6">
-              <button
-                onClick={() => setFilterOpen(false)}
-                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-              >
-                Apply Filters
-              </button>
             </div>
           </div>
         </>
