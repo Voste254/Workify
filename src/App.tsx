@@ -1,5 +1,5 @@
 import About from "./Components/pages/About";
-import EmployeeDashboard from "./Components/pages/EmployeeDashboard";
+import Employee from "./Components/Dashboards/Employee";
 import FeaturedJobs from "./Components/pages/Featured";
 import Footer from "./Components/pages/Footer";
 import Home from "./Components/pages/Home";
@@ -31,7 +31,7 @@ function App(){
   return (
   <Routes>
     <Route path='/' element={<Landing/>} />
-    <Route path='/jobs' element={<EmployeeDashboard/>} />
+    <Route path='/jobs' element={<Employee/>} />
   </Routes>
 
   )
