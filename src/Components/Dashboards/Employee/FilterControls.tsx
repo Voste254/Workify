@@ -80,7 +80,6 @@ const FilterControls: React.FC<Props> = ({
             </select>
           </div>
 
-          {/* Controls: Filter More + Find Jobs */}
           <div className="ml-auto flex items-center gap-3">
             <button
               onClick={onOpenModal}

@@ -36,7 +36,7 @@ export const JobList: React.FC<Props> = ({ jobs, bookmarks, toggleBookmark }) =>
           {jobs.map((job) => (
             <div key={job.id} className="px-6 py-5 border-b last:border-b-0">
               <Link to="/login" className="flex items-center gap-6 w-full">
-                {/* Left: logo + company + title + meta */}
+                
                 <div className="flex items-center gap-4 min-w-0">
                   <img src={job.logo} alt={job.company} className="w-16 h-16 object-contain" />
                   <div className="min-w-0">
@@ -50,7 +50,6 @@ export const JobList: React.FC<Props> = ({ jobs, bookmarks, toggleBookmark }) =>
                   </div>
                 </div>
 
-                {/* Middle: tags centered */}
                 <div className="flex-1 flex items-center justify-center">
                   <div className="flex flex-wrap gap-2">
                     {job.tags.map((t, i) => (
@@ -59,7 +58,6 @@ export const JobList: React.FC<Props> = ({ jobs, bookmarks, toggleBookmark }) =>
                   </div>
                 </div>
 
-                {/* Right: salary + actions */}
                 <div className="flex items-center gap-4 min-w-[240px] justify-end">
                   <div className="flex items-center gap-2 text-gray-800 font-medium">
                     <DollarSign size={18} /> <span>{job.salary}</span>
