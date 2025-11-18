@@ -1,5 +1,5 @@
 import About from "./Components/pages/About";
-import Employee from "./Components/Dashboards/Employee";
+import Employee from "./Components/Dashboards/Employee/Employee";
 import FeaturedJobs from "./Components/pages/Featured";
 import Footer from "./Components/pages/Footer";
 import Home from "./Components/pages/Home";
