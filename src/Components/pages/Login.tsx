@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { Outlet } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
 
   return (
+    <>
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="bg-white w-full max-w-md shadow-xl rounded-lg p-8">
 
@@ -103,6 +105,8 @@ const AuthPage = () => {
         </p>
       </div>
     </div>
+    <Outlet/>
+    </>
   );
 };
 
