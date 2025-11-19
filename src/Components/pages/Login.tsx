@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Outlet } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 
 const AuthPage = () => {
@@ -105,7 +104,7 @@ const AuthPage = () => {
         </p>
       </div>
     </div>
-    <Outlet/>
+   
     </>
   );
 };

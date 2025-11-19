@@ -33,7 +33,15 @@ function App(){
   <Routes>
     <Route path='/' element={<Landing/>} />
     <Route path='/jobs' element={<Employee/>} />
-    <Route path='/login' element={<Login><Footer/><Login/>} />
+  <Route
+        path="/login"
+        element={
+          <>
+            <Login />
+            <Footer />
+          </>
+        }
+      />
   </Routes>
 
   )
