@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const [openMenu, setOpenMenu] = useState<number | null>(null);
@@ -66,12 +67,19 @@ const Navbar = () => {
 
         {/* Desktop Buttons */}
         <div className="hidden lg:flex space-x-4">
-          <button className="px-5 py-2 border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition">
+          <Link to='/login'>
+                    <button className="px-5 py-2 border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition">
             Signup
           </button>
-          <button className="px-5 py-2 border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition">
+          </Link>
+
+          <Link to='/login' >
+                    <button className="px-5 py-2 border border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition">
             Login
           </button>
+          </Link>
+
+
         </div>
 
         {/* Mobile Hamburger */}
