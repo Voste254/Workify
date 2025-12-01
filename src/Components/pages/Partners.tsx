@@ -70,13 +70,12 @@ const Partners = () => {
         Our Trusted Partners
       </h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
         {companies.map((company, index) => (
           <div
             key={index}
-            className="bg-white border border-gray-200 rounded-xl  hover:border-green-700 transition-all duration-300 flex items-center space-x-4 p-5"
+            className="bg-white border border-gray-200 rounded-xl hover:border-green-700 transition-all duration-300 flex items-center space-x-4 p-5"
           >
-            {/* Logo */}
             <div className="flex-shrink-0 w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center p-2">
               <img
                 src={company.logo}
@@ -84,16 +83,17 @@ const Partners = () => {
                 className="w-10 h-10 object-contain"
                 onError={(e) =>
                   (e.currentTarget.src =
-                    "https://via.placeholder.com/80x80?text=Logo")
+                    'https://via.placeholder.com/80x80?text=Logo')
                 }
               />
             </div>
 
-            {/* Company Info */}
             <div>
               <div className="flex items-center space-x-1 text-yellow-400 mb-1">
                 <span>★</span>
-                <span className="text-gray-500 text-sm">{company.rating.toFixed(1)}</span>
+                <span className="text-gray-500 text-sm">
+                  {company.rating.toFixed(1)}
+                </span>
               </div>
               <h3 className="font-semibold text-gray-800 text-lg">{company.name}</h3>
               <p className="text-gray-500 text-sm flex items-center mt-1">
