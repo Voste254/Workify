@@ -1,46 +1,32 @@
-import React, { useState } from "react";
-import { Bell } from "lucide-react";
+import React from 'react';
+import { Bell } from 'lucide-react';
 
-export const TopBar: React.FC = () => {
-  const [open, setOpen] = useState(false);
-
+const Topbar: React.FC = () => {
   return (
-    <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-end items-center h-14">
-          <button
-            aria-label="notifications"
-            className="relative p-2 rounded-md hover:bg-gray-100"
-          >
-            <Bell className="text-gray-600" size={20} />
-            <span className="absolute -top-0.5 -right-0.5 inline-block w-2 h-2 bg-red-500 rounded-full"></span>
-          </button>
+        <div className="flex justify-between items-center h-16">
+          {/* Logo/Brand */}
+          <div className="flex items-center">
+            <h1 className="text-2xl font-bold text-gray-900">Workify</h1>
+          </div>
 
-          <div className="relative ml-4">
-            <button
-              onClick={() => setOpen((s) => !s)}
-              className="flex items-center gap-2 p-1 rounded-md hover:bg-gray-100"
-            >
-              <img
-                src="https://i.pravatar.cc/150?img=32"
-                alt="avatar"
-                className="w-10 h-10 rounded-full border border-gray-200"
-              />
+          {/* Right side - Notifications and Profile */}
+          <div className="flex items-center space-x-4">
+            {/* Notification Bell */}
+            <button className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors">
+              <Bell className="w-6 h-6" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
 
-            {open && (
-              <div className="absolute right-0 mt-2 w-44 bg-white border rounded-md shadow-lg">
-                <button className="block w-full text-left px-4 py-2 hover:bg-green-50">
-                  Profile
-                </button>
-                <button className="block w-full text-left px-4 py-2 hover:bg-green-50">
-                  Settings
-                </button>
-                <button className="block w-full text-left px-4 py-2 hover:bg-green-50">
-                  Logout
-                </button>
-              </div>
-            )}
+            {/* Profile Picture */}
+            <button className="flex items-center space-x-2 hover:bg-gray-100 rounded-full p-1 transition-colors">
+              <img
+                src="https://ui-avatars.com/api/?name=User&background=10b981&color=fff"
+                alt="User Profile"
+                className="w-10 h-10 rounded-full border-2 border-gray-200"
+              />
+            </button>
           </div>
         </div>
       </div>
@@ -48,4 +34,4 @@ export const TopBar: React.FC = () => {
   );
 };
 
-export default TopBar;
+export default Topbar;

@@ -1,137 +1,122 @@
-import React, { useMemo, useState } from "react";
-import TopBar from "./Topbar";
-import FilterControls, { filterCategories } from "./FilterControls";
-import JobList, { type JobType } from "./Joblist";
-import Pagination from "./Pagination";
+import React, { useState } from 'react';
+import Topbar from './Topbar';
+import FilterControls from './FilterControls';
+import Joblist from './Joblist';
+import Pagination from './Pagination';
 
-
-
-const MOCK_JOBS: JobType[] = [
-  {
-    id: 1,
-    company: "Rockstar Games New York",
-    title: "Senior UI/UX Designer",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/6/65/Font_Awesome_5_brands_github.svg",
-    location: "Las Vegas, NV 89107, USA",
-    tags: ["Accounting", "Sales & Marketing"],
-    salary: "$1,000 - $2,000 /year",
-    left: "2 days left to apply",
-  },
-  {
-    id: 2,
-    company: "Rockstar Games New York",
-    title: "Project Manager",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg",
-    location: "Las Vegas, NV 89107, USA",
-    tags: ["UI UX Design", "Accounting"],
-    salary: "$1,000 - $1,300 /year",
-    left: "5 days left to apply",
-  },
-  {
-    id: 3,
-    company: "Rockstar Games New York",
-    title: "Senior UI/UX Designer",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/5/51/IBM_logo.svg",
-    location: "Las Vegas, NV 89107, USA",
-    tags: ["UI UX Design", "Project Manager", "Accounting"],
-    salary: "$2,000 - $2,400 /year",
-    left: "6 days left to apply",
-  },
-  {
-    id: 4,
-    company: "Rockstar Games New York",
-    title: "Full Stack Development",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg",
-    location: "Las Vegas, NV 89107, USA",
-    tags: ["UI UX Design", "Project Manager"],
-    salary: "$1,100 - $1,500 /year",
-    left: "7 days left to apply",
-  },
-];
+interface Job {
+  id: string;
+  company: string;
+  logo: string;
+  title: string;
+  location: string;
+  daysLeft: number;
+  categories: string[];
+  salary: {
+    min: number;
+    max: number;
+    period: string;
+  };
+}
 
 const Employee: React.FC = () => {
-  const [search, setSearch] = useState("");
-  const [location, setLocation] = useState("All Location");
-  const [bookmarks, setBookmarks] = useState<Record<number, boolean>>({});
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('All Location');
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filters, setFilters] = useState({
+    jobType: 'All Job Types',
+    category: 'All Job Categories',
+    salary: 'All Salaries',
+    posted: 'Posted Anytime',
+    seniority: 'Seniority Levels'
+  });
 
-  const toggleBookmark = (id: number) => {
-    setBookmarks((prev) => ({ ...prev, [id]: !prev[id] }));
+  // Sample job data
+  const jobs: Job[] = [
+    {
+      id: '1',
+      company: 'Rockstar Games New York',
+      logo: '/logos/rockstar.png',
+      title: 'Senior UI/UX Designer',
+      location: 'Las Vegas, NV 89107, USA',
+      daysLeft: 2,
+      categories: ['Accounting', 'Sales & Marketing'],
+      salary: { min: 1000, max: 2000, period: 'year' }
+    },
+    {
+      id: '2',
+      company: 'Rockstar Games New York',
+      logo: '/logos/microsoft.png',
+      title: 'Project Manager',
+      location: 'Las Vegas, NV 89107, USA',
+      daysLeft: 5,
+      categories: ['UI UX Design', 'Accounting'],
+      salary: { min: 1000, max: 1300, period: 'year' }
+    },
+    {
+      id: '3',
+      company: 'Rockstar Games New York',
+      logo: '/logos/ibm.png',
+      title: 'Senior UI/UX Designer',
+      location: 'Las Vegas, NV 89107, USA',
+      daysLeft: 6,
+      categories: ['UI UX Design', 'Project Manager', 'Accounting'],
+      salary: { min: 2000, max: 2400, period: 'year' }
+    },
+    {
+      id: '4',
+      company: 'Rockstar Games New York',
+      logo: '/logos/netflix.png',
+      title: 'Full Stack Development',
+      location: 'Las Vegas, NV 89107, USA',
+      daysLeft: 7,
+      categories: ['UI UX Design', 'Project Manager'],
+      salary: { min: 1100, max: 1500, period: 'year' }
+    }
+  ];
+
+  const handleSearch = () => {
+    console.log('Searching for:', searchQuery, 'in location:', selectedLocation);
   };
 
-  // naive paging; page size 4
-  const totalPages = Math.max(1, Math.ceil(MOCK_JOBS.length / 4));
-  const filtered = useMemo(() => {
-    let arr = MOCK_JOBS;
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      arr = arr.filter((j) => j.title.toLowerCase().includes(q) || j.company.toLowerCase().includes(q));
-    }
-    if (location !== "All Location") {
-      arr = arr.filter((j) => j.location.includes(location));
-    }
-    return arr;
-  }, [search, location]);
+  const handleFilterApply = (newFilters: typeof filters) => {
+    setFilters(newFilters);
+    setShowFilterModal(false);
+  };
+
+  const totalResults = jobs.length;
 
   return (
-    <div>
-      <TopBar />
-      <FilterControls
-        search={search}
-        setSearch={setSearch}
-        location={location}
-        setLocation={setLocation}
-        onOpenModal={() => setFilterOpen(true)}
-      />
+    <div className="min-h-screen bg-gray-50">
+      <Topbar />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <FilterControls
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          selectedLocation={selectedLocation}
+          setSelectedLocation={setSelectedLocation}
+          onSearch={handleSearch}
+          onFilterClick={() => setShowFilterModal(true)}
+          showFilterModal={showFilterModal}
+          onCloseModal={() => setShowFilterModal(false)}
+          filters={filters}
+          onFilterApply={handleFilterApply}
+        />
 
-      <JobList jobs={filtered} bookmarks={bookmarks} toggleBookmark={toggleBookmark} />
-
-      <Pagination page={page} setPage={setPage} totalPages={totalPages} />
-
-      {filterOpen && (
-        <div>
-          <div className="fixed inset-0 bg-black/40 z-40" onClick={() => setFilterOpen(false)} />
-
-          <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4">
-            <div className="bg-white w-full max-w-6xl rounded-lg shadow-xl border overflow-hidden">
-              <div className="p-6 border-b flex items-center justify-between">
-                <h3 className="text-xl font-semibold">Filter More</h3>
-                <button onClick={() => setFilterOpen(false)} className="px-3 py-1 rounded hover:bg-gray-100">
-                  Close
-                </button>
-              </div>
-
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-                  {filterCategories.map((cat, idx) => (
-                    <div key={idx}>
-                      <h4 className="font-medium mb-3">{cat.title}</h4>
-                      <div className="space-y-3">
-                        {cat.options.map((opt, j) => (
-                          <label key={j} className="flex items-center gap-2 text-gray-700">
-                            <input type="radio" name={`filter-${idx}`} className="accent-green-600" />
-                            <span>{opt}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="p-6 border-t flex justify-end gap-3">
-                <button onClick={() => setFilterOpen(false)} className="px-4 py-2 rounded border hover:bg-gray-50">
-                  Cancel
-                </button>
-                <button onClick={() => setFilterOpen(false)} className="px-5 py-2 rounded bg-green-600 text-white hover:bg-green-700">
-                  Apply Filters
-                </button>
-              </div>
-            </div>
-          </div>
+        <div className="mt-8">
+          <Joblist jobs={jobs} totalResults={totalResults} />
         </div>
-      )}
+
+        <div className="mt-8">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={5}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      </div>
     </div>
   );
 };

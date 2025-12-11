@@ -1,100 +1,112 @@
-import React from "react";
-import { Filter, MapPin } from "lucide-react";
+import React from 'react';
+import { Search, MapPin, Filter } from 'lucide-react';
+import FilterModal from './FilterModal';
 
-export type FilterCategoriesType = {
-  title: string;
-  options: string[];
-}[];
-
-interface Props {
-  search: string;
-  setSearch: (v: string) => void;
-  location: string;
-  setLocation: (v: string) => void;
-  onOpenModal?: () => void;
+interface FilterControlsProps {
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  selectedLocation: string;
+  setSelectedLocation: (location: string) => void;
+  onSearch: () => void;
+  onFilterClick: () => void;
+  showFilterModal: boolean;
+  onCloseModal: () => void;
+  filters: {
+    jobType: string;
+    category: string;
+    salary: string;
+    posted: string;
+    seniority: string;
+  };
+  onFilterApply: (filters: any) => void;
 }
 
-export const filterCategories: FilterCategoriesType = [
-  {
-    title: "On-site/Remote",
-    options: ["All Job Types", "On-site", "Remote", "Hybrid"],
-  },
-  {
-    title: "All Job Categories",
-    options: ["All Job Categories", "Full-time", "Part-time", "Contract", "Internship", "Temporary"],
-  },
-  {
-    title: "All Salary",
-    options: ["All Salaries", "$1000 - $1500", "$1500 - $2000", "$2000 - $5000"],
-  },
-  {
-    title: "Posted Anytime",
-    options: ["Posted Anytime", "Last 3 days", "Last 7 days"],
-  },
-  {
-    title: "Seniority Levels",
-    options: ["Seniority Levels", "Entry Level", "Mid Level", "Executive"],
-  },
-];
-
-const FilterControls: React.FC<Props> = ({
-  search,
-  setSearch,
-  location,
-  setLocation,
-  onOpenModal,
+const FilterControls: React.FC<FilterControlsProps> = ({
+  searchQuery,
+  setSearchQuery,
+  selectedLocation,
+  setSelectedLocation,
+  onSearch,
+  onFilterClick,
+  showFilterModal,
+  onCloseModal,
+  filters,
+  onFilterApply
 }) => {
+  const locations = [
+    'All Location',
+    'New York, USA',
+    'Los Angeles, USA',
+    'Las Vegas, USA',
+    'Chicago, USA',
+    'San Francisco, USA'
+  ];
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-      <div className="bg-white border rounded-md shadow-sm p-4">
-        <div className="flex flex-col lg:flex-row lg:items-center gap-3">
+    <>
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="flex flex-col lg:flex-row gap-4">
           {/* Search Input */}
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="flex items-center px-3 border-r">
-              <svg className="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none">
-                <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
-                <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="1.5"></circle>
-              </svg>
-            </div>
+          <div className="flex-1 relative">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
               placeholder="Job title, key words or company"
-              className="w-full px-3 py-3 text-gray-700 focus:outline-none"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
             />
           </div>
 
-          {/* Location select */}
-          <div className="flex items-center border-l pl-4">
-            <MapPin className="text-gray-500 mr-2" size={18} />
+          {/* Location Dropdown */}
+          <div className="relative lg:w-64">
+            <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <select
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="py-2 pr-4 pl-1 focus:outline-none"
+              value={selectedLocation}
+              onChange={(e) => setSelectedLocation(e.target.value)}
+              className="w-full pl-12 pr-10 py-3 border border-gray-300 rounded-lg appearance-none focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all bg-white cursor-pointer"
             >
-              <option>All Location</option>
-              <option>Las Vegas</option>
-              <option>New York</option>
-              <option>Los Angeles</option>
+              {locations.map((location) => (
+                <option key={location} value={location}>
+                  {location}
+                </option>
+              ))}
             </select>
+            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </div>
 
-          <div className="ml-auto flex items-center gap-3">
-            <button
-              onClick={onOpenModal}
-              className="flex items-center gap-2 px-4 py-2 border rounded-md hover:bg-gray-50"
-            >
-              <Filter size={16} /> Filter More
-            </button>
+          {/* Filter More Button */}
+          <button
+            onClick={onFilterClick}
+            className="flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700"
+          >
+            <Filter className="w-5 h-5" />
+            Filter More
+          </button>
 
-            <button className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-md">
-              Find Jobs
-            </button>
-          </div>
+          {/* Find Jobs Button */}
+          <button
+            onClick={onSearch}
+            className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold shadow-sm hover:shadow-md"
+          >
+            Find Jobs
+          </button>
         </div>
       </div>
-    </div>
+
+      {/* Filter Modal */}
+      {showFilterModal && (
+        <FilterModal
+          onClose={onCloseModal}
+          filters={filters}
+          onApply={onFilterApply}
+        />
+      )}
+    </>
   );
 };
 

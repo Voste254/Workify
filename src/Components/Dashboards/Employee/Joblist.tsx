@@ -1,92 +1,137 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { MapPin, Calendar, DollarSign, Heart } from "lucide-react";
+import React from 'react';
+import { MapPin, Calendar, Heart } from 'lucide-react';
 
-export type JobType = {
-  id: number;
+interface Job {
+  id: string;
   company: string;
-  title: string;
   logo: string;
+  title: string;
   location: string;
-  tags: string[];
-  salary: string;
-  left: string;
-};
-
-interface Props {
-  jobs: JobType[];
-  bookmarks: Record<number, boolean>;
-  toggleBookmark: (id: number) => void;
+  daysLeft: number;
+  categories: string[];
+  salary: {
+    min: number;
+    max: number;
+    period: string;
+  };
 }
 
-export const JobList: React.FC<Props> = ({ jobs, bookmarks, toggleBookmark }) => {
+interface JoblistProps {
+  jobs: Job[];
+  totalResults: number;
+}
+
+const Joblist: React.FC<JoblistProps> = ({ jobs, totalResults }) => {
+  const getLogoColor = (index: number) => {
+    const colors = ['bg-gray-800', 'bg-gradient-to-br from-orange-500 to-blue-500', 'bg-blue-900', 'bg-red-600'];
+    return colors[index % colors.length];
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-      <div className="bg-white border rounded-md">
-        <div className="px-6 py-4 border-b">
-          <div className="flex items-center gap-3">
-            <button className="p-2 rounded-md bg-green-600 text-white">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v2H4zM4 11h16v2H4zM4 18h16v2H4z" fill="currentColor"/></svg>
-            </button>
-            <div className="text-sm text-gray-700">9 Result(s) Found</div>
-          </div>
+    <div className="space-y-6">
+      {/* Results Header */}
+      <div className="flex items-center gap-3 bg-white px-6 py-4 rounded-lg shadow-sm">
+        <div className="bg-green-600 p-2 rounded">
+          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
         </div>
+        <h2 className="text-lg font-semibold text-gray-900">
+          {totalResults} Result{totalResults !== 1 ? 's' : ''} Found
+        </h2>
+      </div>
 
-        <div>
-          {jobs.map((job) => (
-            <div key={job.id} className="px-6 py-5 border-b last:border-b-0">
-              <Link to="/login" className="flex items-center gap-6 w-full">
+      {/* Job Cards */}
+      <div className="space-y-4">
+        {jobs.map((job, index) => (
+          <div
+            key={job.id}
+            className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 border border-gray-200"
+          >
+            <div className="flex items-start gap-4">
+              {/* Company Logo */}
+              <div className={`flex-shrink-0 w-16 h-16 ${getLogoColor(index)} rounded-lg flex items-center justify-center overflow-hidden`}>
+                {index === 0 && (
+                  <span className="text-white font-bold text-xl">R</span>
+                )}
+                {index === 1 && (
+                  <div className="w-full h-full grid grid-cols-2 grid-rows-2">
+                    <div className="bg-red-500"></div>
+                    <div className="bg-green-500"></div>
+                    <div className="bg-blue-500"></div>
+                    <div className="bg-yellow-500"></div>
+                  </div>
+                )}
+                {index === 2 && (
+                  <span className="text-white font-bold text-2xl" style={{ fontFamily: 'serif' }}>IBM</span>
+                )}
+                {index === 3 && (
+                  <span className="text-white font-bold text-xl">N</span>
+                )}
+              </div>
+
+              {/* Job Details */}
+              <div className="flex-1 min-w-0">
+                {/* Company Name */}
+                <p className="text-sm text-green-600 font-medium mb-1">{job.company}</p>
                 
-                <div className="flex items-center gap-4 min-w-0">
-                  <img src={job.logo} alt={job.company} className="w-16 h-16 object-contain" />
-                  <div className="min-w-0">
-                    <div className="text-green-600 text-sm font-medium">{job.company}</div>
-                    <div className="text-lg font-semibold text-gray-900 truncate">{job.title}</div>
-
-                    <div className="flex items-center gap-3 text-sm text-gray-500 mt-2 flex-wrap">
-                      <span className="flex items-center gap-1"><MapPin size={14} /> {job.location}</span>
-                      <span className="flex items-center gap-1"><Calendar size={14} /> {job.left}</span>
-                    </div>
+                {/* Job Title */}
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{job.title}</h3>
+                
+                {/* Location and Days Left */}
+                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-3">
+                  <div className="flex items-center gap-1.5">
+                    <MapPin className="w-4 h-4" />
+                    <span>{job.location}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-4 h-4" />
+                    <span>{job.daysLeft} days left to apply</span>
                   </div>
                 </div>
+              </div>
 
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="flex flex-wrap gap-2">
-                    {job.tags.map((t, i) => (
-                      <span key={i} className="px-3 py-1 bg-gray-100 rounded-full text-gray-700 text-sm font-medium">{t}</span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4 min-w-[240px] justify-end">
-                  <div className="flex items-center gap-2 text-gray-800 font-medium">
-                    <DollarSign size={18} /> <span>{job.salary}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        toggleBookmark(job.id);
-                      }}
-                      className={`p-2 rounded-full border hover:bg-gray-50 ${bookmarks[job.id] ? "text-green-600 border-green-200 bg-green-50" : "text-gray-500 border-gray-100"}`}
-                      aria-label="bookmark"
+              {/* Categories, Salary and Actions */}
+              <div className="flex flex-col items-end gap-3 ml-4">
+                {/* Categories */}
+                <div className="flex flex-wrap gap-2 justify-end">
+                  {job.categories.map((category, idx) => (
+                    <span
+                      key={idx}
+                      className="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full"
                     >
-                      <Heart size={18} fill={bookmarks[job.id] ? "currentColor" : "none"} />
-                    </button>
-
-                    <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md">
-                      Apply
-                    </button>
-                  </div>
+                      {category}
+                    </span>
+                  ))}
                 </div>
-              </Link>
+
+                {/* Salary and Actions */}
+                <div className="flex items-center gap-3">
+                  {/* Salary */}
+                  <div className="text-right">
+                    <p className="text-lg font-bold text-gray-900">
+                      ${job.salary.min.toLocaleString()} - ${job.salary.max.toLocaleString()}
+                      <span className="text-sm text-gray-600 font-normal"> /{job.salary.period}</span>
+                    </p>
+                  </div>
+
+                  {/* Favorite Button */}
+                  <button className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors">
+                    <Heart className="w-5 h-5" />
+                  </button>
+
+                  {/* Apply Button */}
+                  <button className="px-6 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm">
+                    Apply
+                  </button>
+                </div>
+              </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );
 };
 
-export default JobList;
+export default Joblist;
