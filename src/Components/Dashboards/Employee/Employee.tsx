@@ -17,6 +17,8 @@ interface Job {
     max: number;
     period: string;
   };
+  type: string;
+  featured?: boolean;
 }
 
 const Employee: React.FC = () => {
@@ -24,6 +26,7 @@ const Employee: React.FC = () => {
   const [selectedLocation, setSelectedLocation] = useState('All Location');
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [filters, setFilters] = useState({
     jobType: 'All Job Types',
     category: 'All Job Categories',
@@ -32,52 +35,80 @@ const Employee: React.FC = () => {
     seniority: 'Seniority Levels'
   });
 
-  // Sample job data
   const jobs: Job[] = [
     {
       id: '1',
-      company: 'Rockstar Games New York',
-      logo: '/logos/rockstar.png',
-      title: 'Senior UI/UX Designer',
-      location: 'Las Vegas, NV 89107, USA',
+      company: 'TechCorp Solutions',
+      logo: '/logos/techcorp.png',
+      title: 'Senior Full Stack Developer',
+      location: 'San Francisco, CA',
       daysLeft: 2,
-      categories: ['Accounting', 'Sales & Marketing'],
-      salary: { min: 1000, max: 2000, period: 'year' }
+      categories: ['Engineering', 'Full-time'],
+      salary: { min: 120000, max: 180000, period: 'year' },
+      type: 'Remote',
+      featured: true
     },
     {
       id: '2',
-      company: 'Rockstar Games New York',
-      logo: '/logos/microsoft.png',
-      title: 'Project Manager',
-      location: 'Las Vegas, NV 89107, USA',
+      company: 'Creative Studios',
+      logo: '/logos/creative.png',
+      title: 'UI/UX Product Designer',
+      location: 'New York, NY',
       daysLeft: 5,
-      categories: ['UI UX Design', 'Accounting'],
-      salary: { min: 1000, max: 1300, period: 'year' }
+      categories: ['Design', 'Full-time'],
+      salary: { min: 90000, max: 130000, period: 'year' },
+      type: 'Hybrid'
     },
     {
       id: '3',
-      company: 'Rockstar Games New York',
-      logo: '/logos/ibm.png',
-      title: 'Senior UI/UX Designer',
-      location: 'Las Vegas, NV 89107, USA',
-      daysLeft: 6,
-      categories: ['UI UX Design', 'Project Manager', 'Accounting'],
-      salary: { min: 2000, max: 2400, period: 'year' }
+      company: 'DataFlow Inc',
+      logo: '/logos/dataflow.png',
+      title: 'Data Science Lead',
+      location: 'Austin, TX',
+      daysLeft: 3,
+      categories: ['Data Science', 'Full-time'],
+      salary: { min: 140000, max: 200000, period: 'year' },
+      type: 'On-site',
+      featured: true
     },
     {
       id: '4',
-      company: 'Rockstar Games New York',
-      logo: '/logos/netflix.png',
-      title: 'Full Stack Development',
-      location: 'Las Vegas, NV 89107, USA',
+      company: 'MarketHub',
+      logo: '/logos/markethub.png',
+      title: 'Digital Marketing Manager',
+      location: 'Los Angeles, CA',
       daysLeft: 7,
-      categories: ['UI UX Design', 'Project Manager'],
-      salary: { min: 1100, max: 1500, period: 'year' }
+      categories: ['Marketing', 'Full-time'],
+      salary: { min: 80000, max: 110000, period: 'year' },
+      type: 'Remote'
+    },
+    {
+      id: '5',
+      company: 'CloudTech Systems',
+      logo: '/logos/cloudtech.png',
+      title: 'DevOps Engineer',
+      location: 'Seattle, WA',
+      daysLeft: 4,
+      categories: ['Engineering', 'Full-time'],
+      salary: { min: 110000, max: 160000, period: 'year' },
+      type: 'Hybrid'
+    },
+    {
+      id: '6',
+      company: 'FinanceAI',
+      logo: '/logos/financeai.png',
+      title: 'Product Manager',
+      location: 'Boston, MA',
+      daysLeft: 6,
+      categories: ['Product', 'Full-time'],
+      salary: { min: 130000, max: 170000, period: 'year' },
+      type: 'Remote',
+      featured: true
     }
   ];
 
   const handleSearch = () => {
-    console.log('Searching for:', searchQuery, 'in location:', selectedLocation);
+    console.log('Searching:', searchQuery, selectedLocation, filters);
   };
 
   const handleFilterApply = (newFilters: typeof filters) => {
@@ -85,38 +116,52 @@ const Employee: React.FC = () => {
     setShowFilterModal(false);
   };
 
-  const totalResults = jobs.length;
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <Topbar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <FilterControls
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          selectedLocation={selectedLocation}
-          setSelectedLocation={setSelectedLocation}
-          onSearch={handleSearch}
-          onFilterClick={() => setShowFilterModal(true)}
-          showFilterModal={showFilterModal}
-          onCloseModal={() => setShowFilterModal(false)}
-          filters={filters}
-          onFilterApply={handleFilterApply}
-        />
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
+        {/* Hero Section */}
+        <div className="mb-8 lg:mb-12">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-3">
+              Find Your Dream Job
+            </h1>
+            <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto">
+              Discover thousands of opportunities from top companies around the world
+            </p>
+          </div>
 
-        <div className="mt-8">
-          <Joblist jobs={jobs} totalResults={totalResults} />
+          <FilterControls
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            selectedLocation={selectedLocation}
+            setSelectedLocation={setSelectedLocation}
+            onSearch={handleSearch}
+            onFilterClick={() => setShowFilterModal(true)}
+            showFilterModal={showFilterModal}
+            onCloseModal={() => setShowFilterModal(false)}
+            filters={filters}
+            onFilterApply={handleFilterApply}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+          />
         </div>
 
-        <div className="mt-8">
+        <Joblist 
+          jobs={jobs} 
+          totalResults={jobs.length}
+          viewMode={viewMode}
+        />
+
+        <div className="mt-8 lg:mt-12">
           <Pagination
             currentPage={currentPage}
             totalPages={5}
             onPageChange={setCurrentPage}
           />
         </div>
-      </div>
+      </main>
     </div>
   );
 };
