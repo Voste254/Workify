@@ -1,13 +1,19 @@
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
+import { useNavigate } from "react-router-dom";
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const navigate = useNavigate();
+
+  const handleLogin = ()=>{
+    navigate('/jobs');
+  };
 
   return (
     <>
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="bg-white w-full max-w-md shadow-xl rounded-lg p-8 border-green-950">
+      <div className="bg-white w-full max-w-md shadow-xl rounded-lg p-8 border border-green-950">
 
         {/* Title */}
         <h2 className="text-3xl font-bold text-center text-gray-800">
@@ -72,6 +78,7 @@ const AuthPage = () => {
 
           {/* Submit */}
           <button
+            onClick={handleLogin}
             type="submit"
             className="w-full py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition"
           >
