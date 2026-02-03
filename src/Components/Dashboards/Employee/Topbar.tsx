@@ -1,15 +1,23 @@
-import { Bell } from "lucide-react";
+import { Bell, LogOut } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import NotificationModal from "./NotificationModal";
 
 const TopBar = () => {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+const handleLogout = ()=>{
+  navigate('/')
+}
 
   return (
     <div className="h-16 bg-white border-b flex items-center justify-between px-6 relative">
       <h1 className="text-xl font-semibold">Dashboard</h1>
 
       <div className="flex items-center gap-6">
+
+        {/* Notifications */}
         <button onClick={() => setOpen(!open)} className="relative">
           <Bell />
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1 rounded-full">
@@ -17,9 +25,17 @@ const TopBar = () => {
           </span>
         </button>
 
+        {/* Logout */}
+        <button className="flex items-center gap-2 text-red-600 hover:text-red-700"
+        onClick={handleLogout}>
+          <LogOut size={18}/>
+          Logout
+        </button>
+
+        {/* Avatar */}
         <img
           src="https://i.pravatar.cc/40"
-          className="w-9 h-9 rounded-full cursor-pointer"
+          className="w-9 h-9 rounded-full"
         />
       </div>
 

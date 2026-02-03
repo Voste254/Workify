@@ -1,41 +1,85 @@
-import { MapPin } from "lucide-react";
+import { MapPin, Bookmark } from "lucide-react";
+import { useState } from "react";
 
-const JobCard = () => {
+interface JobCardProps {
+  title: string;
+  company: string;
+  location: string;
+  salary: string;
+  type: "Internship" | "Contractual" | "Permanent";
+  rating: number;
+  daysAgo: number;
+}
+
+const JobCard = ({
+  title,
+  company,
+  location,
+  salary,
+  type,
+  rating,
+  daysAgo,
+}: JobCardProps) => {
+  const [saved, setSaved] = useState(false);
+
   return (
-    <div className="bg-white border rounded-xl p-6 hover:border hover:border-gray-700">
+    <div className="border border-green-300 hover:border-green-800 rounded-xl p-6 bg-white">
 
-      <h4 className="text-lg font-semibold mb-2">
-        Frontend Developer
-      </h4>
+      {/* Top Row */}
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h3 className="text-lg font-semibold">{title}</h3>
+          <p className="text-gray-600">{company}</p>
+        </div>
 
-      <p className="text-gray-500 text-sm mb-2">
-        Tech Solutions Ltd
-      </p>
+        <button onClick={() => setSaved(!saved)}>
+          <Bookmark
+            size={20}
+            className={saved ? "text-green-600 fill-green-600" : "text-gray-400"}
+          />
+        </button>
+      </div>
 
-      <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+      {/* Location + Days */}
+      <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
         <div className="flex items-center gap-1">
           <MapPin size={14} />
-          Nairobi County
+          {location}
         </div>
-        <div>KES 120,000 - 180,000</div>
+        <span>{daysAgo} days ago</span>
       </div>
 
-      <div className="flex gap-2 flex-wrap mb-4">
-        <span className="bg-gray-100 px-2 py-1 text-xs rounded">
-          React
-        </span>
-        <span className="bg-gray-100 px-2 py-1 text-xs rounded">
-          TypeScript
-        </span>
-        <span className="bg-gray-100 px-2 py-1 text-xs rounded">
-          Tailwind
+      {/* Type Badge */}
+      <div className="mb-3">
+        <span className="text-xs px-3 py-1 rounded-full border bg-gray-100">
+          {type}
         </span>
       </div>
 
-      <button className="bg-slate-800 text-white px-4 py-2 rounded">
-        Apply Now
-      </button>
+      {/* Rating */}
+      <div className="flex items-center gap-2 mb-4">
+        <div className="flex text-yellow-500">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <span key={i}>
+              {i < Math.round(rating) ? "★" : "☆"}
+            </span>
+          ))}
+        </div>
+        <span className="text-sm text-gray-600">
+          {rating.toFixed(1)}
+        </span>
+      </div>
 
+      {/* Salary + Apply */}
+      <div className="flex justify-between items-center">
+        <span className="font-semibold text-green-700">
+          KES {salary}
+        </span>
+
+        <button className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm">
+          Apply
+        </button>
+      </div>
     </div>
   );
 };
