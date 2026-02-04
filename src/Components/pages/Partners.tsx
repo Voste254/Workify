@@ -1,67 +1,110 @@
 import { MapPin } from "lucide-react";
 
 const companies = [
+ 
+  {
+    name: "Google",
+    logo: "https://i.ibb.co/1STNwHB/google.jpg",
+    location: "California, USA",
+    rating: 4.8,
+  },
+    {
+    name: "Equity Bank",
+    logo: "https://img.logo.dev/equitybankgroup.com",
+    location: "Nairobi, Kenya",
+    rating: 4.5,
+  },
+
+  {
+    name: "Amazon",
+    logo: "https://img.logo.dev/amazon.com",
+    location: "USA",
+    rating: 4.6,
+  },
+    {
+    name: "Twiga Foods",
+    logo: "https://img.logo.dev/twiga.com",
+    location: "Nairobi, Kenya",
+    rating: 4.3,
+  },
   {
     name: "Samsung",
-    logo: "https://logo.clearbit.com/samsung.com",
+    logo: "https://img.logo.dev/samsung.com",
     location: "Seoul, South Korea",
     rating: 4.5,
   },
+
   {
-    name: "Google",
-    logo: "https://logo.clearbit.com/google.com",
-    location: "Mountain View, CA, USA",
-    rating: 4.8,
-  },
-  {
-    name: "Microsoft",
-    logo: "https://logo.clearbit.com/microsoft.com",
-    location: "Redmond, WA, USA",
-    rating: 4.7,
-  },
-  {
-    name: "Amazon",
-    logo: "https://logo.clearbit.com/amazon.com",
-    location: "Seattle, WA, USA",
-    rating: 4.6,
-  },
-  {
-    name: "Apple",
-    logo: "https://logo.clearbit.com/apple.com",
-    location: "Cupertino, CA, USA",
-    rating: 4.9,
-  },
-  {
-    name: "IBM",
-    logo: "https://logo.clearbit.com/ibm.com",
-    location: "New York, NY, USA",
-    rating: 4.4,
-  },
-  {
-    name: "Tesla",
-    logo: "https://logo.clearbit.com/tesla.com",
-    location: "Austin, TX, USA",
-    rating: 4.6,
+    name: "Oracle",
+    logo: "https://img.logo.dev/oracle.com",
+    location: "USA",
+    rating: 4.3,
   },
   {
     name: "Intel",
-    logo: "https://logo.clearbit.com/intel.com",
-    location: "Santa Clara, CA, USA",
+    logo: "https://img.logo.dev/intel.com",
+    location: "California, USA",
     rating: 4.3,
   },
   {
     name: "Sony",
-    logo: "https://logo.clearbit.com/sony.com",
+    logo: "https://img.logo.dev/sony.com",
     location: "Tokyo, Japan",
     rating: 4.5,
   },
+    {
+    name: "KCB Group",
+    logo: "https://img.logo.dev/kcbgroup.com",
+    location: "Nairobi, Kenya",
+    rating: 4.4,
+  },
+
+
   {
-    name: "Oracle",
-    logo: "https://logo.clearbit.com/oracle.com",
-    location: "Austin, TX, USA",
+    name: "MTN Group",
+    logo: "https://img.logo.dev/mtn.com",
+    location: "South Africa",
+    rating: 4.4,
+  },
+  {
+    name: "Flutterwave",
+    logo: "https://img.logo.dev/flutterwave.com",
+    location: "Nigeria",
+    rating: 4.6,
+  },
+    {
+    name: "IBM",
+    logo: "https://img.logo.dev/ibm.com",
+    location: "New York, USA",
+    rating: 4.4,
+  },
+  {
+    name: "Andela",
+    logo: "https://img.logo.dev/andela.com",
+    location: "Remote (Africa)",
+    rating: 4.7,
+  },
+    {
+    name: "Microsoft",
+    logo: "https://img.logo.dev/microsoft.com",
+    location: "Washington, USA",
+    rating: 4.7,
+  },
+  {
+    name: "Safaricom",
+    logo: "https://img.logo.dev/safaricom.co.ke",
+    location: "Nairobi, Kenya",
+    rating: 4.8,
+  },
+
+  {
+    name: "Cellulant",
+    logo: "https://img.logo.dev/cellulant.io",
+    location: "Nairobi, Kenya",
     rating: 4.2,
   },
 ];
+
 
 const Partners = () => {
   return (

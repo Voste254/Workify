@@ -23,7 +23,7 @@ const BlogPreview = () => {
           author="Jennifer Walsh"
           avatar="https://randomuser.me/api/portraits/women/44.jpg"
           date="2d ago"
-          readTime="8 min"
+          readTime="8 min read"
         />
 
         <BlogCard
@@ -34,18 +34,18 @@ const BlogPreview = () => {
           author="Michael Torres"
           avatar="https://randomuser.me/api/portraits/men/32.jpg"
           date="5d ago"
-          readTime="12 min"
+          readTime="12 min read"
         />
 
         <BlogCard
-          image="https://images.unsplash.com/photo-1517841905240-472988babdf9"
+          image="https://i.ibb.co/chrMm7n4/RESUME.jpg"
           category="CV Writing"
           title="The Art of Writing a CV That Gets Noticed"
           description="Discover what recruiters really look for and how to craft a compelling resume..."
           author="Lisa Park"
           avatar="https://randomuser.me/api/portraits/women/68.jpg"
           date="1/26/2026"
-          readTime="10 min"
+          readTime="10 min read"
         />
 
         <BlogCard
@@ -56,7 +56,7 @@ const BlogPreview = () => {
           author="David Kim"
           avatar="https://randomuser.me/api/portraits/men/75.jpg"
           date="1/22/2026"
-          readTime="7 min"
+          readTime="7 min read"
         />
 
       </div>
