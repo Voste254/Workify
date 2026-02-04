@@ -2,6 +2,7 @@ import { useState } from "react";
 import Sidebar from "./Sidebar";
 import TopBar from "./Topbar";
 import DashboardHome from "./DashboardHome";
+import BlogsPage from "./BlogsPage";
 
 const DashboardLayout = () => {
   const [activePage, setActivePage] = useState("dashboard");
@@ -11,7 +12,7 @@ const DashboardLayout = () => {
       case "dashboard":
         return <DashboardHome />;
       case "jobs":
-        return <div className="p-6">Find Jobs Page</div>;
+        return <div className="p-6">Jobs Page</div>;
       case "applications":
         return <div className="p-6">Applications Page</div>;
       case "profile":
@@ -19,7 +20,7 @@ const DashboardLayout = () => {
       case "saved":
         return <div className="p-6">Saved Items Page</div>;
       case "blog":
-        return <div className="p-6">Blog Page</div>;
+        return <BlogsPage/>;
       default:
         return <DashboardHome />;
     }

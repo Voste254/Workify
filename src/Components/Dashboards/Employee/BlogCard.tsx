@@ -1,7 +1,7 @@
 import { Bookmark } from "lucide-react";
 import { useState } from "react";
 
-interface BlogCardProps {
+export interface BlogCardProps {
   image: string;
   category: string;
   title: string;
