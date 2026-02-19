@@ -1,50 +1,17 @@
 import { useState } from "react";
 import { Edit2, Upload } from "lucide-react";
+import Services from "./Services";
 
-const counties = [
-  "Nairobi",
-  "Mombasa",
-  "Kisumu",
-  "Nakuru",
-  "Kiambu",
-  "Uasin Gishu",
-  "Machakos",
-  "Kajiado",
-];
 
 const MyProfile = () => {
   const [editMode, setEditMode] = useState(false);
 
   const [profile, setProfile] = useState({
-    name: "John Mwangi",
-    service: "Data Analyst",
-    location: "Nairobi",
-    rate: "2500",
-    skills: ["Excel", "SQL", "Power BI"],
-    availability: ["Monday", "Tuesday", "Friday"],
-    bio: "Passionate about solving real world problems using data.",
-  });
+    name: "Okutah Voste",
+     });
 
-  const [newSkill, setNewSkill] = useState("");
+  
 
-  const toggleSkill = (day: string) => {
-    setProfile((prev) => ({
-      ...prev,
-      availability: prev.availability.includes(day)
-        ? prev.availability.filter((d) => d !== day)
-        : [...prev.availability, day],
-    }));
-  };
-
-  const addSkill = () => {
-    if (newSkill.trim()) {
-      setProfile({
-        ...profile,
-        skills: [...profile.skills, newSkill],
-      });
-      setNewSkill("");
-    }
-  };
 
   return (
     <div className="p-6">
@@ -115,126 +82,8 @@ const MyProfile = () => {
               className="w-full border rounded p-2 mt-1"
             />
           </div>
+          <Services/>
 
-          {/* Service */}
-          <div className="mb-4">
-            <label className="text-sm">Service Offered</label>
-            <input
-              disabled={!editMode}
-              value={profile.service}
-              onChange={(e) =>
-                setProfile({ ...profile, service: e.target.value })
-              }
-              className="w-full border rounded p-2 mt-1"
-            />
-          </div>
-
-          {/* Location */}
-          <div className="mb-4">
-            <label className="text-sm">Location</label>
-            <select
-              disabled={!editMode}
-              value={profile.location}
-              onChange={(e) =>
-                setProfile({ ...profile, location: e.target.value })
-              }
-              className="w-full border rounded p-2 mt-1"
-            >
-              {counties.map((c) => (
-                <option key={c}>{c}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Rate */}
-          <div className="mb-4">
-            <label className="text-sm">Daily Rate (KES)</label>
-            <input
-              disabled={!editMode}
-              value={profile.rate}
-              onChange={(e) =>
-                setProfile({ ...profile, rate: e.target.value })
-              }
-              className="w-full border rounded p-2 mt-1"
-            />
-          </div>
-
-          {/* Skills */}
-          <div className="mb-4">
-            <label className="text-sm">Skills</label>
-
-            <div className="flex gap-2 mt-1">
-              <input
-                disabled={!editMode}
-                value={newSkill}
-                onChange={(e) => setNewSkill(e.target.value)}
-                className="border rounded p-2 flex-1"
-              />
-              {editMode && (
-                <button
-                  onClick={addSkill}
-                  className="px-4 bg-green-600 text-white rounded"
-                >
-                  Add
-                </button>
-              )}
-            </div>
-
-            <div className="flex flex-wrap gap-2 mt-2">
-              {profile.skills.map((skill, i) => (
-                <span
-                  key={i}
-                  className="px-3 py-1 bg-gray-100 rounded-full text-sm"
-                >
-                  {skill}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Availability */}
-          <div className="mb-4">
-            <label className="text-sm">Available Days</label>
-
-            <div className="flex flex-wrap gap-2 mt-2">
-              {[
-                "Sunday",
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-                "Saturday",
-              ].map((day) => (
-                <button
-                  key={day}
-                  disabled={!editMode}
-                  onClick={() => toggleSkill(day)}
-                  className={`px-3 py-1 border rounded ${
-                    profile.availability.includes(day)
-                      ? "bg-green-600 text-white"
-                      : ""
-                  }`}
-                >
-                  {day}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Bio */}
-          <div className="mb-6">
-            <label className="text-sm">About Me</label>
-            <textarea
-              disabled={!editMode}
-              value={profile.bio}
-              onChange={(e) =>
-                setProfile({ ...profile, bio: e.target.value })
-              }
-              className="w-full border rounded p-2 mt-1"
-              rows={4}
-            />
-          </div>
 
           {/* Save */}
           {editMode && (
