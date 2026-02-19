@@ -4,6 +4,7 @@ import TopBar from "./Topbar";
 import DashboardHome from "./DashboardHome";
 import BlogsPage from "./BlogsPage";
 import FindJobsPage from "./FindJobs";
+import Profile from "./Profile";
 
 const DashboardLayout = () => {
   const [activePage, setActivePage] = useState("dashboard");
@@ -17,7 +18,7 @@ const DashboardLayout = () => {
       case "applications":
         return <div className="p-6">Applications Page</div>;
       case "profile":
-        return <div className="p-6">Profile Page</div>;
+        return <Profile/>;
       case "saved":
         return <div className="p-6">Saved Items Page</div>;
       case "blog":
