@@ -51,6 +51,20 @@ const AuthPage = () => {
               required
             />
           </div>
+          {!isLogin &&(
+                      <div>
+            <label className="block text-gray-700 text-sm mb-1">Account Type</label>
+              <select id="account_select" name="account_type" className="w-full p-3 border rounded-lg focus:ring-green-500 focus:border-green-500">
+                <option value="">Please choose your account type</option>
+                <option value="Employer">Employer</option>
+                <option value="Job_seeker">Job Seeker</option>
+                <option value="Both">Both</option>
+                
+              </select>
+          </div>
+          )
+
+          }
 
           {/* Password */}
           <div>
