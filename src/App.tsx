@@ -9,6 +9,7 @@ import Partners from "./Components/pages/Partners";
 import Services from "./Components/pages/Services";
 import {Route, Routes} from "react-router-dom"
 import Login  from "./Components/pages/Login";
+import Employer from "./Components/Dashboards/Employer/EmployerDashboardLayout";
 
 
 
@@ -33,6 +34,7 @@ function App(){
   <Routes>
     <Route path='/' element={<Landing/>} />
     <Route path='/jobs' element={<Employee/>} />
+    <Route path='/EmployerDashboard' element={<Employer/>}></Route>
   <Route
         path="/login"
         element={
