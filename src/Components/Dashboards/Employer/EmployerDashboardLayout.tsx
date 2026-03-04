@@ -2,6 +2,7 @@ import { useState } from "react";
 import EmployerSidebar from "./Sidebar";
 import TopBar from "../Employee/Topbar";
 import Home from "./EmployerDashboardHome";
+import PostJobs from "./PostJobs";
 
 /* match sidebar types */
 type ActivePage =
@@ -30,7 +31,7 @@ const EmployerDashboardLayout = () => {
         return <div className="p-6">My Jobs Page</div>;
 
       case "Post Job":
-        return <div className="p-6">Post Job Page</div>;
+        return <PostJobs/>;
 
       case "Applicants":
         return <div className="p-6">Applicants Management</div>;

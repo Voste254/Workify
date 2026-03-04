@@ -5,6 +5,7 @@ import type {
   ChartTypeRegistry,
 } from "chart.js/auto";
 import {Chart} from"chart.js/auto"
+
 interface ChartComponentProps {
   data: ChartData<"bar">;
   options?: ChartOptions<"bar">;

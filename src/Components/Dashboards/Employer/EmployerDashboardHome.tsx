@@ -1,5 +1,5 @@
 import { useState } from "react";
-import DashboardCharts from "./Charts";
+import DashboardCharts from "./Charts/DashboardCharts";
 import RecentApplicants from "./Applicants";
 import { useMemo } from "react";
 import type {
