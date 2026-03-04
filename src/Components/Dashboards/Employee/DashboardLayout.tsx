@@ -5,7 +5,7 @@ import DashboardHome from "./DashboardHome";
 import BlogsPage from "./BlogsPage";
 import FindJobsPage from "./FindJobs";
 import Profile from "./Profile";
-import Settings from "./Settings"
+import Settings from "./Settings/Settings"
 
 const DashboardLayout = () => {
   const [activePage, setActivePage] = useState("dashboard");
