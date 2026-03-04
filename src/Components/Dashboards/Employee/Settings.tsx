@@ -4,8 +4,6 @@ import {
   Bell,
   Shield,
   Clock,
-  Lock,
-  Smartphone,
   Eye,
 } from "lucide-react";
 
@@ -115,7 +113,7 @@ const SidebarItem = ({
     onClick={onClick}
     className={`w-full flex items-start gap-3 p-3 rounded-xl mb-2 text-left transition ${
       active
-        ? "bg-purple-100 text-purple-700"
+        ? "bg-green-100 text-green-600"
         : "hover:bg-gray-100 text-gray-700"
     }`}
   >
@@ -146,14 +144,14 @@ const AccountTab = () => (
         <label className="block text-sm font-medium mb-2">Bio</label>
         <textarea
           rows={4}
-          className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-purple-500 outline-none"
+          className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-600 outline-none"
           defaultValue="Passionate web designer with 8+ years experience."
         />
       </div>
     </div>
 
     <div className="flex justify-end mt-6">
-      <button className="bg-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-700 transition">
+      <button className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-600 transition">
         Save Changes
       </button>
     </div>
@@ -231,11 +229,20 @@ const PrivacyTab = () => (
     <ToggleRow label="Allow recruiters to message me" />
     <ToggleRow label="Show my resume publicly" />
 
-    <div className="mt-8">
+
+<div className="flex justify-between">
+    <div className="mt-8 inline-block">
       <button className="text-red-600 font-medium hover:underline">
         Close My Account
       </button>
     </div>
+        <div className="mt-8 inline-block">
+      <button className="bg-green-600 text-white rounded-md p-1 px-2 font-medium">
+        Save Changes
+      </button>
+    </div>
+</div>
+
   </>
 );
 
@@ -253,7 +260,7 @@ const Input = ({ label, defaultValue }: InputProps) => (
     <label className="block text-sm font-medium mb-2">{label}</label>
     <input
       defaultValue={defaultValue}
-      className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-purple-500 outline-none"
+      className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-600 outline-none"
     />
   </div>
 );
@@ -287,6 +294,6 @@ interface ToggleRowProps {
 const ToggleRow = ({ label }: ToggleRowProps) => (
   <div className="flex justify-between items-center border-b py-4">
     <span className="text-gray-700">{label}</span>
-    <input type="checkbox" className="w-5 h-5 accent-purple-600" />
+    <input type="checkbox" className="w-5 h-5 accent-green-600" />
   </div>
 );
