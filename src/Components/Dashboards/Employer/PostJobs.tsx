@@ -30,7 +30,7 @@ const PostJobPage = () => {
 
   return (
     <div className="p-6">
-      <div className="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl p-8">
+      <div className="max-w-5xl mx-auto border border-gray-300 shadow-xl rounded-2xl p-8">
         
         <h1 className="text-2xl font-bold mb-6">
           Post a New Job
