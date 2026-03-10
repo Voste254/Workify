@@ -8,7 +8,7 @@ import Offer from "./Components/pages/Offer";
 import Partners from "./Components/pages/Partners";
 import Services from "./Components/pages/Services";
 import {Route, Routes} from "react-router-dom"
-import Login  from "./Components/pages/Login";
+import Authentication  from "./Components/pages/Authentication/Authentication";
 import Employer from "./Components/Dashboards/Employer/EmployerDashboardLayout";
 
 
@@ -39,7 +39,7 @@ function App(){
         path="/login"
         element={
           <>
-            <Login />
+            <Authentication />
             <Footer />
           </>
         }
