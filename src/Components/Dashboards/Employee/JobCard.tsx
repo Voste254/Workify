@@ -9,79 +9,58 @@ interface JobCardProps {
   type: "Internship" | "Contractual" | "Permanent";
   rating: number;
   daysAgo: number;
+  logo?: string;
 }
 
-const JobCard = ({
-  title,
-  company,
-  location,
-  salary,
-  type,
-  rating,
-  daysAgo,
-}: JobCardProps) => {
+export default function JobCard({ title, company, location, salary, type, rating, daysAgo, logo }: JobCardProps) {
   const [saved, setSaved] = useState(false);
 
   return (
-    <div className="border border-green-300 hover:border-green-800 rounded-xl p-6 bg-white">
+    <div className="bg-white border-[1.5px] border-gray-200 hover:border-gray-400 transition-colors p-5 flex flex-col gap-4">
 
-      {/* Top Row */}
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-lg font-semibold">{title}</h3>
-          <p className="text-gray-600">{company}</p>
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 border-[1.5px] border-gray-200 bg-gray-50 flex items-center justify-center text-sm font-bold text-gray-900 font-mono flex-shrink-0">
+            {logo ?? company.charAt(0)}
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900 leading-snug">{title}</h3>
+            <p className="text-xs text-gray-500 mt-0.5">{company}</p>
+          </div>
         </div>
-
-        <button onClick={() => setSaved(!saved)}>
-          <Bookmark
-            size={20}
-            className={saved ? "text-green-600 fill-green-600" : "text-gray-400"}
-          />
+        <button onClick={() => setSaved(!saved)} className={`flex-shrink-0 transition-colors ${saved ? "text-amber-500" : "text-gray-300 hover:text-gray-500"}`}>
+          <Bookmark size={16} fill={saved ? "currentColor" : "none"}/>
         </button>
       </div>
 
-      {/* Location + Days */}
-      <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
-        <div className="flex items-center gap-1">
-          <MapPin size={14} />
-          {location}
-        </div>
-        <span>{daysAgo} days ago</span>
-      </div>
-
-      {/* Type Badge */}
-      <div className="mb-3">
-        <span className="text-xs px-3 py-1 rounded-full border bg-gray-100">
-          {type}
-        </span>
+      {/* Meta */}
+      <div className="flex items-center flex-wrap gap-2">
+        <span className="flex items-center gap-1 text-xs text-gray-400"><MapPin size={11}/>{location}</span>
+        <span className="text-xs px-2.5 py-0.5 bg-gray-100 border border-gray-200 text-gray-600 font-medium">{type}</span>
       </div>
 
       {/* Rating */}
-      <div className="flex items-center gap-2 mb-4">
-        <div className="flex text-yellow-500">
+      <div className="flex items-center gap-1.5">
+        <div className="flex text-amber-400 text-xs">
           {Array.from({ length: 5 }).map((_, i) => (
-            <span key={i}>
-              {i < Math.round(rating) ? "★" : "☆"}
-            </span>
+            <span key={i}>{i < Math.round(rating) ? "★" : "☆"}</span>
           ))}
         </div>
-        <span className="text-sm text-gray-600">
-          {rating.toFixed(1)}
-        </span>
+        <span className="text-xs text-gray-400 font-mono">{rating.toFixed(1)}</span>
       </div>
 
-      {/* Salary + Apply */}
-      <div className="flex justify-between items-center">
-        <span className="font-semibold text-green-700">
-          KES {salary}
-        </span>
-
-        <button className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm">
-          Apply
+      {/* Footer */}
+      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+        <div>
+          <p className="text-sm font-semibold text-gray-900 font-mono">KES {salary}</p>
+          <p className="text-xs text-gray-400 mt-0.5">{daysAgo}d ago</p>
+        </div>
+        <button className="h-9 px-4 bg-gray-900 text-white text-xs font-semibold hover:bg-gray-700 transition-colors">
+          Apply →
         </button>
       </div>
+
     </div>
   );
-};
-
-export default JobCard;
+}

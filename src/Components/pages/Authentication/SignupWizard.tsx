@@ -121,7 +121,7 @@ export default function Signup() {
         <div className="w-16 h-16 bg-green-600 flex items-center justify-center text-white text-3xl mx-auto mb-6">✓</div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Account created!</h2>
         <p className="text-sm text-gray-500 mb-8">Welcome to Workify, {form.fname}! Your profile is live and ready.</p>
-        <PrimaryBtn >Proceed to Dashboard →</PrimaryBtn>
+        <Link to='/jobs'><PrimaryBtn >Proceed to Dashboard →</PrimaryBtn></Link>
       </div>
     </div>
   );

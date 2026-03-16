@@ -10,7 +10,6 @@ export default function Login() {
     const f = e.target as HTMLFormElement;
     if (!f.email.value || !f.password.value) { setErr(true); return; }
     setErr(false);
-    alert("Login successful!");
   };
 
   return (
@@ -81,8 +80,8 @@ export default function Login() {
               <input type="checkbox" className="accent-gray-900 w-4 h-4"/>
               <span className="text-sm text-gray-600">Remember me for 30 days</span>
             </label>
-            <button type="submit" className="w-full h-11 bg-gray-900 text-white text-sm font-semibold hover:bg-gray-700 transition mt-2">Sign in →</button>
-          </form>
+            <Link to='/jobs'> <button type="submit" className="w-full h-11 bg-gray-900 text-white text-sm font-semibold hover:bg-gray-700 transition mt-2">Sign in →</button></Link>
+            </form>
 
           <p className="text-center text-sm text-gray-400 mt-6">
             Don't have an account?{" "}
