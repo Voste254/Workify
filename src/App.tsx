@@ -8,7 +8,8 @@ import Offer from "./Components/pages/Offer";
 import Partners from "./Components/pages/Partners";
 import Services from "./Components/pages/Services";
 import {Route, Routes} from "react-router-dom"
-import Authentication  from "./Components/pages/Authentication/Authentication";
+import Login from "./Components/pages/Authentication/Login";
+import Signup from "./Components/pages/Authentication/SignupWizard";
 import Employer from "./Components/Dashboards/Employer/EmployerDashboardLayout";
 
 
@@ -35,15 +36,8 @@ function App(){
     <Route path='/' element={<Landing/>} />
     <Route path='/jobs' element={<Employee/>} />
     <Route path='/EmployerDashboard' element={<Employer/>}></Route>
-  <Route
-        path="/login"
-        element={
-          <>
-            <Authentication />
-            <Footer />
-          </>
-        }
-      />
+    <Route path="/login" element={<Login/>}/>
+    <Route path="/signup" element={<Signup/>}/>
   </Routes>
 
   )
