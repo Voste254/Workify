@@ -293,15 +293,15 @@ export default function ApplicationsTracker() {
       </div>
 
       {/* Content */}
-      <div style={{ flex:1, display:"grid", gridTemplateColumns:selected?"1fr 380px":"1fr", gap:16, padding:20, maxHeight:"calc(100vh - 130px)", overflow:"hidden" }}>
-        <div style={{ display:"flex", flexDirection:"column", gap:10, overflowY:"auto", height:"100%" }}>
+      <div style={{ flex:1, display:"grid", gridTemplateColumns:selected?"1fr 380px":"1fr", gap:16, padding:20, alignItems:"start" }}>
+        <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
           {filtered.length===0
             ? <div style={{ padding:48, textAlign:"center" as const, border:"1.5px dashed #E5E7EB", borderRadius:10, background:"#fff" }}><p style={{ margin:0, fontSize:14, color:"#9CA3AF" }}>No applications match your filters.</p></div>
             : filtered.map(app=><AppCard key={app.id} app={app} selected={selectedId===app.id} onSelect={()=>setSelectedId(p=>p===app.id?null:app.id)} onBookmark={()=>toggleBookmark(app.id)} onWithdraw={()=>withdraw(app.id)}/>)
           }
         </div>
         {selected && (
-          <div style={{ position:"sticky" as const, top:0, height:"calc(100vh - 155px)" }}>
+          <div style={{ position:"sticky" as const, top:20, height:"calc(100vh - 175px)", overflow:"hidden" }}>
             <DetailPanel app={selected} onClose={()=>setSelectedId(null)} onBookmark={()=>toggleBookmark(selected.id)}/>
           </div>
         )}

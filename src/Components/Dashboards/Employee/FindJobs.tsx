@@ -75,7 +75,7 @@ export default function FindJobsPage() {
       <div className="bg-white border-b border-gray-200 px-6 lg:px-10 py-5 flex items-center justify-between gap-4">
         <div>
           <h1 className="text-lg font-bold text-gray-900">Find Jobs</h1>
-          <p className="text-xs text-gray-400 font-mono mt-0.5">{filtered.length} listing{filtered.length !== 1 ? "s" : ""} available</p>
+          <p className="text-xs text-gray-600 font-mono mt-0.5">{filtered.length} listing{filtered.length !== 1 ? "s" : ""} available</p>
         </div>
         {/* Job type tabs */}
         <div className="flex items-center gap-1 bg-gray-100 p-1">
