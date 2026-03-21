@@ -2,9 +2,7 @@ import {
   Star,
   Eye,
   MoreHorizontal,
-  Mail,
-  CheckCircle,
-  XCircle,
+ 
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
