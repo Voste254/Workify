@@ -1,18 +1,9 @@
-import {
-  Star,
-  Eye,
-  MoreHorizontal,
- 
-} from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useMemo } from "react";
 
-export type ApplicantStatus =
-  | "Applied"
-  | "Shortlisted"
-  | "Approved"
-  | "Rejected";
+// ── Types & Config ─────────────────────────────────────────────────────────────
+type ApplicantStatus = "Applied" | "Shortlisted" | "Approved" | "Rejected";
 
-export type Applicant = {
+interface Applicant {
   id: number;
   name: string;
   role: string;
@@ -20,217 +11,134 @@ export type Applicant = {
   reviews: number;
   applied: string;
   status: ApplicantStatus;
+  avatar: string;
+}
+
+const STATUS_CONFIG: Record<ApplicantStatus, { label: string; color: string; bg: string }> = {
+  Applied: { label: "Applied", color: "#6B7280", bg: "#F3F4F6" },
+  Shortlisted: { label: "Shortlisted", color: "#D97706", bg: "#FEF3C7" },
+  Approved: { label: "Approved", color: "#059669", bg: "#D1FAE5" },
+  Rejected: { label: "Rejected", color: "#FFFFFF", bg: "#DC2626" },
 };
 
-type Props = {
-  applicants: Applicant[];
-  onStatusChange: (
-    id: number,
-    status: ApplicantStatus
-  ) => void;
+const MOCK_APPLICANTS: Applicant[] = [
+  { id: 1, name: "Sarah Chen", role: "Full Stack Developer", rating: 4.9, reviews: 47, applied: "2d ago", status: "Shortlisted", avatar: "https://i.pravatar.cc/150?img=47" },
+  { id: 2, name: "Michael Ochieng", role: "Backend Engineer", rating: 4.6, reviews: 23, applied: "3d ago", status: "Applied", avatar: "https://i.pravatar.cc/150?img=11" },
+  { id: 3, name: "Jessica Kama", role: "Product Designer", rating: 5.0, reviews: 89, applied: "1w ago", status: "Approved", avatar: "https://i.pravatar.cc/150?img=5" },
+];
+
+// ── Icons ──────────────────────────────────────────────────────────────────────
+const I = (d: string, s = 14, fill = "none") => <svg width={s} height={s} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: d }} />;
+const Ico = {
+  search: I('<circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>', 14),
+  star: I('<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>', 12, "currentColor"),
+  more: I('<circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/>', 16),
+  eye: I('<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>', 14),
+  check: I('<path d="M20 6 9 17l-5-5"/>', 14),
+  x: I('<line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/>', 14)
 };
 
-const RecentApplicants = ({
-  applicants,
-  onStatusChange,
-}: Props) => {
-  const [openMenu, setOpenMenu] =
-    useState<number | null>(null);
-  const [confirmRejectId, setConfirmRejectId] =
-    useState<number | null>(null);
+// ── Shared styles ──────────────────────────────────────────────────────────────
+const sel = { fontFamily: "'DM Sans',sans-serif", padding: "7px 10px", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 12, color: "#374151", background: "#F9FAFB", cursor: "pointer", outline: "none" };
 
-  const menuRef =
-    useRef<HTMLDivElement | null>(null);
+// ── Main ───────────────────────────────────────────────────────────────────────
+export default function Applicants() {
+  const [applicants, setApplicants] = useState<Applicant[]>(MOCK_APPLICANTS);
+  const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState<ApplicantStatus | "all">("all");
 
-  useEffect(() => {
-    const handleClickOutside = (
-      event: MouseEvent
-    ) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(
-          event.target as Node
-        )
-      ) {
-        setOpenMenu(null);
-      }
-    };
+  const q = search.toLowerCase();
+  const filtered = useMemo(() => applicants.filter(a => (!q || a.name.toLowerCase().includes(q) || a.role.toLowerCase().includes(q)) && (filterStatus === "all" || a.status === filterStatus)), [applicants, q, filterStatus]);
 
-    if (openMenu !== null) {
-      document.addEventListener(
-        "mousedown",
-        handleClickOutside
-      );
-    }
-
-    return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      );
-    };
-  }, [openMenu]);
-
-  const statusStyles = {
-    Applied: "bg-gray-100 text-gray-600",
-    Shortlisted: "bg-green-50 text-green-600",
-    Approved: "bg-blue-50 text-blue-600",
-    Rejected: "bg-red-50 text-red-600",
+  const changeStatus = (id: number, status: ApplicantStatus) => {
+    setApplicants(prev => prev.map(a => a.id === id ? { ...a, status } : a));
   };
 
   return (
-    <>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h3 className="text-gray-800 font-semibold text-lg">
-            Recent Applicants
-          </h3>
-        </div>
+    <div style={{ fontFamily: "'DM Sans','Segoe UI',sans-serif", background: "#F9FAFB", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap');*{box-sizing:border-box}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:4px}`}</style>
 
-        <div className="grid grid-cols-5 px-6 py-3 text-sm text-gray-500 font-medium border-b border-gray-100">
-          <span>Applicant</span>
-          <span>Rating</span>
-          <span>Applied</span>
-          <span>Status</span>
-          <span className="text-right">
-            Actions
-          </span>
-        </div>
-
-        <div className="divide-y divide-gray-100">
-          {applicants.map((app) => (
-            <div
-              key={app.id}
-              className="grid grid-cols-5 items-center px-6 py-4 hover:bg-gray-50 relative"
-            >
-              <div>
-                <p className="font-medium text-gray-800">
-                  {app.name}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {app.role}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-1 text-sm">
-                <Star
-                  size={14}
-                  className="text-yellow-400 fill-yellow-400"
-                />
-                {app.rating} ({app.reviews})
-              </div>
-
-              <p className="text-sm text-gray-500">
-                {app.applied}
-              </p>
-
-              <span
-                className={`text-sm px-3 py-1 rounded-md w-fit ${statusStyles[app.status]}`}
-              >
-                {app.status}
-              </span>
-
-              <div className="relative flex justify-end items-center gap-4">
-                <button className="flex items-center gap-1 text-sm text-gray-600 hover:text-green-600">
-                  <Eye size={16} />
-                  View
-                </button>
-
-                <button
-                  onClick={() =>
-                    setOpenMenu(
-                      openMenu === app.id
-                        ? null
-                        : app.id
-                    )
-                  }
-                  className="text-gray-500 hover:text-green-600"
-                >
-                  <MoreHorizontal size={18} />
-                </button>
-
-                {openMenu === app.id && (
-                  <div
-                    ref={menuRef}
-                    className="absolute right-0 top-10 bg-white border rounded-lg shadow-lg w-44 z-20 animate-fadeIn"
-                  >
-                    <button
-                      onClick={() =>
-                        onStatusChange(
-                          app.id,
-                          "Shortlisted"
-                        )
-                      }
-                      className="w-full px-4 py-2 text-left text-green-600 hover:bg-green-50 text-sm"
-                    >
-                      Shortlist
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        onStatusChange(
-                          app.id,
-                          "Approved"
-                        )
-                      }
-                      className="w-full px-4 py-2 text-left text-blue-600 hover:bg-blue-50 text-sm"
-                    >
-                      Approve
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setConfirmRejectId(
-                          app.id
-                        );
-                        setOpenMenu(null);
-                      }}
-                      className="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50 text-sm"
-                    >
-                      Reject
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
+      {/* Top bar */}
+      <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#111827" }}>Applicants</h1>
+          <p style={{ margin: 0, fontSize: 12, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>{filtered.length} total candidates</p>
         </div>
       </div>
 
-      {/* Confirm Modal */}
-      {confirmRejectId !== null && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl w-96 p-6 animate-fadeIn">
-            <h3 className="text-lg font-semibold mb-4">
-              Reject Applicant?
-            </h3>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() =>
-                  setConfirmRejectId(null)
-                }
-                className="px-4 py-2 bg-gray-100 rounded-md"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  onStatusChange(
-                    confirmRejectId,
-                    "Rejected"
-                  );
-                  setConfirmRejectId(null);
-                }}
-                className="px-4 py-2 bg-red-600 text-white rounded-md"
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
+      {/* Filters */}
+      <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "10px 24px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" as const }}>
+        <div style={{ position: "relative" as const, flex: 1, maxWidth: 300 }}>
+          <span style={{ position: "absolute" as const, left: 10, top: "50%", transform: "translateY(-50%)", color: "#9CA3AF" }}>{Ico.search}</span>
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name or role…"
+            style={{ width: "100%", padding: "7px 10px 7px 32px", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 12, color: "#111827", background: "#F9FAFB", outline: "none", fontFamily: "'DM Sans',sans-serif" }} />
         </div>
-      )}
-    </>
-  );
-};
+        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as ApplicantStatus | "all")} style={sel}>
+          <option value="all">Any Status</option>
+          {(Object.keys(STATUS_CONFIG) as ApplicantStatus[]).map(s => <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>)}
+        </select>
+      </div>
 
-export default RecentApplicants;
+      {/* Content */}
+      <div style={{ padding: 24 }}>
+        <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 10, overflow: "hidden" }}>
+          
+          <div style={{ display: "grid", gridTemplateColumns: "3fr 1fr 1fr 1fr 1.5fr", gap: 16, padding: "12px 20px", background: "#F9FAFB", borderBottom: "1px solid #E5E7EB", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#9CA3AF" }}>
+            <div>Candidate</div>
+            <div>Rating</div>
+            <div>Applied</div>
+            <div>Status</div>
+            <div style={{ textAlign: "right" }}>Actions</div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {filtered.map((app, idx) => {
+              const cfg = STATUS_CONFIG[app.status];
+              return (
+                <div key={app.id} style={{ display: "grid", gridTemplateColumns: "3fr 1fr 1fr 1fr 1.5fr", gap: 16, padding: "16px 20px", alignItems: "center", borderBottom: idx < filtered.length - 1 ? "1px solid #E5E7EB" : "none", opacity: app.status === "Rejected" ? 0.7 : 1 }}>
+                  
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <img src={app.avatar} alt={app.name} style={{ width: 40, height: 40, borderRadius: 8, border: "1px solid #E5E7EB", objectFit: "cover" }} />
+                    <div>
+                      <p style={{ margin: "0 0 2px", fontSize: 14, fontWeight: 700, color: "#111827" }}>{app.name}</p>
+                      <p style={{ margin: 0, fontSize: 12, color: "#6B7280" }}>{app.role}</p>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 600, color: "#111827" }}>
+                    <span style={{ color: "#D97706" }}>{Ico.star}</span> {app.rating} <span style={{ color: "#9CA3AF", fontWeight: 400 }}>({app.reviews})</span>
+                  </div>
+
+                  <div style={{ fontSize: 12, color: "#6B7280", fontFamily: "'DM Mono',monospace" }}>{app.applied}</div>
+
+                  <div>
+                    <span style={{ display: "inline-block", fontSize: 11, fontWeight: 600, padding: "4px 10px", borderRadius: 4, textTransform: "uppercase" as const, color: cfg.color, background: cfg.bg }}>{cfg.label}</span>
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 8 }}>
+                    <button style={{ background: "none", border: "1px solid #E5E7EB", borderRadius: 6, padding: "6px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, color: "#374151" }}>
+                      {Ico.eye} View
+                    </button>
+                    
+                    {app.status === "Applied" && (
+                       <>
+                         <button onClick={() => changeStatus(app.id, "Shortlisted")} style={{ background: "#FEF3C7", border: "none", color: "#D97706", borderRadius: 6, padding: "6px 10px", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>Shortlist</button>
+                         <button onClick={() => changeStatus(app.id, "Rejected")} style={{ background: "#FEE2E2", border: "none", color: "#EF4444", borderRadius: 6, padding: "6px 10px", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>Reject</button>
+                       </>
+                    )}
+                    {app.status === "Shortlisted" && (
+                       <button onClick={() => changeStatus(app.id, "Approved")} style={{ background: "#D1FAE5", border: "none", color: "#059669", borderRadius: 6, padding: "6px 10px", cursor: "pointer", fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
+                         {Ico.check} Approve
+                       </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}

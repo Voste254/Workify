@@ -3,6 +3,11 @@ import EmployerSidebar from "./Sidebar";
 import TopBar from "../Employee/Topbar";
 import Home from "./EmployerDashboardHome";
 import PostJobs from "./PostJobs";
+import MyJobs from "./MyJobs";
+import FindTalent from "./FindTalent";
+import Reports from "./Reports";
+import Messages from "./Messages";
+import Settings from "./Settings";
 
 /* match sidebar types */
 type ActivePage =
@@ -28,7 +33,7 @@ const EmployerDashboardLayout = () => {
         return <Home/>;
 
       case "My Jobs":
-        return <div className="p-6">My Jobs Page</div>;
+        return <MyJobs/>;
 
       case "Post Job":
         return <PostJobs/>;
@@ -37,13 +42,13 @@ const EmployerDashboardLayout = () => {
         return <div className="p-6">Applicants Management</div>;
 
       case "Find Talent":
-        return <div className="p-6">Find Talent Page</div>;
+        return <FindTalent/>;
 
       case "Reports":
-        return <div className="p-6">Reports & Analytics</div>;
+        return <Reports/>;
 
       case "Messages":
-        return <div className="p-6">Messages Page</div>;
+        return <Messages/>;
 
       case "Notifications":
         return <div className="p-6">Notifications Page</div>;
@@ -55,7 +60,7 @@ const EmployerDashboardLayout = () => {
         return <div className="p-6">Blog & Education</div>;
 
       case "Settings":
-        return <div className="p-6">Account Settings</div>;
+        return <Settings/>;
 
       default:
         return <div className="p-6">Employer Dashboard</div>;
