@@ -8,6 +8,8 @@ import FindTalent from "./FindTalent";
 import Reports from "./Reports";
 import Messages from "./Messages";
 import Settings from "./Settings";
+import Applicants from "./Applicants";
+import NotificationModal from "../Employee/NotificationModal";
 
 /* match sidebar types */
 type ActivePage =
@@ -39,7 +41,7 @@ const EmployerDashboardLayout = () => {
         return <PostJobs/>;
 
       case "Applicants":
-        return <div className="p-6">Applicants Management</div>;
+        return <Applicants/> ;
 
       case "Find Talent":
         return <FindTalent/>;
@@ -51,7 +53,7 @@ const EmployerDashboardLayout = () => {
         return <Messages/>;
 
       case "Notifications":
-        return <div className="p-6">Notifications Page</div>;
+        return <NotificationModal/>;
 
       case "Saved":
         return <div className="p-6">Saved Candidates</div>;
