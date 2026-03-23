@@ -85,7 +85,7 @@ const EmployerSidebar = ({ setActiveComponent }: SidebarProps) => {
               : "text-gray-400"
           }
         />
-        <span className="text-sm font-medium">{item.name}</span>
+        <span className="text-base font-medium">{item.name}</span>
       </button>
     ));
 
@@ -94,7 +94,7 @@ const EmployerSidebar = ({ setActiveComponent }: SidebarProps) => {
       
       {/* LOGO */}
       <div className="h-16 flex items-center px-6 border-b border-gray-100">
-        <h2 className="text-xl font-bold text-gray-800">Workify</h2>
+        <h2 className="text-2xl font-bold text-gray-800">Workify</h2>
       </div>
 
       {/* MENU */}
@@ -105,7 +105,7 @@ const EmployerSidebar = ({ setActiveComponent }: SidebarProps) => {
 
         {/* ANALYTICS */}
         <div>
-          <p className="text-xs text-gray-400 uppercase mb-2 font-semibold">
+          <p className="text-sm text-gray-400 uppercase mb-2 font-semibold">
             Analytics
           </p>
           <div className="space-y-1">{renderMenu(analyticsMenu)}</div>
@@ -113,7 +113,7 @@ const EmployerSidebar = ({ setActiveComponent }: SidebarProps) => {
 
         {/* COMMUNICATION */}
         <div>
-          <p className="text-xs text-gray-400 uppercase mb-2 font-semibold">
+          <p className="text-sm text-gray-400 uppercase mb-2 font-semibold">
             Communication
           </p>
           <div className="space-y-1">{renderMenu(communicationMenu)}</div>
@@ -121,7 +121,7 @@ const EmployerSidebar = ({ setActiveComponent }: SidebarProps) => {
 
         {/* OTHER */}
         <div>
-          <p className="text-xs text-gray-400 uppercase mb-2 font-semibold">
+          <p className="text-sm text-gray-400 uppercase mb-2 font-semibold">
             Other
           </p>
           <div className="space-y-1">{renderMenu(otherMenu)}</div>
@@ -129,7 +129,7 @@ const EmployerSidebar = ({ setActiveComponent }: SidebarProps) => {
       </nav>
 
       {/* FOOTER */}
-      <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
+      <div className="p-4 text-sm text-gray-400 border-t border-gray-100">
         © {new Date().getFullYear()} Workify
       </div>
     </aside>

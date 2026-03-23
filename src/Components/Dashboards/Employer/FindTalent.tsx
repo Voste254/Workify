@@ -27,8 +27,8 @@ const Ico = {
 };
 
 // ── Shared styles ──────────────────────────────────────────────────────────────
-const sel = { fontFamily: "'DM Sans',sans-serif", padding: "7px 10px", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 12, color: "#374151", background: "#F9FAFB", cursor: "pointer", outline: "none" };
-const sectionLabel = { margin: "0 0 8px", fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.1em", color: "#9CA3AF" };
+const sel = { fontFamily: "'DM Sans',sans-serif", padding: "7px 10px", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 14, color: "#374151", background: "#F9FAFB", cursor: "pointer", outline: "none" };
+const sectionLabel = { margin: "0 0 8px", fontSize: 13, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.1em", color: "#9CA3AF" };
 const iconBtn = (color = "#6B7280") => ({ background: "none", border: "1px solid #E5E7EB", borderRadius: 6, padding: "6px 8px", cursor: "pointer", color, display: "flex", alignItems: "center" as const });
 
 // ── Candidate Card ─────────────────────────────────────────────────────────────
@@ -39,20 +39,20 @@ function CandidateCard({ cand, selected, onSelect, onBookmark }: { cand: Candida
         <img src={cand.image} alt={cand.name} style={{ width: 44, height: 44, borderRadius: 10, border: "1.5px solid #E5E7EB", objectFit: "cover" }} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
-            <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#111827" }}>{cand.name}</p>
+            <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: "#111827" }}>{cand.name}</p>
             <button onClick={e => { e.stopPropagation(); onBookmark(); }} style={{ background: "none", border: "none", cursor: "pointer", padding: 2, color: cand.isSaved ? "#D97706" : "#9CA3AF" }}>{Ico.bookmark(cand.isSaved)}</button>
           </div>
-          <p style={{ margin: 0, fontSize: 12, color: "#6B7280" }}>{cand.role}</p>
+          <p style={{ margin: 0, fontSize: 14, color: "#6B7280" }}>{cand.role}</p>
           <div style={{ display: "flex", gap: 10, marginTop: 8, flexWrap: "wrap" as const }}>
-            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 11, color: "#9CA3AF" }}>{Ico.location} {cand.location}</span>
-            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 11, color: "#D97706", fontWeight: 600 }}>{Ico.star} {cand.rating} <span style={{ color: "#9CA3AF", fontWeight: 400 }}>({cand.reviews})</span></span>
+            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 13, color: "#9CA3AF" }}>{Ico.location} {cand.location}</span>
+            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 13, color: "#D97706", fontWeight: 600 }}>{Ico.star} {cand.rating} <span style={{ color: "#9CA3AF", fontWeight: 400 }}>({cand.reviews})</span></span>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
-            {cand.skills.map(s => <span key={s} style={{ fontSize: 10, color: "#374151", background: "#F3F4F6", padding: "2px 6px", borderRadius: 4, fontWeight: 500 }}>{s}</span>)}
+            {cand.skills.map(s => <span key={s} style={{ fontSize: 12, color: "#374151", background: "#F3F4F6", padding: "2px 6px", borderRadius: 4, fontWeight: 500 }}>{s}</span>)}
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
-             <span style={{ fontSize: 12, fontWeight: 600, color: "#111827" }}>{cand.rate}</span>
-             <span style={{ fontSize: 10, color: "#059669", background: "#D1FAE5", padding: "2px 6px", borderRadius: 4, fontWeight: 600, textTransform: "uppercase" as const }}>{cand.available}</span>
+             <span style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{cand.rate}</span>
+             <span style={{ fontSize: 12, color: "#059669", background: "#D1FAE5", padding: "2px 6px", borderRadius: 4, fontWeight: 600, textTransform: "uppercase" as const }}>{cand.available}</span>
           </div>
         </div>
       </div>
@@ -70,8 +70,8 @@ function DetailPanel({ cand, onClose, onBookmark }: { cand: Candidate; onClose: 
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <img src={cand.image} alt={cand.name} style={{ width: 44, height: 44, borderRadius: 10, border: "1.5px solid #E5E7EB", objectFit: "cover" }} />
             <div>
-              <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#111827" }}>{cand.name}</p>
-              <p style={{ margin: 0, fontSize: 12, color: "#6B7280" }}>{cand.role}</p>
+              <p style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#111827" }}>{cand.name}</p>
+              <p style={{ margin: 0, fontSize: 14, color: "#6B7280" }}>{cand.role}</p>
             </div>
           </div>
           <div style={{ display: "flex", gap: 6 }}>
@@ -80,10 +80,10 @@ function DetailPanel({ cand, onClose, onBookmark }: { cand: Candidate; onClose: 
           </div>
         </div>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as const }}>
-          <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 600, padding: "4px 10px", borderRadius: 4, color: "#D97706", background: "#FEF3C7" }}>
+          <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 13, fontWeight: 600, padding: "4px 10px", borderRadius: 4, color: "#D97706", background: "#FEF3C7" }}>
             {Ico.star} {cand.rating} ({cand.reviews} reviews)
           </span>
-          <span style={{ fontSize: 11, padding: "4px 10px", borderRadius: 4, color: "#374151", background: "#F3F4F6", fontWeight: 500 }}>{cand.location}</span>
+          <span style={{ fontSize: 13, padding: "4px 10px", borderRadius: 4, color: "#374151", background: "#F3F4F6", fontWeight: 500 }}>{cand.location}</span>
         </div>
       </div>
 
@@ -92,28 +92,28 @@ function DetailPanel({ cand, onClose, onBookmark }: { cand: Candidate; onClose: 
         
         <p style={sectionLabel}>Quick Actions</p>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 20 }}>
-          <button style={{ padding: "8px", background: "#111827", color: "#fff", border: "none", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+          <button style={{ padding: "8px", background: "#111827", color: "#fff", border: "none", borderRadius: 6, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
             {Ico.mail} Message
           </button>
-          <button style={{ padding: "8px", background: "#fff", color: "#111827", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>Invite to Apply</button>
+          <button style={{ padding: "8px", background: "#fff", color: "#111827", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>Invite to Apply</button>
         </div>
 
         <p style={sectionLabel}>About</p>
-        <p style={{ margin: "0 0 20px", fontSize: 12, color: "#374151", lineHeight: 1.6 }}>
+        <p style={{ margin: "0 0 20px", fontSize: 14, color: "#374151", lineHeight: 1.6 }}>
           {cand.name} is a highly experienced {cand.role.toLowerCase()} with a proven track record of delivering scalable solutions. Available {cand.available.toLowerCase()} for new opportunities.
         </p>
 
         <p style={sectionLabel}>Skills</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 20 }}>
-          {cand.skills.map(s => <span key={s} style={{ fontSize: 11, color: "#374151", border: "1px solid #E5E7EB", padding: "4px 8px", borderRadius: 4, fontWeight: 500 }}>{s}</span>)}
+          {cand.skills.map(s => <span key={s} style={{ fontSize: 13, color: "#374151", border: "1px solid #E5E7EB", padding: "4px 8px", borderRadius: 4, fontWeight: 500 }}>{s}</span>)}
         </div>
 
         <p style={sectionLabel}>Details</p>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
           {[["Hourly Rate", cand.rate], ["Availability", cand.available]].map(([label, value]) => (
             <div key={label} style={{ padding: "10px 12px", borderRadius: 6, background: "#F9FAFB", border: "1px solid #E5E7EB" }}>
-              <p style={{ margin: "0 0 2px", fontSize: 10, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</p>
-              <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: "#111827", fontFamily: "'DM Mono',monospace" }}>{value}</p>
+              <p style={{ margin: "0 0 2px", fontSize: 12, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</p>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#111827", fontFamily: "'DM Mono',monospace" }}>{value}</p>
             </div>
           ))}
         </div>
@@ -151,14 +151,14 @@ export default function FindTalent() {
       {/* Top bar */}
       <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#111827" }}>Find Talent</h1>
-          <p style={{ margin: 0, fontSize: 12, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>Discover top professionals</p>
+          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#111827" }}>Find Talent</h1>
+          <p style={{ margin: 0, fontSize: 14, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>Discover top professionals</p>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           {([["Total", stats.total, false], ["Immediate", stats.available, false], ["Saved", stats.saved, true]] as [string, number, boolean][]).map(([label, value, dark]) => (
             <div key={label} style={{ padding: "6px 14px", borderRadius: 6, background: dark ? "#111827" : "#F3F4F6", border: dark ? "none" : "1px solid #E5E7EB", textAlign: "center" as const }}>
-              <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: dark ? "#fff" : "#111827", fontFamily: "'DM Mono',monospace" }}>{value}</p>
-              <p style={{ margin: 0, fontSize: 10, color: dark ? "#9CA3AF" : "#6B7280", textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>{label}</p>
+              <p style={{ margin: 0, fontSize: 18, fontWeight: 700, color: dark ? "#fff" : "#111827", fontFamily: "'DM Mono',monospace" }}>{value}</p>
+              <p style={{ margin: 0, fontSize: 12, color: dark ? "#9CA3AF" : "#6B7280", textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>{label}</p>
             </div>
           ))}
         </div>
@@ -169,21 +169,21 @@ export default function FindTalent() {
         <div style={{ position: "relative" as const, flex: 1, maxWidth: 300 }}>
           <span style={{ position: "absolute" as const, left: 10, top: "50%", transform: "translateY(-50%)", color: "#9CA3AF" }}>{Ico.search}</span>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search skills, roles or names…"
-            style={{ width: "100%", padding: "7px 10px 7px 32px", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 12, color: "#111827", background: "#F9FAFB", outline: "none" }} />
+            style={{ width: "100%", padding: "7px 10px 7px 32px", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 14, color: "#111827", background: "#F9FAFB", outline: "none" }} />
         </div>
         <select value={filterRole} onChange={e => setFilterRole(e.target.value)} style={sel}>
           <option value="all">Any Role Category</option>
           <option value="Engineer">Engineering</option>
           <option value="Designer">Design & UI/UX</option>
         </select>
-        <span style={{ fontSize: 12, color: "#9CA3AF", marginLeft: "auto", fontFamily: "'DM Mono',monospace" }}>{filtered.length} candidates</span>
+        <span style={{ fontSize: 14, color: "#9CA3AF", marginLeft: "auto", fontFamily: "'DM Mono',monospace" }}>{filtered.length} candidates</span>
       </div>
 
       {/* Content */}
       <div style={{ flex: 1, display: "grid", gridTemplateColumns: selected ? "1fr 380px" : "1fr", gap: 16, padding: 20, alignItems: "start" }}>
         <div style={{ display: "grid", gridTemplateColumns: selected ? "1fr" : "repeat(auto-fill, minmax(320px, 1fr))", gap: 12 }}>
           {filtered.length === 0
-            ? <div style={{ padding: 48, textAlign: "center" as const, border: "1.5px dashed #E5E7EB", borderRadius: 10, background: "#fff", gridColumn: "1/-1" }}><p style={{ margin: 0, fontSize: 14, color: "#9CA3AF" }}>No talent matches your search.</p></div>
+            ? <div style={{ padding: 48, textAlign: "center" as const, border: "1.5px dashed #E5E7EB", borderRadius: 10, background: "#fff", gridColumn: "1/-1" }}><p style={{ margin: 0, fontSize: 16, color: "#9CA3AF" }}>No talent matches your search.</p></div>
             : filtered.map(cand => <CandidateCard key={cand.id} cand={cand} selected={selectedId === cand.id} onSelect={() => setSelectedId(p => p === cand.id ? null : cand.id)} onBookmark={() => toggleBookmark(cand.id)} />)
           }
         </div>

@@ -6,8 +6,8 @@ const BlogPreview = () => {
 
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Career Insights</h2>
-        <button className="text-green-600 text-sm font-medium">
+        <h2 className="text-2xl font-semibold">Career Insights</h2>
+        <button className="text-green-600 text-base font-medium">
           View All →
         </button>
       </div>

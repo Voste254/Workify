@@ -25,7 +25,7 @@ const Sidebar = ({ activePage, setActivePage }: Props) => {
 
   return (
     <div className="w-64 bg-slate-900 text-white hidden md:flex flex-col">
-      <div className="p-6 text-2xl font-bold">Workify</div>
+      <div className="p-6 text-3xl font-bold">Workify</div>
 
       {/* Main Menu */}
       <div className="flex-1 px-4">
@@ -55,7 +55,7 @@ const Sidebar = ({ activePage, setActivePage }: Props) => {
           Settings
         </button>
 
-        <div className="mt-6 text-sm text-gray-400">
+        <div className="mt-6 text-base text-gray-400">
           Logged in as <span className="text-white">Job Seeker</span>
         </div>
       </div>

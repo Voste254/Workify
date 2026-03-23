@@ -57,15 +57,15 @@ const Ico = {
 };
 
 // ── Shared styles ──────────────────────────────────────────────────────────────
-const sel = { fontFamily:"'DM Sans',sans-serif", padding:"7px 10px", border:"1px solid #E5E7EB", borderRadius:6, fontSize:12, color:"#374151", background:"#F9FAFB", cursor:"pointer", outline:"none" };
-const sectionLabel = { margin:"0 0 8px", fontSize:11, fontWeight:700, textTransform:"uppercase" as const, letterSpacing:"0.1em", color:"#9CA3AF" };
+const sel = { fontFamily:"'DM Sans',sans-serif", padding:"7px 10px", border:"1px solid #E5E7EB", borderRadius:6, fontSize: 14, color:"#374151", background:"#F9FAFB", cursor:"pointer", outline:"none" };
+const sectionLabel = { margin:"0 0 8px", fontSize: 13, fontWeight:700, textTransform:"uppercase" as const, letterSpacing:"0.1em", color:"#9CA3AF" };
 const iconBtn = (color="#6B7280") => ({ background:"none", border:"1px solid #E5E7EB", borderRadius:6, padding:"6px 8px", cursor:"pointer", color, display:"flex", alignItems:"center" as const });
 
 // ── Stage Progress Bar ─────────────────────────────────────────────────────────
 function StageBar({ stage }: { stage: Stage }) {
   const cfg = SC[stage];
   if (isTerminal(stage)) return (
-    <span style={{ fontSize:11, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", padding:"3px 10px", borderRadius:3, color:cfg.color, background:cfg.bg }}>{cfg.label}</span>
+    <span style={{ fontSize: 13, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", padding:"3px 10px", borderRadius:3, color:cfg.color, background:cfg.bg }}>{cfg.label}</span>
   );
   return (
     <div style={{ display:"flex", alignItems:"center", gap:4 }}>
@@ -73,7 +73,7 @@ function StageBar({ stage }: { stage: Stage }) {
         const active = s===stage, past = SC[s].step < cfg.step;
         return <div key={s} title={SC[s].label} style={{ width:active?28:8, height:8, borderRadius:4, background:active||past?"#111827":"#E5E7EB", opacity:past?0.3:1, transition:"width 0.3s ease" }}/>;
       })}
-      <span style={{ fontSize:11, fontWeight:600, letterSpacing:"0.05em", textTransform:"uppercase", color:"#111827", marginLeft:4 }}>{cfg.label}</span>
+      <span style={{ fontSize: 13, fontWeight:600, letterSpacing:"0.05em", textTransform:"uppercase", color:"#111827", marginLeft:4 }}>{cfg.label}</span>
     </div>
   );
 }
@@ -86,30 +86,30 @@ function AppCard({ app, selected, onSelect, onBookmark, onWithdraw }: { app:Appl
     <div onClick={onSelect} style={{ background:"#fff", border:`1.5px solid ${selected?"#111827":"#E5E7EB"}`, borderRadius:8, padding:"16px 18px", cursor:"pointer", opacity:terminal?0.7:1, transition:"border-color 0.15s", position:"relative" as const }}>
       {urgent && !terminal && <div style={{ position:"absolute", top:12, right:12, width:7, height:7, borderRadius:"50%", background:"#EF4444" }}/>}
       <div style={{ display:"flex", gap:12 }}>
-        <div style={{ width:40, height:40, borderRadius:8, background:"#F9FAFB", border:"1.5px solid #E5E7EB", display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, fontWeight:700, color:"#111827", flexShrink:0, fontFamily:"'DM Mono',monospace" }}>{app.logo}</div>
+        <div style={{ width:40, height:40, borderRadius:8, background:"#F9FAFB", border:"1.5px solid #E5E7EB", display:"flex", alignItems:"center", justifyContent:"center", fontSize: 18, fontWeight:700, color:"#111827", flexShrink:0, fontFamily:"'DM Mono',monospace" }}>{app.logo}</div>
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ display:"flex", justifyContent:"space-between", marginBottom:2 }}>
-            <p style={{ margin:0, fontSize:14, fontWeight:600, color:"#111827" }}>{app.jobTitle}</p>
+            <p style={{ margin:0, fontSize: 16, fontWeight:600, color:"#111827" }}>{app.jobTitle}</p>
             <button onClick={e=>{e.stopPropagation();onBookmark();}} style={{ background:"none", border:"none", cursor:"pointer", padding:2, color:app.isBookmarked?"#D97706":"#9CA3AF" }}>{Ico.bookmark(app.isBookmarked)}</button>
           </div>
-          <p style={{ margin:0, fontSize:12, color:"#6B7280" }}>{app.company}</p>
+          <p style={{ margin:0, fontSize: 14, color:"#6B7280" }}>{app.company}</p>
           <div style={{ display:"flex", gap:10, marginTop:8, flexWrap:"wrap" as const }}>
-            <span style={{ display:"flex", alignItems:"center", gap:3, fontSize:11, color:"#9CA3AF" }}>{Ico.location} {app.location}</span>
-            <span style={{ fontSize:11, color:"#6B7280", padding:"2px 7px", background:"#F3F4F6", borderRadius:3, fontWeight:500 }}>{app.jobType}</span>
+            <span style={{ display:"flex", alignItems:"center", gap:3, fontSize: 13, color:"#9CA3AF" }}>{Ico.location} {app.location}</span>
+            <span style={{ fontSize: 13, color:"#6B7280", padding:"2px 7px", background:"#F3F4F6", borderRadius:3, fontWeight:500 }}>{app.jobType}</span>
           </div>
           <div style={{ marginTop:10 }}><StageBar stage={app.stage}/></div>
           {app.nextAction && !terminal && (
             <div style={{ marginTop:10, padding:"7px 10px", background:urgent?"#FEF2F2":"#F9FAFB", border:`1px solid ${urgent?"#FECACA":"#E5E7EB"}`, borderRadius:6, display:"flex", alignItems:"center", gap:6 }}>
               <span style={{ color:urgent?"#DC2626":"#D97706" }}>{Ico.alert}</span>
-              <span style={{ fontSize:11, color:urgent?"#DC2626":"#6B7280" }}>
+              <span style={{ fontSize: 13, color:urgent?"#DC2626":"#6B7280" }}>
                 {app.nextAction}{app.nextActionDate && <strong style={{ marginLeft:4, color:urgent?"#DC2626":"#111827" }}> — {daysUntil(app.nextActionDate)}</strong>}
               </span>
             </div>
           )}
           <div style={{ display:"flex", justifyContent:"space-between", marginTop:10 }}>
-            <span style={{ fontSize:11, color:"#9CA3AF", fontFamily:"'DM Mono',monospace" }}>Updated {daysAgo(app.lastUpdated)}</span>
+            <span style={{ fontSize: 13, color:"#9CA3AF", fontFamily:"'DM Mono',monospace" }}>Updated {daysAgo(app.lastUpdated)}</span>
             {!terminal && app.stage!=="hired" && (
-              <button onClick={e=>{e.stopPropagation();onWithdraw();}} style={{ background:"none", border:"none", cursor:"pointer", fontSize:11, color:"#9CA3AF", display:"flex", alignItems:"center", gap:3 }}>
+              <button onClick={e=>{e.stopPropagation();onWithdraw();}} style={{ background:"none", border:"none", cursor:"pointer", fontSize: 13, color:"#9CA3AF", display:"flex", alignItems:"center", gap:3 }}>
                 {Ico.withdraw} Withdraw
               </button>
             )}
@@ -131,10 +131,10 @@ function DetailPanel({ app, onClose, onBookmark }: { app:Application; onClose:()
       <div style={{ padding:"18px 20px", borderBottom:"1px solid #E5E7EB" }}>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:12 }}>
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <div style={{ width:44, height:44, borderRadius:10, background:"#F9FAFB", border:"1.5px solid #E5E7EB", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, fontWeight:700, fontFamily:"'DM Mono',monospace" }}>{app.logo}</div>
+            <div style={{ width:44, height:44, borderRadius:10, background:"#F9FAFB", border:"1.5px solid #E5E7EB", display:"flex", alignItems:"center", justifyContent:"center", fontSize: 20, fontWeight:700, fontFamily:"'DM Mono',monospace" }}>{app.logo}</div>
             <div>
-              <p style={{ margin:0, fontSize:15, fontWeight:700, color:"#111827" }}>{app.jobTitle}</p>
-              <p style={{ margin:0, fontSize:12, color:"#6B7280" }}>{app.company} · {app.location}</p>
+              <p style={{ margin:0, fontSize: 17, fontWeight:700, color:"#111827" }}>{app.jobTitle}</p>
+              <p style={{ margin:0, fontSize: 14, color:"#6B7280" }}>{app.company} · {app.location}</p>
             </div>
           </div>
           <div style={{ display:"flex", gap:6 }}>
@@ -143,8 +143,8 @@ function DetailPanel({ app, onClose, onBookmark }: { app:Application; onClose:()
           </div>
         </div>
         <div style={{ display:"flex", gap:6, flexWrap:"wrap" as const }}>
-          <span style={{ fontSize:11, fontWeight:600, letterSpacing:"0.05em", padding:"4px 10px", borderRadius:4, textTransform:"uppercase" as const, color:cfg.color, background:cfg.bg }}>{cfg.label}</span>
-          {[app.jobType, app.salary].map(t => <span key={t} style={{ fontSize:11, padding:"4px 10px", borderRadius:4, color:"#374151", background:"#F3F4F6", fontWeight:500 }}>{t}</span>)}
+          <span style={{ fontSize: 13, fontWeight:600, letterSpacing:"0.05em", padding:"4px 10px", borderRadius:4, textTransform:"uppercase" as const, color:cfg.color, background:cfg.bg }}>{cfg.label}</span>
+          {[app.jobType, app.salary].map(t => <span key={t} style={{ fontSize: 13, padding:"4px 10px", borderRadius:4, color:"#374151", background:"#F3F4F6", fontWeight:500 }}>{t}</span>)}
         </div>
       </div>
 
@@ -164,7 +164,7 @@ function DetailPanel({ app, onClose, onBookmark }: { app:Application; onClose:()
                   </div>
                   {i<timeline.length-1 && <div style={{ width:2, height:20, background:done?"#111827":"#E5E7EB", opacity:done?0.3:1 }}/>}
                 </div>
-                <p style={{ margin:"2px 0 14px", fontSize:12, fontWeight:active?700:500, color:done||active?"#111827":"#9CA3AF" }}>
+                <p style={{ margin:"2px 0 14px", fontSize: 14, fontWeight:active?700:500, color:done||active?"#111827":"#9CA3AF" }}>
                   {label} {active && <span style={{ color:"#D97706", fontWeight:400 }}>← current</span>}
                 </p>
               </div>
@@ -172,8 +172,8 @@ function DetailPanel({ app, onClose, onBookmark }: { app:Application; onClose:()
           </div>
         ) : (
           <div style={{ padding:"10px 14px", borderRadius:6, background:cfg.bg, marginBottom:20, display:"flex", gap:8 }}>
-            <span style={{ fontSize:12, fontWeight:600, color:cfg.color }}>{cfg.label}</span>
-            <span style={{ fontSize:12, color:"#6B7280" }}>{app.stage==="rejected"?"This application was not successful.":"You withdrew this application."}</span>
+            <span style={{ fontSize: 14, fontWeight:600, color:cfg.color }}>{cfg.label}</span>
+            <span style={{ fontSize: 14, color:"#6B7280" }}>{app.stage==="rejected"?"This application was not successful.":"You withdrew this application."}</span>
           </div>
         )}
 
@@ -181,8 +181,8 @@ function DetailPanel({ app, onClose, onBookmark }: { app:Application; onClose:()
         {app.nextAction && <>
           <p style={sectionLabel}>Next Action</p>
           <div style={{ padding:"12px 14px", borderRadius:6, border:"1px solid #E5E7EB", marginBottom:20, background:"#FAFAFA" }}>
-            <p style={{ margin:0, fontSize:13, color:"#111827", fontWeight:500 }}>{app.nextAction}</p>
-            {app.nextActionDate && <p style={{ margin:"4px 0 0", fontSize:11, color:"#6B7280", display:"flex", alignItems:"center", gap:4 }}>{Ico.calendar} {fmtDate(app.nextActionDate)} — <strong style={{ color:"#111827" }}>{daysUntil(app.nextActionDate)}</strong></p>}
+            <p style={{ margin:0, fontSize: 15, color:"#111827", fontWeight:500 }}>{app.nextAction}</p>
+            {app.nextActionDate && <p style={{ margin:"4px 0 0", fontSize: 13, color:"#6B7280", display:"flex", alignItems:"center", gap:4 }}>{Ico.calendar} {fmtDate(app.nextActionDate)} — <strong style={{ color:"#111827" }}>{daysUntil(app.nextActionDate)}</strong></p>}
           </div>
         </>}
 
@@ -191,10 +191,10 @@ function DetailPanel({ app, onClose, onBookmark }: { app:Application; onClose:()
           <p style={sectionLabel}>Recruiter Contact</p>
           <div style={{ padding:"12px 14px", borderRadius:6, border:"1px solid #E5E7EB", marginBottom:20, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
             <div>
-              <p style={{ margin:0, fontSize:13, fontWeight:600, color:"#111827" }}>{app.recruiterName}</p>
-              <p style={{ margin:"2px 0 0", fontSize:11, color:"#6B7280" }}>{app.recruiterEmail}</p>
+              <p style={{ margin:0, fontSize: 15, fontWeight:600, color:"#111827" }}>{app.recruiterName}</p>
+              <p style={{ margin:"2px 0 0", fontSize: 13, color:"#6B7280" }}>{app.recruiterEmail}</p>
             </div>
-            <a href={`mailto:${app.recruiterEmail}`} style={{ display:"flex", alignItems:"center", gap:4, fontSize:11, color:"#111827", fontWeight:600, padding:"6px 12px", border:"1px solid #E5E7EB", borderRadius:6, textDecoration:"none", background:"#F9FAFB" }}>
+            <a href={`mailto:${app.recruiterEmail}`} style={{ display:"flex", alignItems:"center", gap:4, fontSize: 13, color:"#111827", fontWeight:600, padding:"6px 12px", border:"1px solid #E5E7EB", borderRadius:6, textDecoration:"none", background:"#F9FAFB" }}>
               {Ico.mail} Email
             </a>
           </div>
@@ -204,7 +204,7 @@ function DetailPanel({ app, onClose, onBookmark }: { app:Application; onClose:()
         {app.notes && <>
           <p style={sectionLabel}>Notes</p>
           <div style={{ padding:"12px 14px", borderRadius:6, background:"#FFFBEB", border:"1px solid #FDE68A", marginBottom:20 }}>
-            <p style={{ margin:0, fontSize:12, color:"#78350F", lineHeight:1.6 }}>{app.notes}</p>
+            <p style={{ margin:0, fontSize: 14, color:"#78350F", lineHeight:1.6 }}>{app.notes}</p>
           </div>
         </>}
 
@@ -213,8 +213,8 @@ function DetailPanel({ app, onClose, onBookmark }: { app:Application; onClose:()
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
           {[["Applied",fmtDate(app.appliedDate)],["Last Update",fmtDate(app.lastUpdated)]].map(([label,value]) => (
             <div key={label} style={{ padding:"10px 12px", borderRadius:6, background:"#F9FAFB", border:"1px solid #E5E7EB" }}>
-              <p style={{ margin:"0 0 2px", fontSize:10, color:"#9CA3AF", textTransform:"uppercase", letterSpacing:"0.08em" }}>{label}</p>
-              <p style={{ margin:0, fontSize:12, fontWeight:600, color:"#111827", fontFamily:"'DM Mono',monospace" }}>{value}</p>
+              <p style={{ margin:"0 0 2px", fontSize: 12, color:"#9CA3AF", textTransform:"uppercase", letterSpacing:"0.08em" }}>{label}</p>
+              <p style={{ margin:0, fontSize: 14, fontWeight:600, color:"#111827", fontFamily:"'DM Mono',monospace" }}>{value}</p>
             </div>
           ))}
         </div>
@@ -256,14 +256,14 @@ export default function ApplicationsTracker() {
       {/* Top bar */}
       <div style={{ background:"#fff", borderBottom:"1px solid #E5E7EB", padding:"14px 24px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
         <div>
-          <h1 style={{ margin:0, fontSize:18, fontWeight:700, color:"#111827" }}>My Applications</h1>
-          <p style={{ margin:0, fontSize:12, color:"#9CA3AF", fontFamily:"'DM Mono',monospace" }}>{stats.active} active · {apps.length} total</p>
+          <h1 style={{ margin:0, fontSize: 20, fontWeight:700, color:"#111827" }}>My Applications</h1>
+          <p style={{ margin:0, fontSize: 14, color:"#9CA3AF", fontFamily:"'DM Mono',monospace" }}>{stats.active} active · {apps.length} total</p>
         </div>
         <div style={{ display:"flex", gap:8 }}>
           {([["Active",stats.active,false],["Interviews",stats.interviews,false],["Offers",stats.offers,false],["Hired",stats.hired,true]] as [string,number,boolean][]).map(([label,value,dark])=>(
             <div key={label} style={{ padding:"6px 14px", borderRadius:6, background:dark?"#111827":"#F3F4F6", border:dark?"none":"1px solid #E5E7EB", textAlign:"center" as const }}>
-              <p style={{ margin:0, fontSize:16, fontWeight:700, color:dark?"#fff":"#111827", fontFamily:"'DM Mono',monospace" }}>{value}</p>
-              <p style={{ margin:0, fontSize:10, color:dark?"#9CA3AF":"#6B7280", textTransform:"uppercase" as const, letterSpacing:"0.06em" }}>{label}</p>
+              <p style={{ margin:0, fontSize: 18, fontWeight:700, color:dark?"#fff":"#111827", fontFamily:"'DM Mono',monospace" }}>{value}</p>
+              <p style={{ margin:0, fontSize: 12, color:dark?"#9CA3AF":"#6B7280", textTransform:"uppercase" as const, letterSpacing:"0.06em" }}>{label}</p>
             </div>
           ))}
         </div>
@@ -274,7 +274,7 @@ export default function ApplicationsTracker() {
         <div style={{ position:"relative" as const, flex:1, maxWidth:260 }}>
           <span style={{ position:"absolute" as const, left:10, top:"50%", transform:"translateY(-50%)", color:"#9CA3AF" }}>{Ico.search}</span>
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search jobs or companies…"
-            style={{ width:"100%", padding:"7px 10px 7px 32px", border:"1px solid #E5E7EB", borderRadius:6, fontSize:12, color:"#111827", background:"#F9FAFB", outline:"none" }}/>
+            style={{ width:"100%", padding:"7px 10px 7px 32px", border:"1px solid #E5E7EB", borderRadius:6, fontSize: 14, color:"#111827", background:"#F9FAFB", outline:"none" }}/>
         </div>
         <select value={filterStage} onChange={e=>setFilterStage(e.target.value as Stage|"all")} style={sel}>
           <option value="all">All Stages</option>
@@ -289,14 +289,14 @@ export default function ApplicationsTracker() {
           <option value="appliedDate">Sort: Date Applied</option>
           <option value="company">Sort: Company A–Z</option>
         </select>
-        <span style={{ fontSize:12, color:"#9CA3AF", marginLeft:"auto", fontFamily:"'DM Mono',monospace" }}>{filtered.length} result{filtered.length!==1?"s":""}</span>
+        <span style={{ fontSize: 14, color:"#9CA3AF", marginLeft:"auto", fontFamily:"'DM Mono',monospace" }}>{filtered.length} result{filtered.length!==1?"s":""}</span>
       </div>
 
       {/* Content */}
       <div style={{ flex:1, display:"grid", gridTemplateColumns:selected?"1fr 380px":"1fr", gap:16, padding:20, alignItems:"start" }}>
         <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
           {filtered.length===0
-            ? <div style={{ padding:48, textAlign:"center" as const, border:"1.5px dashed #E5E7EB", borderRadius:10, background:"#fff" }}><p style={{ margin:0, fontSize:14, color:"#9CA3AF" }}>No applications match your filters.</p></div>
+            ? <div style={{ padding:48, textAlign:"center" as const, border:"1.5px dashed #E5E7EB", borderRadius:10, background:"#fff" }}><p style={{ margin:0, fontSize: 16, color:"#9CA3AF" }}>No applications match your filters.</p></div>
             : filtered.map(app=><AppCard key={app.id} app={app} selected={selectedId===app.id} onSelect={()=>setSelectedId(p=>p===app.id?null:app.id)} onBookmark={()=>toggleBookmark(app.id)} onWithdraw={()=>withdraw(app.id)}/>)
           }
         </div>

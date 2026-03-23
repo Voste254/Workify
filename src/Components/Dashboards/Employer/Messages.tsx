@@ -50,8 +50,8 @@ export default function Messages() {
       {/* Top bar */}
       <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#111827" }}>Messages</h1>
-          <p style={{ margin: 0, fontSize: 12, color: "#9CA3AF" }}>Communicate with candidates</p>
+          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#111827" }}>Messages</h1>
+          <p style={{ margin: 0, fontSize: 14, color: "#9CA3AF" }}>Communicate with candidates</p>
         </div>
       </div>
 
@@ -63,7 +63,7 @@ export default function Messages() {
             <div style={{ position: "relative" as const }}>
               <span style={{ position: "absolute" as const, left: 10, top: "50%", transform: "translateY(-50%)", color: "#9CA3AF" }}>{Ico.search}</span>
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search messages…"
-                style={{ width: "100%", padding: "8px 10px 8px 32px", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 12, color: "#111827", background: "#F9FAFB", outline: "none", fontFamily: "'DM Sans',sans-serif" }} />
+                style={{ width: "100%", padding: "8px 10px 8px 32px", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 14, color: "#111827", background: "#F9FAFB", outline: "none", fontFamily: "'DM Sans',sans-serif" }} />
             </div>
           </div>
           
@@ -78,13 +78,13 @@ export default function Messages() {
                    </div>
                    <div style={{ flex: 1, minWidth: 0, textAlign: "left" as const }}>
                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
-                       <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#111827", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</p>
-                       <span style={{ fontSize: 10, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>{c.time}</span>
+                       <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#111827", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</p>
+                       <span style={{ fontSize: 12, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>{c.time}</span>
                      </div>
-                     <p style={{ margin: "0 0 4px", fontSize: 11, color: active ? "#111827" : "#6B7280", fontWeight: active ? 600 : 400, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.role}</p>
-                     <p style={{ margin: 0, fontSize: 12, color: "#9CA3AF", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.lastMessage}</p>
+                     <p style={{ margin: "0 0 4px", fontSize: 13, color: active ? "#111827" : "#6B7280", fontWeight: active ? 600 : 400, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.role}</p>
+                     <p style={{ margin: 0, fontSize: 14, color: "#9CA3AF", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.lastMessage}</p>
                    </div>
-                   {c.unread > 0 && <div style={{ background: "#111827", color: "#fff", fontSize: 10, fontWeight: 700, width: 20, height: 20, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>{c.unread}</div>}
+                   {c.unread > 0 && <div style={{ background: "#111827", color: "#fff", fontSize: 12, fontWeight: 700, width: 20, height: 20, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>{c.unread}</div>}
                  </button>
                );
             })}
@@ -99,8 +99,8 @@ export default function Messages() {
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <img src={activeChat.avatar} alt={activeChat.name} style={{ width: 40, height: 40, borderRadius: 20, objectFit: "cover", border: "1px solid #E5E7EB" }} />
               <div>
-                <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#111827" }}>{activeChat.name}</p>
-                <p style={{ margin: 0, fontSize: 11, color: "#6B7280" }}>{activeChat.role}</p>
+                <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#111827" }}>{activeChat.name}</p>
+                <p style={{ margin: 0, fontSize: 13, color: "#6B7280" }}>{activeChat.role}</p>
               </div>
             </div>
             <div style={{ display: "flex", gap: 6 }}>
@@ -116,10 +116,10 @@ export default function Messages() {
                 const isMe = msg.sender === "employer";
                 return (
                   <div key={msg.id} style={{ alignSelf: isMe ? "flex-end" : "flex-start", maxWidth: "70%", display: "flex", flexDirection: "column", alignItems: isMe ? "flex-end" : "flex-start", gap: 4 }}>
-                    <div style={{ background: isMe ? "#111827" : "#fff", color: isMe ? "#fff" : "#111827", border: isMe ? "none" : "1.5px solid #E5E7EB", padding: "10px 14px", fontSize: 13, borderRadius: 10, borderTopRightRadius: isMe ? 2 : 10, borderTopLeftRadius: isMe ? 10 : 2, lineHeight: 1.5 }}>
+                    <div style={{ background: isMe ? "#111827" : "#fff", color: isMe ? "#fff" : "#111827", border: isMe ? "none" : "1.5px solid #E5E7EB", padding: "10px 14px", fontSize: 15, borderRadius: 10, borderTopRightRadius: isMe ? 2 : 10, borderTopLeftRadius: isMe ? 10 : 2, lineHeight: 1.5 }}>
                       {msg.text}
                     </div>
-                    <span style={{ fontSize: 10, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>{msg.time}</span>
+                    <span style={{ fontSize: 12, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>{msg.time}</span>
                   </div>
                 );
              })}
@@ -134,7 +134,7 @@ export default function Messages() {
                </div>
                <div style={{ flex: 1, position: "relative" as const }}>
                  <textarea value={inputText} onChange={e => setInputText(e.target.value)} placeholder="Type a message..." rows={1}
-                  style={{ width: "100%", padding: "12px 14px", border: "1.5px solid #E5E7EB", borderRadius: 8, fontSize: 13, color: "#111827", background: "#F9FAFB", outline: "none", fontFamily: "'DM Sans',sans-serif", resize: "none" }} />
+                  style={{ width: "100%", padding: "12px 14px", border: "1.5px solid #E5E7EB", borderRadius: 8, fontSize: 15, color: "#111827", background: "#F9FAFB", outline: "none", fontFamily: "'DM Sans',sans-serif", resize: "none" }} />
                </div>
                <button style={{ background: "#111827", color: "#fff", border: "none", cursor: "pointer", padding: "12px 14px", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
                  {Ico.send}

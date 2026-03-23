@@ -34,7 +34,7 @@ const PrivacySettings = () => {
 
   return (
     <>
-      <h2 className="text-xl font-semibold mb-6">Privacy Settings</h2>
+      <h2 className="text-2xl font-semibold mb-6">Privacy Settings</h2>
 
       {items.map(([label, val, setter]) => (
         <div

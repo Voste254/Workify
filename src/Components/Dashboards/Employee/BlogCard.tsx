@@ -36,7 +36,7 @@ const BlogCard = ({
         />
 
         {/* Category Badge */}
-        <span className="absolute top-4 left-4 text-xs px-3 py-1 rounded-full bg-white text-gray-700 font-medium">
+        <span className="absolute top-4 left-4 text-sm px-3 py-1 rounded-full bg-white text-gray-700 font-medium">
           {category}
         </span>
       </div>
@@ -45,12 +45,12 @@ const BlogCard = ({
       <div className="p-5">
 
         {/* Title */}
-        <h3 className="text-lg font-semibold mb-2 leading-snug">
+        <h3 className="text-xl font-semibold mb-2 leading-snug">
           {title}
         </h3>
 
         {/* Description */}
-        <p className="text-gray-500 text-sm mb-4 line-clamp-2">
+        <p className="text-gray-500 text-base mb-4 line-clamp-2">
           {description}
         </p>
 
@@ -68,8 +68,8 @@ const BlogCard = ({
             />
 
             <div>
-              <p className="text-sm font-medium">{author}</p>
-              <p className="text-xs text-gray-500">
+              <p className="text-base font-medium">{author}</p>
+              <p className="text-sm text-gray-500">
                 {date} • {readTime}
               </p>
             </div>

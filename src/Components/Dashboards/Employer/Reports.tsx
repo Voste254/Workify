@@ -12,7 +12,7 @@ const Ico = {
 };
 
 // ── Shared styles ──────────────────────────────────────────────────────────────
-const sel = { fontFamily: "'DM Sans',sans-serif", padding: "7px 10px", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 12, color: "#374151", background: "#F9FAFB", cursor: "pointer", outline: "none" };
+const sel = { fontFamily: "'DM Sans',sans-serif", padding: "7px 10px", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 14, color: "#374151", background: "#F9FAFB", cursor: "pointer", outline: "none" };
 
 const STATS = [
   { title: "Active Jobs", value: "12", change: "+2 this week", trend: "up", icon: Ico.briefcase, bg: "#F3F4F6", text: "#111827" },
@@ -38,8 +38,8 @@ export default function Reports() {
       {/* Top bar */}
       <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#111827" }}>Reports & Analytics</h1>
-          <p style={{ margin: 0, fontSize: 12, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>Track hiring performance</p>
+          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#111827" }}>Reports & Analytics</h1>
+          <p style={{ margin: 0, fontSize: 14, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>Track hiring performance</p>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
           <select value={timeRange} onChange={e => setTimeRange(e.target.value)} style={sel}>
@@ -66,33 +66,33 @@ export default function Reports() {
                   {stat.icon}
                 </div>
               </div>
-              <p style={{ margin: "0 0 4px", fontSize: 12, fontWeight: 600, color: "#6B7280" }}>{stat.title}</p>
-              <p style={{ margin: "0 0 8px", fontSize: 24, fontWeight: 700, color: "#111827", fontFamily: "'DM Mono',monospace" }}>{stat.value}</p>
-              <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: stat.trend === "up" ? "#059669" : "#DC2626" }}>{stat.change}</p>
+              <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 600, color: "#6B7280" }}>{stat.title}</p>
+              <p style={{ margin: "0 0 8px", fontSize: 26, fontWeight: 700, color: "#111827", fontFamily: "'DM Mono',monospace" }}>{stat.value}</p>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: stat.trend === "up" ? "#059669" : "#DC2626" }}>{stat.change}</p>
             </div>
           ))}
         </div>
 
         {/* Charts Area */}
         <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16 }}>
-          <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 10, minHeight: 400, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textContent: "center" }}>
+          <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 10, minHeight: 400, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" as const }}>
             <div style={{ color: "#D1D5DB", marginBottom: 16 }}>{Ico.chart}</div>
-            <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: "#111827" }}>Applicant Trends</p>
-            <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6B7280", maxWidth: 300, textAlign: "center" }}>Interactive charts will be available once data integration is complete.</p>
+            <p style={{ margin: 0, fontSize: 18, fontWeight: 600, color: "#111827" }}>Applicant Trends</p>
+            <p style={{ margin: "4px 0 0", fontSize: 15, color: "#6B7280", maxWidth: 300, textAlign: "center" }}>Interactive charts will be available once data integration is complete.</p>
           </div>
 
           <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 10, padding: 20 }}>
-            <h3 style={{ margin: "0 0 20px", fontSize: 14, fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.05em" }}>Top Job Postings</h3>
+            <h3 style={{ margin: "0 0 20px", fontSize: 16, fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.05em" }}>Top Job Postings</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               {TOP_JOBS.map((job, idx) => (
                 <div key={idx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 16, borderBottom: idx < TOP_JOBS.length - 1 ? "1px solid #E5E7EB" : "none" }}>
                   <div>
-                    <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 600, color: "#111827" }}>{job.role}</p>
-                    <p style={{ margin: 0, fontSize: 11, color: "#6B7280", fontFamily: "'DM Mono',monospace" }}>{job.views} views</p>
+                    <p style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 600, color: "#111827" }}>{job.role}</p>
+                    <p style={{ margin: 0, fontSize: 13, color: "#6B7280", fontFamily: "'DM Mono',monospace" }}>{job.views} views</p>
                   </div>
                   <div style={{ textAlign: "right" }}>
-                    <p style={{ margin: "0 0 2px", fontSize: 14, fontWeight: 700, color: "#111827", fontFamily: "'DM Mono',monospace" }}>{job.apps}</p>
-                    <p style={{ margin: 0, fontSize: 10, color: "#9CA3AF", textTransform: "uppercase" }}>Applicants</p>
+                    <p style={{ margin: "0 0 2px", fontSize: 16, fontWeight: 700, color: "#111827", fontFamily: "'DM Mono',monospace" }}>{job.apps}</p>
+                    <p style={{ margin: 0, fontSize: 12, color: "#9CA3AF", textTransform: "uppercase" }}>Applicants</p>
                   </div>
                 </div>
               ))}

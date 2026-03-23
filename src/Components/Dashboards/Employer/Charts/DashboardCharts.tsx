@@ -15,7 +15,7 @@ const DashboardCharts = ({
       
       {/* Line Chart */}
       <div className="bg-white p-4 rounded-xl shadow">
-        <h2 className="text-lg font-semibold mb-4">
+        <h2 className="text-xl font-semibold mb-4">
           Monthly Applications
         </h2>
         <ChartComponent data={barData} />
@@ -23,7 +23,7 @@ const DashboardCharts = ({
 
       {/* Bar Chart */}
       <div className="bg-white p-4 rounded-xl shadow">
-        <h2 className="text-lg font-semibold mb-4">
+        <h2 className="text-xl font-semibold mb-4">
           Applications per Job
         </h2>
         <ChartComponent data={barData} />

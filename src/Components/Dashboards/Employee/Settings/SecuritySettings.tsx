@@ -28,7 +28,7 @@ const SecuritySettings = () => {
 
   return (
     <>
-      <h2 className="text-xl font-semibold mb-6">Security Settings</h2>
+      <h2 className="text-2xl font-semibold mb-6">Security Settings</h2>
 
       {/* Password */}
       <div className="flex justify-between items-center border-b py-5">
@@ -45,7 +45,7 @@ const SecuritySettings = () => {
         <div className="space-y-4 mb-6">
           {["Old Password", "New Password"].map((label) => (
             <div key={label}>
-              <label className="block text-sm font-medium mb-2">{label}</label>
+              <label className="block text-base font-medium mb-2">{label}</label>
               <input
                 type="password"
                 className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-600 outline-none"
@@ -64,7 +64,7 @@ const SecuritySettings = () => {
       <div className="flex justify-between items-center border-b py-5">
         <div>
           <p className="font-medium">Two-Factor Authentication</p>
-          <p className="text-sm text-gray-500">
+          <p className="text-base text-gray-500">
             Add extra protection to your account
           </p>
         </div>
@@ -83,7 +83,7 @@ const SecuritySettings = () => {
       </div>
 
       {showDevices && (
-        <div className="mt-4 space-y-3 text-sm text-gray-600">
+        <div className="mt-4 space-y-3 text-base text-gray-600">
           {[
             ["Chrome - Windows", "Nairobi, Kenya"],
             ["Safari - iPhone", "Mombasa, Kenya"],
@@ -96,7 +96,7 @@ const SecuritySettings = () => {
                 <p className="font-medium">{name}</p>
                 <p className="text-gray-500">{location}</p>
               </div>
-              <button className="text-red-500 text-sm">Log out</button>
+              <button className="text-red-500 text-base">Log out</button>
             </div>
           ))}
         </div>

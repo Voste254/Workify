@@ -38,7 +38,7 @@ const NotificationSettings = () => {
 
   return (
     <>
-      <h2 className="text-xl font-semibold mb-6">Notifications</h2>
+      <h2 className="text-2xl font-semibold mb-6">Notifications</h2>
 
       {Object.entries(options).map(([key, label]) => (
         <div

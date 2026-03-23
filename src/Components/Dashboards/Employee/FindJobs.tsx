@@ -27,7 +27,7 @@ const LOCATIONS      = ["All Locations", "Nairobi, Kenya", "Mombasa, Kenya", "La
 const SORT_OPTIONS   = ["Newest", "Highest Rated", "Salary: High to Low"];
 
 const Sel = ({ value, onChange, children }: React.SelectHTMLAttributes<HTMLSelectElement> & { children: React.ReactNode }) => (
-  <select value={value} onChange={onChange} className="h-9 border border-gray-200 bg-white px-3 text-xs text-gray-700 outline-none focus:border-gray-900 transition appearance-none cursor-pointer">
+  <select value={value} onChange={onChange} className="h-9 border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none focus:border-gray-900 transition appearance-none cursor-pointer">
     {children}
   </select>
 );
@@ -74,14 +74,14 @@ export default function FindJobsPage() {
       {/* Top bar */}
       <div className="bg-white border-b border-gray-200 px-6 lg:px-10 py-5 flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-lg font-bold text-gray-900">Find Jobs</h1>
-          <p className="text-xs text-gray-600 font-mono mt-0.5">{filtered.length} listing{filtered.length !== 1 ? "s" : ""} available</p>
+          <h1 className="text-xl font-bold text-gray-900">Find Jobs</h1>
+          <p className="text-sm text-gray-600 font-mono mt-0.5">{filtered.length} listing{filtered.length !== 1 ? "s" : ""} available</p>
         </div>
         {/* Job type tabs */}
         <div className="flex items-center gap-1 bg-gray-100 p-1">
           {(["All", "Corporate", "Manual/Casual"] as const).map(t => (
             <button key={t} onClick={() => setJobType(t)}
-              className={`px-3 py-1.5 text-xs font-semibold transition ${jobType === t ? "bg-white text-gray-900 border border-gray-200" : "text-gray-500 hover:text-gray-700"}`}>
+              className={`px-3 py-1.5 text-sm font-semibold transition ${jobType === t ? "bg-white text-gray-900 border border-gray-200" : "text-gray-500 hover:text-gray-700"}`}>
               {t} <span className="font-mono ml-1 opacity-60">{t === "All" ? JOBS.length : JOBS.filter(j => j.jobType === t).length}</span>
             </button>
           ))}
@@ -93,7 +93,7 @@ export default function FindJobsPage() {
         <div className="relative flex-1 min-w-[180px] max-w-xs">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"/>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search jobs or companies…"
-            className="w-full h-9 border border-gray-200 pl-8 pr-8 text-xs text-gray-900 outline-none focus:border-gray-900 transition placeholder:text-gray-400 bg-white"/>
+            className="w-full h-9 border border-gray-200 pl-8 pr-8 text-sm text-gray-900 outline-none focus:border-gray-900 transition placeholder:text-gray-400 bg-white"/>
           {search && <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"><X size={13}/></button>}
         </div>
         <Sel value={contract} onChange={e => setContract(e.target.value)}>
@@ -105,20 +105,20 @@ export default function FindJobsPage() {
         <Sel value={sort} onChange={e => setSort(e.target.value)}>
           {SORT_OPTIONS.map(s => <option key={s}>{s}</option>)}
         </Sel>
-        <span className="text-xs text-gray-400 font-mono ml-auto">{filtered.length} result{filtered.length !== 1 ? "s" : ""}</span>
+        <span className="text-sm text-gray-400 font-mono ml-auto">{filtered.length} result{filtered.length !== 1 ? "s" : ""}</span>
       </div>
 
       {/* Active filter chips */}
       {activeFilters.length > 0 && (
         <div className="px-6 lg:px-10 py-2.5 flex items-center gap-2 flex-wrap bg-white border-b border-gray-200">
-          <span className="text-xs text-gray-400">Active:</span>
+          <span className="text-sm text-gray-400">Active:</span>
           {activeFilters.map(f => (
-            <span key={f} className="flex items-center gap-1.5 bg-gray-900 text-white text-xs px-2.5 py-1 font-mono">
+            <span key={f} className="flex items-center gap-1.5 bg-gray-900 text-white text-sm px-2.5 py-1 font-mono">
               {f} <button onClick={() => clearFilter(f)} className="opacity-60 hover:opacity-100"><X size={11}/></button>
             </span>
           ))}
           <button onClick={() => { setJobType("All"); setContract("All"); setLocation("All Locations"); }}
-            className="text-xs text-gray-400 hover:text-gray-700 underline ml-1">Clear all</button>
+            className="text-sm text-gray-400 hover:text-gray-700 underline ml-1">Clear all</button>
         </div>
       )}
 
@@ -126,8 +126,8 @@ export default function FindJobsPage() {
       <div className="px-6 lg:px-10 py-6">
         {filtered.length === 0 ? (
           <div className="border-[1.5px] border-dashed border-gray-200 bg-white py-20 text-center">
-            <p className="text-sm font-semibold text-gray-900 mb-1">No jobs found</p>
-            <p className="text-xs text-gray-400">Try adjusting your search or filters.</p>
+            <p className="text-base font-semibold text-gray-900 mb-1">No jobs found</p>
+            <p className="text-sm text-gray-400">Try adjusting your search or filters.</p>
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">

@@ -13,10 +13,10 @@ const Ico = {
 };
 
 // ── Shared styles ──────────────────────────────────────────────────────────────
-const labelStyle = { display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 6, fontFamily: "'DM Sans',sans-serif" };
+const labelStyle = { display: "block", fontSize: 15, fontWeight: 600, color: "#374151", marginBottom: 6, fontFamily: "'DM Sans',sans-serif" };
 const inputOuter = { position: "relative" as const, display: "flex", alignItems: "center" };
 const inputIcon = { position: "absolute" as const, left: 12, color: "#9CA3AF" };
-const inputStyle = { width: "100%", padding: "10px 14px 10px 36px", border: "1.5px solid #E5E7EB", borderRadius: 8, fontSize: 14, color: "#111827", background: "#fff", outline: "none", fontFamily: "'DM Sans',sans-serif", transition: "border-color 0.15s" };
+const inputStyle = { width: "100%", padding: "10px 14px 10px 36px", border: "1.5px solid #E5E7EB", borderRadius: 8, fontSize: 16, color: "#111827", background: "#fff", outline: "none", fontFamily: "'DM Sans',sans-serif", transition: "border-color 0.15s" };
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function Settings() {
@@ -35,12 +35,12 @@ export default function Settings() {
       {/* Top bar */}
       <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#111827" }}>Account Settings</h1>
-          <p style={{ margin: 0, fontSize: 12, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>Company Profile</p>
+          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#111827" }}>Account Settings</h1>
+          <p style={{ margin: 0, fontSize: 14, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>Company Profile</p>
         </div>
         <div>
-          {isSaved && <span style={{ marginRight: 16, fontSize: 13, color: "#059669", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 6 }}>{Ico.check} Saved Successfully</span>}
-          <button onClick={handleSubmit} style={{ padding: "8px 16px", background: "#111827", color: "#fff", border: "none", borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+          {isSaved && <span style={{ marginRight: 16, fontSize: 15, color: "#059669", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 6 }}>{Ico.check} Saved Successfully</span>}
+          <button onClick={handleSubmit} style={{ padding: "8px 16px", background: "#111827", color: "#fff", border: "none", borderRadius: 6, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
             Save Changes
           </button>
         </div>
@@ -51,7 +51,7 @@ export default function Settings() {
           
           {/* Cover Photo */}
           <div style={{ height: 140, background: "#111827", position: "relative" as const }}>
-            <button style={{ position: "absolute", right: 20, bottom: 20, background: "rgba(255,255,255,0.2)", color: "#fff", border: "none", borderRadius: 6, padding: "8px 12px", display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, cursor: "pointer", backdropFilter: "blur(4px)" }}>
+            <button style={{ position: "absolute", right: 20, bottom: 20, background: "rgba(255,255,255,0.2)", color: "#fff", border: "none", borderRadius: 6, padding: "8px 12px", display: "flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 600, cursor: "pointer", backdropFilter: "blur(4px)" }}>
               {Ico.camera} Edit Cover
             </button>
           </div>
@@ -63,12 +63,12 @@ export default function Settings() {
               <div style={{ width: 100, height: 100, background: "#fff", border: "4px solid #fff", borderRadius: 12, boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" as const, cursor: "pointer", overflow: "hidden" }}>
                 <div style={{ width: "100%", height: "100%", background: "#F9FAFB", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#9CA3AF" }}>
                   {Ico.camera}
-                  <span style={{ fontSize: 10, fontWeight: 600, marginTop: 4, textTransform: "uppercase", letterSpacing: "0.05em" }}>Logo</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, marginTop: 4, textTransform: "uppercase", letterSpacing: "0.05em" }}>Logo</span>
                 </div>
               </div>
             </div>
 
-            <h3 style={{ margin: "0 0 20px", fontSize: 16, fontWeight: 700, color: "#111827", borderBottom: "1px solid #E5E7EB", paddingBottom: 10 }}>Company Details</h3>
+            <h3 style={{ margin: "0 0 20px", fontSize: 18, fontWeight: 700, color: "#111827", borderBottom: "1px solid #E5E7EB", paddingBottom: 10 }}>Company Details</h3>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
               <div>
@@ -94,7 +94,7 @@ export default function Settings() {
                 style={{ ...inputStyle, paddingLeft: 14, resize: "vertical" }} />
             </div>
 
-            <h3 style={{ margin: "0 0 20px", fontSize: 16, fontWeight: 700, color: "#111827", borderBottom: "1px solid #E5E7EB", paddingBottom: 10 }}>Contact Information</h3>
+            <h3 style={{ margin: "0 0 20px", fontSize: 18, fontWeight: 700, color: "#111827", borderBottom: "1px solid #E5E7EB", paddingBottom: 10 }}>Contact Information</h3>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
               <div>

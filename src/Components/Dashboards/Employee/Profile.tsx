@@ -18,7 +18,7 @@ const MyProfile = () => {
 
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">My Profile</h2>
+        <h2 className="text-2xl font-semibold">My Profile</h2>
 
         <button
           onClick={() => setEditMode(!editMode)}
@@ -44,7 +44,7 @@ const MyProfile = () => {
             />
 
             {editMode && (
-              <button className="text-sm text-green-600 flex gap-2 items-center">
+              <button className="text-base text-green-600 flex gap-2 items-center">
                 <Upload size={14} />
                 Upload Photo
               </button>
@@ -53,14 +53,14 @@ const MyProfile = () => {
 
           {/* Rating */}
           <div className="mt-6 text-center">
-            <p className="text-gray-600 text-sm">Employer Rating</p>
-            <div className="text-yellow-500 text-lg">★★★★☆</div>
-            <p className="text-sm text-gray-500">4.2 / 5</p>
+            <p className="text-gray-600 text-base">Employer Rating</p>
+            <div className="text-yellow-500 text-xl">★★★★☆</div>
+            <p className="text-base text-gray-500">4.2 / 5</p>
           </div>
 
           {/* CV Upload */}
           <div className="mt-6">
-            <p className="text-sm font-medium mb-2">CV / Resume</p>
+            <p className="text-base font-medium mb-2">CV / Resume</p>
             <button className="w-full border border-green-600 text-green-600 py-2 rounded">
               Upload CV
             </button>
@@ -72,7 +72,7 @@ const MyProfile = () => {
 
           {/* Name */}
           <div className="mb-4">
-            <label className="text-sm">Full Name</label>
+            <label className="text-base">Full Name</label>
             <input
               disabled={!editMode}
               value={profile.name}

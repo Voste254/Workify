@@ -27,7 +27,7 @@ const TopBar = () => {
     <div className="h-16 bg-white border-b flex items-center justify-between px-6 relative">
       
       {/* Title */}
-      <h1 className="text-xl font-semibold">Dashboard</h1>
+      <h1 className="text-2xl font-semibold">Dashboard</h1>
 
       <div className="flex items-center gap-6">
 
@@ -35,7 +35,7 @@ const TopBar = () => {
         <div className="flex bg-gray-200 rounded-full p-2">
           <button
             onClick={switchToJobSeeker}
-            className={`px-4 py-1 rounded-full text-sm font-medium transition ${
+            className={`px-4 py-1 rounded-full text-base font-medium transition ${
               !isEmployer
                 ? "bg-white shadow text-black"
                 : "text-gray-500"
@@ -46,7 +46,7 @@ const TopBar = () => {
 
           <button
             onClick={switchToEmployer}
-            className={`px-4 py-1 rounded-full text-sm font-medium transition ${
+            className={`px-4 py-1 rounded-full text-base font-medium transition ${
               isEmployer
                 ? "bg-white shadow text-black"
                 : "text-gray-500"
@@ -62,7 +62,7 @@ const TopBar = () => {
           className="relative"
         >
           <Bell />
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1 rounded-full">
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-sm px-1 rounded-full">
             3
           </span>
         </button>

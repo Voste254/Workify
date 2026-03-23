@@ -96,17 +96,17 @@ const BlogPage = () => {
 
         <div className="absolute inset-0 bg-black/40 flex items-end">
           <div className="p-8 text-white max-w-2xl">
-            <span className="inline-block bg-green-600 px-3 py-1 rounded-full text-xs mb-3">
+            <span className="inline-block bg-green-600 px-3 py-1 rounded-full text-sm mb-3">
               Featured
             </span>
-            <h1 className="text-3xl font-bold mb-2">
+            <h1 className="text-4xl font-bold mb-2">
               {featuredBlog.props.title}
             </h1>
-            <p className="text-sm opacity-90">
+            <p className="text-base opacity-90">
               {featuredBlog.props.description}
             </p>
 
-            <div className="flex items-center gap-3 mt-4 text-sm">
+            <div className="flex items-center gap-3 mt-4 text-base">
               <img
                 src={featuredBlog.props.avatar}
                 className="w-8 h-8 rounded-full"
@@ -126,7 +126,7 @@ const BlogPage = () => {
           <input
             type="text"
             placeholder="Search articles..."
-            className="bg-transparent outline-none w-full text-sm"
+            className="bg-transparent outline-none w-full text-base"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -137,7 +137,7 @@ const BlogPage = () => {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm border transition
+              className={`px-4 py-2 rounded-full text-base border transition
                 ${
                   activeCategory === cat
                     ? "bg-green-600 text-white border-green-600"
@@ -152,10 +152,10 @@ const BlogPage = () => {
 
       {/* ARTICLE COUNT */}
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">
+        <h2 className="text-2xl font-semibold">
           Latest Articles
         </h2>
-        <span className="text-sm text-gray-500">
+        <span className="text-base text-gray-500">
           {filteredBlogs.length} articles
         </span>
       </div>

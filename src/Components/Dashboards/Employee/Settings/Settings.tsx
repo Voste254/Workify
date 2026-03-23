@@ -24,7 +24,7 @@ const JobSeekerSettings = () => {
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-semibold text-gray-800 mb-6">Settings</h1>
+        <h1 className="text-4xl font-semibold text-gray-800 mb-6">Settings</h1>
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar */}
@@ -42,7 +42,7 @@ const JobSeekerSettings = () => {
                 <Icon size={18} />
                 <div>
                   <p className="font-medium">{title}</p>
-                  <p className="text-sm text-gray-500">{desc}</p>
+                  <p className="text-base text-gray-500">{desc}</p>
                 </div>
               </button>
             ))}

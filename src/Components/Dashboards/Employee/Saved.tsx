@@ -24,10 +24,10 @@ const EMPLOYERS: SavedEmployer[] = [
 // ── Shared styles ──────────────────────────────────────────────────────────────
 const S = {
   card: { background:"#fff", border:"1.5px solid #E5E7EB", borderRadius:10, padding:"18px 20px", display:"flex" as const, flexDirection:"column" as const, transition:"border-color 0.15s ease" },
-  logo: (dark=false) => ({ width:44, height:44, borderRadius:10, flexShrink:0 as const, background:dark?"#111827":"#F9FAFB", border:"1.5px solid #E5E7EB", display:"flex" as const, alignItems:"center" as const, justifyContent:"center" as const, fontSize:17, fontWeight:700, color:dark?"#fff":"#111827", fontFamily:"'DM Mono',monospace" }),
-  badge: (bg="#F3F4F6", color="#374151", border="#E5E7EB") => ({ fontSize:11, padding:"3px 9px", borderRadius:4, background:bg, color, fontWeight:500 as const, border:`1px solid ${border}` }),
-  btn: { display:"flex" as const, alignItems:"center" as const, gap:5, fontSize:13, fontWeight:600 as const, padding:"7px 14px", background:"#111827", color:"#fff", border:"none", borderRadius:7, cursor:"pointer" as const, fontFamily:"'DM Sans',sans-serif" },
-  meta: { display:"flex" as const, alignItems:"center" as const, gap:4, fontSize:12, color:"#9CA3AF" },
+  logo: (dark=false) => ({ width:44, height:44, borderRadius:10, flexShrink:0 as const, background:dark?"#111827":"#F9FAFB", border:"1.5px solid #E5E7EB", display:"flex" as const, alignItems:"center" as const, justifyContent:"center" as const, fontSize: 19, fontWeight:700, color:dark?"#fff":"#111827", fontFamily:"'DM Mono',monospace" }),
+  badge: (bg="#F3F4F6", color="#374151", border="#E5E7EB") => ({ fontSize: 13, padding:"3px 9px", borderRadius:4, background:bg, color, fontWeight:500 as const, border:`1px solid ${border}` }),
+  btn: { display:"flex" as const, alignItems:"center" as const, gap:5, fontSize: 15, fontWeight:600 as const, padding:"7px 14px", background:"#111827", color:"#fff", border:"none", borderRadius:7, cursor:"pointer" as const, fontFamily:"'DM Sans',sans-serif" },
+  meta: { display:"flex" as const, alignItems:"center" as const, gap:4, fontSize: 14, color:"#9CA3AF" },
   footer: { paddingTop:12, borderTop:"1px solid #F3F4F6", marginTop:"auto" as const, display:"flex" as const, alignItems:"center" as const, justifyContent:"space-between" as const },
 };
 
@@ -66,8 +66,8 @@ function JobCard({ job, onUnsave }: { job:SavedJob; onUnsave:()=>void }) {
         <div style={{ flex:1 }}>
           <div style={{ display:"flex", justifyContent:"space-between" }}>
             <div>
-              <p style={{ margin:0, fontSize:15, fontWeight:700, color:"#111827" }}>{job.title}</p>
-              <p style={{ margin:"2px 0 0", fontSize:13, color:"#6B7280" }}>{job.company}</p>
+              <p style={{ margin:0, fontSize: 17, fontWeight:700, color:"#111827" }}>{job.title}</p>
+              <p style={{ margin:"2px 0 0", fontSize: 15, color:"#6B7280" }}>{job.company}</p>
             </div>
             <UnsaveBtn onUnsave={onUnsave}/>
           </div>
@@ -77,12 +77,12 @@ function JobCard({ job, onUnsave }: { job:SavedJob; onUnsave:()=>void }) {
         <span style={S.meta}>{Ico.location} {job.location}</span>
         <span style={S.meta}>{Ico.briefcase} {job.jobType}</span>
       </div>
-      <p style={{ margin:"0 0 10px", fontSize:14, fontWeight:600, color:"#111827", fontFamily:"'DM Mono',monospace" }}>{job.salary}</p>
+      <p style={{ margin:"0 0 10px", fontSize: 16, fontWeight:600, color:"#111827", fontFamily:"'DM Mono',monospace" }}>{job.salary}</p>
       <div style={{ display:"flex", gap:6, flexWrap:"wrap" as const, marginBottom:14 }}>
         {job.tags.map(t=><span key={t} style={S.badge()}>{t}</span>)}
       </div>
       <div style={S.footer}>
-        <span style={{ fontSize:12, color:"#9CA3AF", fontFamily:"'DM Mono',monospace" }}>Saved {job.savedDaysAgo}d ago</span>
+        <span style={{ fontSize: 14, color:"#9CA3AF", fontFamily:"'DM Mono',monospace" }}>Saved {job.savedDaysAgo}d ago</span>
         <HoverBtn label="View Job"/>
       </div>
     </div>
@@ -104,8 +104,8 @@ function EmployerCard({ employer, onUnsave }: { employer:SavedEmployer; onUnsave
         <div style={{ flex:1 }}>
           <div style={{ display:"flex", justifyContent:"space-between" }}>
             <div>
-              <p style={{ margin:0, fontSize:15, fontWeight:700, color:"#111827" }}>{employer.name}</p>
-              <p style={{ margin:"2px 0 0", fontSize:13, color:"#6B7280" }}>{employer.industry}</p>
+              <p style={{ margin:0, fontSize: 17, fontWeight:700, color:"#111827" }}>{employer.name}</p>
+              <p style={{ margin:"2px 0 0", fontSize: 15, color:"#6B7280" }}>{employer.industry}</p>
             </div>
             <UnsaveBtn onUnsave={onUnsave}/>
           </div>
@@ -113,7 +113,7 @@ function EmployerCard({ employer, onUnsave }: { employer:SavedEmployer; onUnsave
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:14 }}>
         {meta.map(({ icon, text }, i) => (
-          <div key={i} style={{ display:"flex", alignItems:"center", gap:5, fontSize:12, color:"#6B7280", padding:"7px 10px", background:"#F9FAFB", border:"1px solid #E5E7EB", borderRadius:6 }}>
+          <div key={i} style={{ display:"flex", alignItems:"center", gap:5, fontSize: 14, color:"#6B7280", padding:"7px 10px", background:"#F9FAFB", border:"1px solid #E5E7EB", borderRadius:6 }}>
             <span style={{ color:"#9CA3AF", display:"flex" }}>{icon}</span>
             <span style={{ overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" as const }}>{text}</span>
           </div>
@@ -148,14 +148,14 @@ export default function SavedPage() {
       {/* Top bar */}
       <div style={{ background:"#fff", borderBottom:"1px solid #E5E7EB", padding:"16px 26px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
         <div>
-          <h1 style={{ margin:0, fontSize:20, fontWeight:700, color:"#111827" }}>Saved</h1>
-          <p style={{ margin:0, fontSize:13, color:"#9CA3AF", fontFamily:"'DM Mono',monospace" }}>{jobs.length} jobs · {employers.length} employers</p>
+          <h1 style={{ margin:0, fontSize: 22, fontWeight:700, color:"#111827" }}>Saved</h1>
+          <p style={{ margin:0, fontSize: 15, color:"#9CA3AF", fontFamily:"'DM Mono',monospace" }}>{jobs.length} jobs · {employers.length} employers</p>
         </div>
         <div style={{ display:"flex", gap:8 }}>
           {[{label:"Jobs",value:jobs.length,dark:false},{label:"Employers",value:employers.length,dark:true}].map(({label,value,dark})=>(
             <div key={label} style={{ padding:"7px 16px", borderRadius:6, textAlign:"center" as const, background:dark?"#111827":"#F3F4F6", border:dark?"none":"1px solid #E5E7EB" }}>
-              <p style={{ margin:0, fontSize:17, fontWeight:700, color:dark?"#fff":"#111827", fontFamily:"'DM Mono',monospace" }}>{value}</p>
-              <p style={{ margin:0, fontSize:11, color:dark?"#9CA3AF":"#6B7280", textTransform:"uppercase" as const, letterSpacing:"0.06em" }}>{label}</p>
+              <p style={{ margin:0, fontSize: 19, fontWeight:700, color:dark?"#fff":"#111827", fontFamily:"'DM Mono',monospace" }}>{value}</p>
+              <p style={{ margin:0, fontSize: 13, color:dark?"#9CA3AF":"#6B7280", textTransform:"uppercase" as const, letterSpacing:"0.06em" }}>{label}</p>
             </div>
           ))}
         </div>
@@ -167,25 +167,25 @@ export default function SavedPage() {
           <span style={{ position:"absolute" as const, left:10, top:"50%", transform:"translateY(-50%)", color:"#9CA3AF", display:"flex" }}>{Ico.search}</span>
           <input value={search} onChange={e=>setSearch(e.target.value)}
             placeholder={tab==="jobs"?"Search jobs, companies, skills…":"Search employers or industry…"}
-            style={{ width:"100%", padding:"8px 32px", border:"1px solid #E5E7EB", borderRadius:7, fontSize:13, color:"#111827", background:"#F9FAFB", outline:"none", fontFamily:"'DM Sans',sans-serif" }}
+            style={{ width:"100%", padding:"8px 32px", border:"1px solid #E5E7EB", borderRadius:7, fontSize: 15, color:"#111827", background:"#F9FAFB", outline:"none", fontFamily:"'DM Sans',sans-serif" }}
           />
           {search && <button onClick={()=>setSearch("")} style={{ position:"absolute" as const, right:8, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", color:"#9CA3AF", display:"flex" }}>{Ico.close}</button>}
         </div>
         <div style={{ display:"flex", gap:4, background:"#F3F4F6", padding:4, borderRadius:8 }}>
           {(["jobs","employers"] as const).map(t=>(
-            <button key={t} onClick={()=>setTab(t)} style={{ padding:"7px 16px", borderRadius:6, cursor:"pointer", fontSize:13, fontWeight:600, fontFamily:"'DM Sans',sans-serif", background:tab===t?"#fff":"transparent", color:tab===t?"#111827":"#6B7280", border:tab===t?"1px solid #E5E7EB":"1px solid transparent", transition:"all 0.15s ease" }}>
+            <button key={t} onClick={()=>setTab(t)} style={{ padding:"7px 16px", borderRadius:6, cursor:"pointer", fontSize: 15, fontWeight:600, fontFamily:"'DM Sans',sans-serif", background:tab===t?"#fff":"transparent", color:tab===t?"#111827":"#6B7280", border:tab===t?"1px solid #E5E7EB":"1px solid transparent", transition:"all 0.15s ease" }}>
               {t==="jobs"?"Saved Jobs":"Saved Employers"}
             </button>
           ))}
         </div>
-        <span style={{ fontSize:13, color:"#9CA3AF", marginLeft:"auto", fontFamily:"'DM Mono',monospace" }}>{count} result{count!==1?"s":""}</span>
+        <span style={{ fontSize: 15, color:"#9CA3AF", marginLeft:"auto", fontFamily:"'DM Mono',monospace" }}>{count} result{count!==1?"s":""}</span>
       </div>
 
       {/* Grid */}
       <div style={{ padding:"22px 26px" }}>
         {count===0 ? (
           <div style={{ padding:56, textAlign:"center" as const, border:"1.5px dashed #E5E7EB", borderRadius:10, background:"#fff" }}>
-            <p style={{ margin:0, fontSize:15, color:"#9CA3AF" }}>{search?`No saved ${tab} match your search.`:`You have no saved ${tab} yet.`}</p>
+            <p style={{ margin:0, fontSize: 17, color:"#9CA3AF" }}>{search?`No saved ${tab} match your search.`:`You have no saved ${tab} yet.`}</p>
           </div>
         ) : (
           <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))", gap:14 }}>

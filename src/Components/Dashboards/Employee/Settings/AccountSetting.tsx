@@ -1,17 +1,17 @@
 const AccountSettings = () => (
   <>
-    <h2 className="text-xl font-semibold mb-6">Account Information</h2>
+    <h2 className="text-2xl font-semibold mb-6">Account Information</h2>
 
     <div className="grid md:grid-cols-2 gap-6">
       {["Full Name", "Email Address", "Phone Number"].map((label) => (
         <div key={label}>
-          <label className="block text-sm font-medium mb-2">{label}</label>
+          <label className="block text-base font-medium mb-2">{label}</label>
           <input className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-600 outline-none" />
         </div>
       ))}
 
       <div>
-        <label className="block text-sm font-medium mb-2">
+        <label className="block text-base font-medium mb-2">
           Account Type
         </label>
         <select className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-600 outline-none">
