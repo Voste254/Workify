@@ -9,7 +9,7 @@ import Reports from "./Reports";
 import Messages from "./Messages";
 import Settings from "./Settings";
 import Applicants from "./Applicants";
-import NotificationModal from "../Employee/NotificationModal";
+import Notifications from "./Notifications";
 
 /* match sidebar types */
 type ActivePage =
@@ -53,7 +53,7 @@ const EmployerDashboardLayout = () => {
         return <Messages/>;
 
       case "Notifications":
-        return <NotificationModal/>;
+        return <Notifications/>;
 
       case "Saved":
         return <div className="p-6">Saved Candidates</div>;
