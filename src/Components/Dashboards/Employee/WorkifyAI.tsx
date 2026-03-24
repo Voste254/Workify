@@ -1,87 +1,188 @@
+import { useState } from "react";
 
-import { Sparkles, FileText, TrendingUp, Target, CheckCircle2 } from 'lucide-react';
+// ── Icons ──────────────────────────────────────────────────────────────────────
+const I = (d: string, s = 14, fill = "none") => <svg width={s} height={s} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: d }} />;
+const Ico = {
+  sparkles: I('<path d="M12 3v18"/><path d="m5 10 14 \n 4"/><path d="m19 10-14 4"/>', 18),
+  fileText: I('<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/>', 16),
+  trending: I('<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>', 16),
+  target: I('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>', 16),
+  check: I('<path d="M20 6 9 17l-5-5"/>', 16),
+  close: I('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>', 16),
+  smartphone: I('<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>', 16)
+};
 
-const WorkifyAI = () => {
+// ── Shared styles ──────────────────────────────────────────────────────────────
+const labelStyle = { display: "block", fontSize: 13, fontWeight: 700, color: "#374151", marginBottom: 8, fontFamily: "'DM Sans',sans-serif" };
+const inputOuter = { position: "relative" as const, display: "flex", alignItems: "center", marginBottom: 16 };
+const inputIcon = { position: "absolute" as const, left: 14, color: "#9CA3AF" };
+const inputStyle = { width: "100%", padding: "12px 16px 12px 40px", border: "1.5px solid #E5E7EB", borderRadius: 8, fontSize: 14, color: "#111827", background: "#fff", outline: "none", fontFamily: "'DM Sans',sans-serif", transition: "border-color 0.15s" };
+
+// ── Main Component ─────────────────────────────────────────────────────────────
+export default function WorkifyAI() {
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [phone, setPhone] = useState("07");
+  const [paymentState, setPaymentState] = useState<"idle" | "processing" | "sent">("idle");
+
+  const closePayment = () => {
+    setSelectedPlan(null);
+    setPaymentState("idle");
+    setPhone("07");
+  };
+
+  const handlePay = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPaymentState("processing");
+    setTimeout(() => {
+      setPaymentState("sent");
+    }, 1500);
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 p-8 flex flex-col items-center">
-      
-      {/* Introduction Hero */}
-      <div className="max-w-3xl w-full text-center mb-12 mt-8">
-        <div className="inline-flex items-center justify-center p-4 bg-purple-100 rounded-full mb-6">
-          <Sparkles className="w-10 h-10 text-purple-600" />
+    <div style={{ fontFamily: "'DM Sans','Segoe UI',sans-serif", background: "#F9FAFB", minHeight: "100vh", padding: "40px 24px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap');*{box-sizing:border-box}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:4px}`}</style>
+
+      {/* Hero Header */}
+      <div style={{ maxWidth: 800, textAlign: "center", marginBottom: 40 }}>
+        <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: 16, background: "#111827", color: "#fff", borderRadius: "50%", marginBottom: 20 }}>
+          {Ico.sparkles}
         </div>
-        <h1 className="text-4xl font-bold text-slate-900 mb-4 tracking-tight">Meet <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">Workify AI</span></h1>
-        <p className="text-lg text-slate-600">
-          Your intelligent career companion. Draft winning resumes, get personalized career coaching, and land your dream job faster.
-        </p>
-        <div className="mt-6 flex items-center justify-center gap-2 text-sm font-semibold text-purple-700 bg-purple-100 px-4 py-2 rounded-full w-fit mx-auto">
-          <span className="animate-pulse w-2 h-2 bg-purple-600 rounded-full"></span>
-          Premium Feature
-        </div>
+        <h1 style={{ margin: "0 0 16px", fontSize: 32, fontWeight: 700, color: "#111827" }}>Workify AI</h1>
+        <p style={{ margin: 0, fontSize: 16, color: "#6B7280", lineHeight: 1.6 }}>Your intelligent career companion. Draft winning resumes, get personalized career coaching, and land your ideal permanent or casual job faster.</p>
+        <span style={{ display: "inline-block", marginTop: 24, fontSize: 12, fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.1em", padding: "6px 12px", border: "1.5px solid #111827", borderRadius: 20 }}>Premium Feature</span>
       </div>
 
-      {/* Feature Highlights */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl w-full mb-16">
+      {/* Features Grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24, maxWidth: 960, width: "100%", marginBottom: 60 }}>
         {[
-          { icon: FileText, title: "AI Resume Drafting", desc: "Generate tailored resumes instantly based on the specific permanent or casual job you want." },
-          { icon: TrendingUp, title: "Career Coaching", desc: "Receive actionable tips to negotiate salaries, prepare for interviews, and grow." },
-          { icon: Target, title: "Smart Matching", desc: "Get highly accurate job recommendations analyzing your profile against specific employer needs." }
-        ].map((feat, idx) => (
-          <div key={idx} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center hover:shadow-md transition-shadow">
-            <div className="p-3 bg-slate-100 rounded-xl mb-4 text-slate-700">
-              <feat.icon className="w-6 h-6" />
+          { icon: Ico.fileText, title: "AI Resume Drafting", desc: "Instantly create tailored resumes based on the exact corporate or casual job description you want." },
+          { icon: Ico.trending, title: "Career Coaching", desc: "Gain actionable advice on how to negotiate local Kenyan salaries and prepare for interviews." },
+          { icon: Ico.target, title: "Smart Matching", desc: "Get highly accurate job recommendations analyzing your profile against precise employer needs." }
+        ].map((feat, i) => (
+          <div key={i} style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 10, padding: 24, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" as const }}>
+            <div style={{ width: 44, height: 44, borderRadius: 8, background: "#F3F4F6", color: "#111827", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+              {feat.icon}
             </div>
-            <h3 className="font-bold text-slate-900 mb-2">{feat.title}</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">{feat.desc}</p>
+            <h3 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 700, color: "#111827" }}>{feat.title}</h3>
+            <p style={{ margin: 0, fontSize: 14, color: "#6B7280", lineHeight: 1.5 }}>{feat.desc}</p>
           </div>
         ))}
       </div>
 
-      {/* Pricing / Plan Overlay */}
-      <div className="w-full max-w-5xl">
-        <div className="text-center mb-10">
-          <h2 className="text-2xl font-bold text-slate-900">Unlock Workify AI Today</h2>
-          <p className="text-slate-600 mt-2">Choose the plan that fits your career goals.</p>
+      {/* Pricing Title */}
+      <div style={{ textAlign: "center", marginBottom: 32 }}>
+        <h2 style={{ margin: "0 0 8px", fontSize: 24, fontWeight: 700, color: "#111827" }}>Unlock Workify AI Today</h2>
+        <p style={{ margin: 0, fontSize: 14, color: "#6B7280" }}>Select the tier that accelerates your career goals.</p>
+      </div>
+
+      {/* Pricing Cards */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 24, maxWidth: 800, width: "100%" }}>
+        
+        {/* Pro Plan */}
+        <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 12, padding: 32, display: "flex", flexDirection: "column" }}>
+          <h3 style={{ margin: "0 0 8px", fontSize: 20, fontWeight: 700, color: "#111827" }}>Pro Upgrade</h3>
+          <p style={{ margin: "0 0 24px", fontSize: 13, color: "#6B7280" }}>Perfect for active job seekers needing an edge.</p>
+          <div style={{ marginBottom: 24 }}>
+            <span style={{ fontSize: 36, fontWeight: 700, color: "#111827", fontFamily: "'DM Mono',monospace" }}>KES 499</span>
+            <span style={{ fontSize: 14, color: "#6B7280" }}> / mo</span>
+          </div>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 16, marginBottom: 32 }}>
+            {["5 AI Resumes per month", "Standard Cover Letters", "Interview question prep", "Priority matching alerts"].map((item, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                <span style={{ color: "#111827", marginTop: 2 }}>{Ico.check}</span>
+                <span style={{ fontSize: 14, color: "#374151", fontWeight: 600 }}>{item}</span>
+              </div>
+            ))}
+          </div>
+          <button onClick={() => setSelectedPlan("Pro Upgrade")} style={{ width: "100%", padding: "14px", background: "#fff", color: "#111827", border: "2px solid #111827", borderRadius: 8, fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "background 0.1s" }} onMouseOver={e => e.currentTarget.style.background = "#F9FAFB"} onMouseOut={e => e.currentTarget.style.background = "#fff"}>
+            Select Pro
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {/* Basic Plan */}
-          <div className="bg-white border border-slate-200 rounded-3xl p-8 relative flex flex-col">
-            <h3 className="text-xl font-bold text-slate-900">Pro Upgrade</h3>
-            <p className="text-slate-500 text-sm mt-2 mb-6">Perfect for active job seekers needing an edge.</p>
-            <div className="text-4xl font-bold text-slate-900 mb-6">KES 499 <span className="text-lg font-normal text-slate-500">/mo</span></div>
-            
-            <ul className="space-y-4 mb-8 flex-1">
-              {["5 AI generated Resumes per month", "Basic Cover Letter drafting", "Interview question prep (standard)", "Priority job matching"].map((item, i) => (
-                <li key={i} className="flex items-start gap-3 text-sm text-slate-700">
-                  <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" /> {item}
-                </li>
-              ))}
-            </ul>
-            <button className="w-full py-3 px-4 bg-slate-100 text-slate-900 font-bold rounded-xl hover:bg-slate-200 transition-colors">Select Pro</button>
+        {/* Elite Plan */}
+        <div style={{ background: "#111827", border: "1.5px solid #111827", borderRadius: 12, padding: 32, display: "flex", flexDirection: "column", position: "relative" as const }}>
+          <div style={{ position: "absolute", top: -12, right: 32, background: "#fff", color: "#111827", fontSize: 11, fontWeight: 700, padding: "4px 12px", border: "1.5px solid #111827", borderRadius: 12, textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>Popular</div>
+          <h3 style={{ margin: "0 0 8px", fontSize: 20, fontWeight: 700, color: "#fff" }}>Elite Career</h3>
+          <p style={{ margin: "0 0 24px", fontSize: 13, color: "#9CA3AF" }}>Comprehensive AI coaching and limitless generation.</p>
+          <div style={{ marginBottom: 24 }}>
+            <span style={{ fontSize: 36, fontWeight: 700, color: "#fff", fontFamily: "'DM Mono',monospace" }}>KES 1,299</span>
+            <span style={{ fontSize: 14, color: "#9CA3AF" }}> / mo</span>
           </div>
-
-          {/* Elite Plan */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 relative flex flex-col shadow-xl">
-            <div className="absolute top-0 right-8 transform -translate-y-1/2 bg-gradient-to-r from-purple-500 to-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Most Popular</div>
-            <h3 className="text-xl font-bold text-white">Elite Career</h3>
-            <p className="text-slate-400 text-sm mt-2 mb-6">Comprehensive AI coaching and limitless generation.</p>
-            <div className="text-4xl font-bold text-white mb-6">KES 1,299 <span className="text-lg font-normal text-slate-400">/mo</span></div>
-            
-            <ul className="space-y-4 mb-8 flex-1">
-              {["Unlimited AI Resume/Cover Letters", "1-on-1 AI Career Coaching ChatBot", "Advanced Salary Negotiation scripts", "Guaranteed top-tier visibility to employers", "Unlimited platform bookmarking"].map((item, i) => (
-                <li key={i} className="flex items-start gap-3 text-sm text-slate-300">
-                  <CheckCircle2 className="w-5 h-5 text-purple-400 shrink-0" /> {item}
-                </li>
-              ))}
-            </ul>
-            <button className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-xl hover:opacity-90 transition-opacity">Select Elite</button>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 16, marginBottom: 32 }}>
+            {["Unlimited AI Resumes", "1-on-1 AI ChatBot Coaching", "Salary Negotiation scripts", "Top-tier employer visibility"].map((item, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                <span style={{ color: "#fff", marginTop: 2 }}>{Ico.check}</span>
+                <span style={{ fontSize: 14, color: "#E5E7EB", fontWeight: 600 }}>{item}</span>
+              </div>
+            ))}
           </div>
+          <button onClick={() => setSelectedPlan("Elite Career")} style={{ width: "100%", padding: "14px", background: "#fff", color: "#111827", border: "none", borderRadius: 8, fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", transition: "opacity 0.1s" }} onMouseOver={e => e.currentTarget.style.opacity = "0.9"} onMouseOut={e => e.currentTarget.style.opacity = "1"}>
+            Select Elite
+          </button>
         </div>
 
       </div>
+
+      {/* Payment Overlay Modal */}
+      {selectedPlan && (
+        <div style={{ position: "fixed" as const, inset: 0, zIndex: 50, background: "rgba(17, 24, 39, 0.7)", display: "flex", alignItems: "center", justifyItems: "center", justifyContent: "center", padding: 24, backdropFilter: "blur(4px)" }}>
+          <div style={{ background: "#fff", width: "100%", maxWidth: 400, borderRadius: 12, overflow: "hidden", border: "1.5px solid #E5E7EB", boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}>
+            
+            <div style={{ padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #E5E7EB", background: "#F9FAFB" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#111827" }}>Complete Subscription</h3>
+              <button onClick={closePayment} style={{ background: "none", border: "none", color: "#6B7280", cursor: "pointer", display: "flex", padding: 4 }}>{Ico.close}</button>
+            </div>
+
+            <div style={{ padding: 24 }}>
+               <p style={{ margin: "0 0 20px", fontSize: 14, color: "#374151", fontWeight: 600 }}>You selected the <strong style={{ color: "#111827" }}>{selectedPlan}</strong> plan.</p>
+
+               {paymentState === "idle" && (
+                 <form onSubmit={handlePay}>
+                   <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20, padding: 16, border: "2px solid #059669", borderRadius: 8, background: "#ECFDF5" }}>
+                     <div style={{ width: 40, height: 40, borderRadius: 20, background: "#059669", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 18 }}>M</div>
+                     <div>
+                       <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#065F46" }}>Pay via M-PESA</p>
+                       <p style={{ margin: 0, fontSize: 12, color: "#047857" }}>Safaricom</p>
+                     </div>
+                   </div>
+
+                   <label style={labelStyle}>M-PESA Phone Number</label>
+                   <div style={inputOuter}>
+                     <span style={inputIcon}>{Ico.smartphone}</span>
+                     <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="07XX XXX XXX" style={{ ...inputStyle, fontFamily: "'DM Mono',monospace" }} required />
+                   </div>
+
+                   <button type="submit" style={{ width: "100%", padding: "14px", background: "#111827", color: "#fff", border: "none", borderRadius: 8, fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+                     Pay Now
+                   </button>
+                 </form>
+               )}
+
+               {paymentState === "processing" && (
+                 <div style={{ padding: "30px 0", textAlign: "center", color: "#6B7280" }}>
+                   <div style={{ margin: "0 auto 16px", width: 40, height: 40, border: "4px solid #E5E7EB", borderTopColor: "#111827", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+                   <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#111827" }}>Connecting to Safaricom...</p>
+                   <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+                 </div>
+               )}
+
+               {paymentState === "sent" && (
+                 <div style={{ padding: "20px 0", textAlign: "center" }}>
+                   <div style={{ display: "inline-flex", padding: 16, background: "#D1FAE5", color: "#059669", borderRadius: "50%", marginBottom: 16 }}>
+                      {Ico.check}
+                   </div>
+                   <h4 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 700, color: "#111827" }}>M-PESA Prompt Sent!</h4>
+                   <p style={{ margin: "0 0 24px", fontSize: 14, color: "#6B7280", lineHeight: 1.5 }}>Please check your phone (<strong>{phone}</strong>) and enter your M-PESA PIN to complete the subscription for the {selectedPlan} plan.</p>
+                   <button onClick={closePayment} style={{ padding: "10px 24px", background: "#fff", color: "#111827", border: "1.5px solid #E5E7EB", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+                     Close
+                   </button>
+                 </div>
+               )}
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
-};
-
-export default WorkifyAI;
+}
