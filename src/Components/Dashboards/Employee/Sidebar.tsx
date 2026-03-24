@@ -5,7 +5,8 @@ import {
   User,
   Bookmark,
   BookOpen,
-  Settings
+  Settings,
+  Sparkles
 } from "lucide-react";
 
 interface Props {
@@ -21,6 +22,7 @@ const Sidebar = ({ activePage, setActivePage }: Props) => {
     { name: "profile", icon: User, label: "My Profile" },
     { name: "saved", icon: Bookmark, label: "Saved" },
     { name: "blog", icon: BookOpen, label: "Blogs" },
+    { name: "workify-ai", icon: Sparkles, label: "Workify AI" },
   ];
 
   return (

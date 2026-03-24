@@ -19,7 +19,7 @@ const SC: Record<Stage, { label: string; color: string; bg: string; step: number
 };
 
 const STAGES_FLOW: Stage[] = ["applied", "screening", "interview", "offer", "hired"];
-
+// TODO : 
 const MOCK_APPS: Application[] = [
   { id: "1", applicantName: "John Omondi", jobTitle: "Construction Foreman", jobCategory: "Casual", appliedDate: "2025-03-20", lastUpdated: "2025-03-22", stage: "screening", avatar: "https://i.pravatar.cc/150?img=11", phone: "0712 345 678", location: "Nairobi, Kenya", note: "Has 5 years site experience in Westlands.", rateRequest: "KES 2,500/day" },
   { id: "2", applicantName: "Sarah Wanjiku", jobTitle: "Senior DevOps Engineer", jobCategory: "Corporate", appliedDate: "2025-03-15", lastUpdated: "2025-03-21", stage: "interview", avatar: "https://i.pravatar.cc/150?img=5", phone: "0723 456 789", location: "Remote", note: "Scheduled for technical round on Friday.", rateRequest: "KES 250,000/mo" },

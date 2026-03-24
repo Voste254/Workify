@@ -8,6 +8,7 @@ import Profile from "./Profile";
 import Settings from "./Settings/Settings"
 import SavedPage from "./Saved";
 import ApplicationsPage from "./Applications";
+import WorkifyAI from "./WorkifyAI";
 
 const DashboardLayout = () => {
   const [activePage, setActivePage] = useState("dashboard");
@@ -26,6 +27,8 @@ const DashboardLayout = () => {
         return <SavedPage/>;
       case "blog":
         return <BlogsPage/>;
+      case "workify-ai":
+        return <WorkifyAI/>;
       case "settings":
         return <Settings/>;
       default:
