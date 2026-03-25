@@ -10,6 +10,8 @@ import Messages from "./Messages";
 import Settings from "./Settings";
 import Applicants from "./Applicants";
 import Notifications from "./Notifications";
+import EmployerSaved from "./EmployerSaved";
+import EmployerBlog from "./EmployerBlog";
 
 /* match sidebar types */
 type ActivePage =
@@ -56,10 +58,10 @@ const EmployerDashboardLayout = () => {
         return <Notifications/>;
 
       case "Saved":
-        return <div className="p-6">Saved Candidates</div>;
+        return <EmployerSaved/>;
 
       case "Blog":
-        return <div className="p-6">Blog & Education</div>;
+        return <EmployerBlog/>;
 
       case "Settings":
         return <Settings/>;
