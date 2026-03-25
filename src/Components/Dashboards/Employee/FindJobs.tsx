@@ -88,7 +88,8 @@ export default function FindJobsPage() {
   [search, jobType, contract, location, sort, selectedCategory]);
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb", fontFamily: "'DM Sans', sans-serif", boxSizing: "border-box", color: "#111827" }}>
+    <div style={{ minHeight: "100vh", backgroundColor: "#F9FAFB", fontFamily: "'DM Sans','Segoe UI',sans-serif", boxSizing: "border-box", color: "#111827" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap');*{box-sizing:border-box}`}</style>
 
       {/* Top bar */}
       <div style={{ backgroundColor: "#ffffff", borderBottom: "1px solid #e5e7eb", padding: "20px 40px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "16px" }}>

@@ -22,7 +22,8 @@ const EmployerBlog = () => {
   const [content, setContent] = useState("");
 
   return (
-    <div style={{ padding: "40px", maxWidth: "1152px", margin: "0 auto", fontFamily: "'DM Sans', sans-serif", color: "#111827", display: "flex", flexDirection: "column", gap: "40px", boxSizing: "border-box" }}>
+    <div style={{ background: "#F9FAFB", minHeight: "100vh", padding: "40px", maxWidth: "1152px", margin: "0 auto", fontFamily: "'DM Sans','Segoe UI',sans-serif", color: "#111827", display: "flex", flexDirection: "column", gap: "40px", boxSizing: "border-box" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap');*{box-sizing:border-box}`}</style>
       
       {/* Header */}
       <div>

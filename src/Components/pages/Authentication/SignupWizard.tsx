@@ -163,7 +163,7 @@ export default function Signup() {
                 <Field label="First name"><Input placeholder="John" value={form.fname} onChange={e => set("fname", e.target.value)}/></Field>
                 <Field label="Last name"><Input placeholder="Doe" value={form.lname} onChange={e => set("lname", e.target.value)}/></Field>
               </div>
-              <Field label="Email"><Input type="email" placeholder="you@example.com" value={form.email} onChange={e => set("email", e.target.value)}/></Field>
+              <Field label="Email"><Input type="email" placeholder="you@example.com" required value={form.email} onChange={e => set("email", e.target.value)}/></Field>
               <Field label="Phone"><Input type="tel" placeholder="+254 7xx xxx xxx" value={form.phone} onChange={e => set("phone", e.target.value)}/></Field>
               <Field label="Password">
                 <div className="relative">
