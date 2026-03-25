@@ -10,6 +10,8 @@ import {
   Bookmark,
   Settings,
   FileText,
+  PanelLeftClose,
+  PanelLeft
 } from "lucide-react";
 import { useState } from "react";
 
@@ -60,6 +62,7 @@ const otherMenu: MenuItem[] = [
 
 const EmployerSidebar = ({ setActiveComponent }: SidebarProps) => {
   const [active, setActive] = useState<ActivePage>("Dashboard");
+  const [collapsed, setCollapsed] = useState(false);
 
   const handleClick = (page: ActivePage) => {
     setActive(page);
@@ -71,66 +74,107 @@ const EmployerSidebar = ({ setActiveComponent }: SidebarProps) => {
       <button
         key={item.name}
         onClick={() => handleClick(item.name)}
+        title={collapsed ? item.name : undefined}
         className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition ${
           active === item.name
             ? "bg-green-50 text-green-600 shadow-sm"
             : "text-gray-600 hover:bg-gray-100"
-        }`}
+        } ${collapsed ? "justify-center px-0" : ""}`}
       >
         <item.icon
-          size={18}
-          className={
+          size={20}
+          className={`shrink-0 ${
             active === item.name
               ? "text-green-600"
               : "text-gray-400"
-          }
+          }`}
         />
-        <span className="text-base font-medium">{item.name}</span>
+        {!collapsed && <span className="text-base font-medium truncate">{item.name}</span>}
       </button>
     ));
 
   return (
-    <aside className="w-64 h-screen bg-white border-r border-gray-200 shadow-sm flex flex-col">
+    <aside className={`h-screen bg-white border-r border-gray-200 shadow-sm flex flex-col transition-all duration-300 ${
+      collapsed ? "w-20" : "w-64"
+    } hidden md:flex`}>
       
       {/* LOGO */}
-      <div className="h-16 flex items-center px-6 border-b border-gray-100">
-        <h2 className="text-2xl font-bold text-gray-800">Workify</h2>
+      <div className={`h-16 flex items-center border-b border-gray-100 ${
+        collapsed ? "justify-center flex-col gap-2 py-2" : "justify-between px-6"
+      }`}>
+        {collapsed ? (
+          <>
+            <h2 className="text-2xl font-bold text-green-600 leading-none">W</h2>
+            <button 
+              onClick={() => setCollapsed(!collapsed)}
+              className="text-gray-400 hover:text-green-600 transition-colors"
+              title="Expand Sidebar"
+            >
+              <PanelLeft size={20} />
+            </button>
+          </>
+        ) : (
+          <>
+            <h2 className="text-2xl font-bold text-gray-800">Workify</h2>
+            <button 
+              onClick={() => setCollapsed(!collapsed)}
+              className="text-gray-400 hover:text-green-600 transition-colors"
+              title="Collapse Sidebar"
+            >
+              <PanelLeftClose size={20} />
+            </button>
+          </>
+        )}
       </div>
 
       {/* MENU */}
-      <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
+      <nav className={`flex-1 overflow-y-auto ${collapsed ? "px-2" : "px-4"} py-4 space-y-6`}>
         
         {/* MAIN */}
         <div className="space-y-1">{renderMenu(mainMenu)}</div>
 
         {/* ANALYTICS */}
         <div>
-          <p className="text-sm text-gray-400 uppercase mb-2 font-semibold">
-            Analytics
-          </p>
+          {!collapsed ? (
+            <p className="text-sm text-gray-400 uppercase mb-2 font-semibold">
+              Analytics
+            </p>
+          ) : (
+            <div className="my-4 border-t border-gray-100 mx-2"></div>
+          )}
           <div className="space-y-1">{renderMenu(analyticsMenu)}</div>
         </div>
 
         {/* COMMUNICATION */}
         <div>
-          <p className="text-sm text-gray-400 uppercase mb-2 font-semibold">
-            Communication
-          </p>
+          {!collapsed ? (
+            <p className="text-sm text-gray-400 uppercase mb-2 font-semibold">
+              Communication
+            </p>
+          ) : (
+            <div className="my-4 border-t border-gray-100 mx-2"></div>
+          )}
           <div className="space-y-1">{renderMenu(communicationMenu)}</div>
         </div>
 
         {/* OTHER */}
         <div>
-          <p className="text-sm text-gray-400 uppercase mb-2 font-semibold">
-            Other
-          </p>
+          {!collapsed ? (
+            <p className="text-sm text-gray-400 uppercase mb-2 font-semibold">
+              Other
+            </p>
+          ) : (
+            <div className="my-4 border-t border-gray-100 mx-2"></div>
+          )}
           <div className="space-y-1">{renderMenu(otherMenu)}</div>
         </div>
       </nav>
 
       {/* FOOTER */}
-      <div className="p-4 text-sm text-gray-400 border-t border-gray-100">
-        © {new Date().getFullYear()} Workify
+      <div className={`p-4 text-sm text-gray-400 border-t border-gray-100 ${
+        collapsed ? "text-center text-xs" : ""
+      }`}>
+        {collapsed ? "©" : `© ${new Date().getFullYear()} Workify`}
       </div>
     </aside>
   );
