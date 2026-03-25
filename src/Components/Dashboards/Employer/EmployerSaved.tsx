@@ -3,115 +3,125 @@ import { Search, MapPin, Briefcase, BookmarkMinus, MessageSquare, ExternalLink }
 const SAVED_CANDIDATES = [
   {
     id: 1,
-    name: "Alex Johnson",
-    title: "Senior Full Stack Engineer",
-    location: "New York, NY",
-    salary: "$120k - $150k",
-    skills: ["React", "Node.js", "TypeScript", "AWS"],
+    name: "Onyango Omondi",
+    title: "Masonry & Construction Worker",
+    location: "Kisumu, Kenya",
+    salary: "KES 1,500 / day",
+    skills: ["Masonry", "Plumbing", "Heavy Lifting"],
     avatar: "https://i.pravatar.cc/150?u=a042581f4e29026024d",
-    savedDate: "Saved 2 days ago"
+    savedDate: "Saved 2 days ago",
+    jobType: "Casual"
   },
   {
     id: 2,
-    name: "Samantha Lee",
-    title: "Product Designer",
-    location: "San Francisco, CA",
-    salary: "$110k - $130k",
-    skills: ["Figma", "UI/UX", "Prototyping", "User Research"],
+    name: "Wanjiku Njoroge",
+    title: "Senior Full Stack Engineer",
+    location: "Nairobi, Kenya",
+    salary: "KES 150k - 200k / month",
+    skills: ["React", "Node.js", "TypeScript", "AWS"],
     avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d",
-    savedDate: "Saved 1 week ago"
+    savedDate: "Saved 1 week ago",
+    jobType: "Full-Time"
   },
   {
     id: 3,
-    name: "Michael Chen",
-    title: "Data Scientist",
-    location: "Remote",
-    salary: "$130k - $160k",
-    skills: ["Python", "Machine Learning", "SQL", "Tableau"],
+    name: "Kamau Mbugua",
+    title: "Delivery Driver",
+    location: "Thika, Kenya",
+    salary: "KES 20,000 / month",
+    skills: ["Valid License", "Logistics", "Time Management"],
     avatar: "https://i.pravatar.cc/150?u=a04258a2462d826712d",
-    savedDate: "Saved 2 weeks ago"
+    savedDate: "Saved 2 weeks ago",
+    jobType: "Contractual"
   },
   {
     id: 4,
-    name: "Emily Davis",
-    title: "Digital Marketing Manager",
-    location: "Chicago, IL",
-    salary: "$85k - $105k",
-    skills: ["SEO", "Content Strategy", "Google Ads", "Analytics"],
+    name: "Amina Hassan",
+    title: "Customer Support Agent",
+    location: "Mombasa, Kenya",
+    salary: "KES 35,000 - 50,000 / month",
+    skills: ["Communication", "Zendesk", "Problem Solving", "Bilingual"],
     avatar: "https://i.pravatar.cc/150?u=a042581f4e29026703d",
-    savedDate: "Saved 1 month ago"
+    savedDate: "Saved 1 month ago",
+    jobType: "Part-Time"
   }
 ];
 
 const EmployerSaved = () => {
   return (
-    <div className="p-6 md:p-10 max-w-6xl mx-auto space-y-8 font-sans text-gray-900">
+    <div style={{ padding: "40px", maxWidth: "1152px", margin: "0 auto", fontFamily: "'DM Sans', sans-serif", color: "#111827", display: "flex", flexDirection: "column", gap: "32px", boxSizing: "border-box" }}>
       
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "16px" }}>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Saved Candidates</h1>
-          <p className="text-gray-500 mt-2">Manage and review the talent profiles you've bookmarked.</p>
+          <h1 style={{ fontSize: "30px", fontWeight: "700", margin: "0 0 8px 0" }}>Saved Candidates</h1>
+          <p style={{ color: "#6b7280", margin: "0", fontSize: "16px" }}>Manage and review the talent profiles you've bookmarked.</p>
         </div>
         
-        {/* Search / Filter */}
-        <div className="relative w-full md:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+        {/* Search */}
+        <div style={{ position: "relative", width: "288px" }}>
+          <Search size={18} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#9ca3af" }} />
           <input 
             type="text" 
             placeholder="Search saved candidates..."
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black transition"
+            style={{ width: "100%", padding: "10px 16px 10px 40px", backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "8px", fontFamily: "inherit", fontSize: "14px", boxSizing: "border-box", outline: "none", color: "#111827" }}
           />
         </div>
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))", gap: "24px" }}>
         {SAVED_CANDIDATES.map(candidate => (
-          <div key={candidate.id} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 hover:shadow-md transition group">
-            <div className="flex justify-between items-start mb-4">
-              <div className="flex gap-4 items-center">
-                <img src={candidate.avatar} alt={candidate.name} className="w-16 h-16 rounded-full object-cover border border-gray-100" />
+          <div key={candidate.id} style={{ backgroundColor: "#ffffff", padding: "24px", borderRadius: "16px", border: "1px solid #e5e7eb", boxShadow: "0 1px 2px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
+            
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
+              <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+                <img src={candidate.avatar} alt={candidate.name} style={{ width: "64px", height: "64px", borderRadius: "50%", objectFit: "cover", border: "1px solid #f3f4f6" }} />
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">{candidate.name}</h3>
-                  <p className="text-gray-600 font-medium">{candidate.title}</p>
+                  <h3 style={{ fontSize: "18px", fontWeight: "600", margin: "0 0 4px 0", color: "#111827" }}>{candidate.name}</h3>
+                  <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
+                    <p style={{ margin: 0, color: "#4b5563", fontSize: "14px", fontWeight: "500" }}>{candidate.title}</p>
+                    <span style={{ padding: "2px 8px", backgroundColor: "#eef2ff", color: "#4f46e5", fontSize: "10px", fontWeight: "700", textTransform: "uppercase", borderRadius: "9999px", letterSpacing: "0.05em" }}>
+                      {candidate.jobType}
+                    </span>
+                  </div>
                 </div>
               </div>
               <button 
-                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
                 title="Remove from saved"
+                style={{ cursor: "pointer", background: "none", border: "none", color: "#9ca3af", padding: "8px", borderRadius: "8px" }}
               >
                 <BookmarkMinus size={20} />
               </button>
             </div>
 
-            <div className="space-y-2 mb-6 text-sm text-gray-600">
-              <div className="flex items-center gap-2">
-                <MapPin size={16} className="text-gray-400" />
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "24px", fontSize: "14px", color: "#4b5563" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <MapPin size={16} style={{ color: "#9ca3af" }} />
                 <span>{candidate.location}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Briefcase size={16} className="text-gray-400" />
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <Briefcase size={16} style={{ color: "#9ca3af" }} />
                 <span>{candidate.salary}</span>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2 mb-6">
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "24px" }}>
               {candidate.skills.map(skill => (
-                <span key={skill} className="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">
+                <span key={skill} style={{ padding: "4px 12px", backgroundColor: "#f3f4f6", color: "#374151", fontSize: "12px", fontWeight: "500", borderRadius: "9999px" }}>
                   {skill}
                 </span>
               ))}
             </div>
 
-            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-              <span className="text-xs text-gray-400 font-medium">{candidate.savedDate}</span>
-              <div className="flex gap-2">
-                <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition text-sm">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "16px", borderTop: "1px solid #f3f4f6", marginTop: "auto", flexWrap: "wrap", gap: "16px" }}>
+              <span style={{ fontSize: "12px", color: "#9ca3af", fontWeight: "500" }}>{candidate.savedDate}</span>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 16px", backgroundColor: "#f3f4f6", color: "#374151", border: "none", borderRadius: "8px", fontFamily: "inherit", fontWeight: "500", cursor: "pointer", fontSize: "14px" }}>
                   <MessageSquare size={16} />
                   Message
                 </button>
-                <button className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white font-medium rounded-lg hover:bg-black transition text-sm">
+                <button style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 16px", backgroundColor: "#111827", color: "#ffffff", border: "none", borderRadius: "8px", fontFamily: "inherit", fontWeight: "500", cursor: "pointer", fontSize: "14px" }}>
                   <ExternalLink size={16} />
                   View Profile
                 </button>
