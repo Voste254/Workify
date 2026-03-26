@@ -197,23 +197,23 @@ export default function Settings() {
                
                <div style={{ padding: 24, border: "2px solid #111827", borderRadius: 10, background: "#F9FAFB", marginBottom: 30 }}>
                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                   <div>
+                  <div>
                      <p style={{ margin: "0 0 8px", fontSize: 14, fontWeight: 700, color: "#2563EB", textTransform: "uppercase", letterSpacing: "0.05em" }}>Corporate Pro Plan</p>
                      <p style={{ margin: 0, fontSize: 24, fontWeight: 700, color: "#111827", fontFamily: "'DM Mono',monospace" }}>KES 15,000 / month</p>
-                   </div>
+                  </div>
                    <button style={{ padding: "10px 20px", background: "#fff", color: "#111827", border: "1.5px solid #111827", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer" }}>Change Plan</button>
-                 </div>
-               </div>
+                </div>
+              </div>
 
                <h3 style={{ margin: "0 0 20px", fontSize: 16, fontWeight: 700, color: "#111827" }}>Payment Methods</h3>
-               <div style={{ padding: 20, border: "1.5px solid #E5E7EB", borderRadius: 10, display: "flex", alignItems: "center", gap: 16 }}>
-                 <div style={{ width: 60, height: 40, background: "#111827", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, fontWeight: 700, fontSize: 12 }}>VISA</div>
-                 <div style={{ flex: 1 }}>
-                   <p style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 700, color: "#111827" }}>Visa ending in 4242</p>
-                   <p style={{ margin: 0, fontSize: 13, color: "#6B7280" }}>Expires 12/26</p>
-                 </div>
-                 <button style={{ background: "none", border: "none", color: "#2563EB", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>Edit</button>
-               </div>
+              <div style={{ padding: 20, border: "1.5px solid #E5E7EB", borderRadius: 10, display: "flex", alignItems: "center", gap: 16 }}>
+                <div style={{ width: 60, height: 40, background: "#111827", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, fontWeight: 700, fontSize: 12 }}>VISA</div>
+                <div style={{ flex: 1 }}>
+                  <p style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 700, color: "#111827" }}>Visa ending in 4242</p>
+                  <p style={{ margin: 0, fontSize: 13, color: "#6B7280" }}>Expires 12/26</p>
+                </div>
+                <button style={{ background: "none", border: "none", color: "#2563EB", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>Edit</button>
+              </div>
             </div>
           )}
 
