@@ -131,24 +131,27 @@ const handleSignup = async () => {
 
   setSubmitting(true);
 
+  console.log("Starting signup...");
+
   const { data, error } = await supabase.auth.signUp({
     email: form.email,
     password: form.password,
   });
 
   if (error) {
-    console.error(error.message);
+    console.error("Auth Error: ",error.message);
     setSubmitting(false);
     return;
   }
 
+  console.log("Auth success: ", data);
   const user = data.user;
 
   if (user) {
     const { error: profileError } = await supabase
       .from("profiles")
 .upsert({
-  id: user.id, // ⚠️ REQUIRED
+  id: user.id, // REQUIRED
 
   email: form.email,
   first_name: form.fname,
@@ -174,7 +177,10 @@ const handleSignup = async () => {
 });
 
     if (profileError) {
-      console.error(profileError.message);
+      console.error("Profile Error: ",profileError.message);
+    }
+    else{
+      console.log("Profile saved successfully")
     }
   }
 
