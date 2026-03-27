@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { supabase } from "../../../lib/supabaseClient"; 
 
 type Role = "seeker" | "employer";
 
@@ -125,6 +126,61 @@ export default function Signup() {
       </div>
     </div>
   );
+const handleSignup = async () => {
+  if (!form.terms) return;
+
+  setSubmitting(true);
+
+  const { data, error } = await supabase.auth.signUp({
+    email: form.email,
+    password: form.password,
+  });
+
+  if (error) {
+    console.error(error.message);
+    setSubmitting(false);
+    return;
+  }
+
+  const user = data.user;
+
+  if (user) {
+    const { error: profileError } = await supabase
+      .from("profiles")
+.upsert({
+  id: user.id, // ⚠️ REQUIRED
+
+  email: form.email,
+  first_name: form.fname,
+  last_name: form.lname,
+  phone: form.phone,
+
+  role: roles,
+
+  profession: form.profession,
+  seeker_location: form.location,
+  employment_type_preference: form.emptype,
+  expected_pay: form.pay,
+  bio: form.bio,
+  skills: skills,
+
+  company_name: form.company,
+  industry: form.industry,
+  company_size: form.size,
+  company_location: form.elocation,
+
+  terms_accepted: form.terms,
+  marketing_consent: form.marketing,
+});
+
+    if (profileError) {
+      console.error(profileError.message);
+    }
+  }
+
+  setSubmitting(false);
+  setDone(true);
+};
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
@@ -296,7 +352,10 @@ export default function Signup() {
               </label>
             </div>
             {!form.terms && <p className="text-xs text-red-500 mb-3">You must agree to the Terms of Service.</p>}
-            <PrimaryBtn disabled={!form.terms || submitting} onClick={() => { if (!form.terms) return; setSubmitting(true); setTimeout(() => { setSubmitting(false); setDone(true); }, 1400); }}>
+            <PrimaryBtn
+              disabled={!form.terms || submitting}
+              onClick={handleSignup}
+            >
               {submitting ? "Creating account…" : "Create my account →"}
             </PrimaryBtn>
           </>}
