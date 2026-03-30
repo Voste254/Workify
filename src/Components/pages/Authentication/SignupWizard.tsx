@@ -75,6 +75,7 @@ export default function Signup() {
   const [skillInput, setSkillInput] = useState("");
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [authError, setAuthError] = useState("");
 
   const [form, setForm] = useState({
     fname:"", lname:"", email:"", phone:"", password:"", confirm:"",
@@ -128,65 +129,72 @@ export default function Signup() {
   );
 const handleSignup = async () => {
   if (!form.terms) return;
-
   setSubmitting(true);
+  setAuthError("");
 
-  console.log("Starting signup...");
-
+  // 1. Create the auth user
   const { data, error } = await supabase.auth.signUp({
     email: form.email,
     password: form.password,
   });
 
   if (error) {
-    console.error("Auth Error: ",error.message);
+    setAuthError(error.message);   // surface to user, not just console
     setSubmitting(false);
     return;
   }
 
-  console.log("Auth success: ", data);
   const user = data.user;
+  if (!user) {
+    setAuthError("Signup succeeded but no user was returned. Please try again.");
+    setSubmitting(false);
+    return;
+  }
 
-  if (user) {
-    const { error: profileError } = await supabase
-      .from("profiles")
-.upsert({
-  id: user.id, // REQUIRED
+  // 2. Write the profile row
+  const { error: profileError } = await supabase.from("profiles").upsert({
+    id: user.id,                                   // FK → auth.users.id  (required)
 
-  email: form.email,
-  first_name: form.fname,
-  last_name: form.lname,
-  phone: form.phone,
+    // Step 1
+    email:      form.email,
+    first_name: form.fname,
+    last_name:  form.lname,
+    phone:      form.phone,
 
-  role: roles,
+    // Step 2 — array of "seeker" | "employer"
+    role: roles,                                   // text[]
 
-  profession: form.profession,
-  seeker_location: form.location,
-  employment_type_preference: form.emptype,
-  expected_pay: form.pay,
-  bio: form.bio,
-  skills: skills,
+    // Step 3a — seeker fields (null/empty when employer-only)
+    profession:                  form.profession   || null,
+    seeker_location:             form.location     || null,
+    employment_type_preference:  form.emptype      || null,
+    expected_pay:                form.pay          || null,
+    bio:                         form.bio          || null,
+    skills:                      skills.length ? skills : [],   // text[]
 
-  company_name: form.company,
-  industry: form.industry,
-  company_size: form.size,
-  company_location: form.elocation,
+    // Step 3b — employer fields (null/empty when seeker-only)
+    company_name:     form.company   || null,
+    industry:         form.industry  || null,
+    company_size:     form.size      || null,
+    company_location: form.elocation || null,
 
-  terms_accepted: form.terms,
-  marketing_consent: form.marketing,
-});
+    // Step 4
+    terms_accepted:    form.terms,
+    marketing_consent: form.marketing,
+  });
 
-    if (profileError) {
-      console.error("Profile Error: ",profileError.message);
-    }
-    else{
-      console.log("Profile saved successfully")
-    }
+  if (profileError) {
+    // Profile write failed — auth user was created, but profile wasn't saved.
+    // In production you'd want to delete the auth user or retry.
+    setAuthError(`Account created but profile save failed: ${profileError.message}`);
+    setSubmitting(false);
+    return;
   }
 
   setSubmitting(false);
   setDone(true);
 };
+
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
@@ -358,6 +366,7 @@ const handleSignup = async () => {
               </label>
             </div>
             {!form.terms && <p className="text-xs text-red-500 mb-3">You must agree to the Terms of Service.</p>}
+           {authError && <p className="text-xs text-red-500 mb-3">{authError}</p>}
             <PrimaryBtn
               disabled={!form.terms || submitting}
               onClick={handleSignup}
