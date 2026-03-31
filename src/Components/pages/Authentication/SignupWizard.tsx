@@ -112,7 +112,7 @@ export default function Signup() {
 
   const step1Valid = form.fname && form.lname && form.email.includes("@") && form.phone && form.password.length >= 8 && form.password === form.confirm;
   const step2Valid = roles.length > 0;
-  const step3Valid = isSeeker ? (form.profession && form.location) : (form.company && form.industry);
+  const step3Valid = (!isSeeker || (form.profession && form.location)) && (!isEmployer || (form.company && form.industry));
 
   const roleCards: { role: Role; icon: string; title: string; desc: string }[] = [
     { role: "seeker", icon: "🔍", title: "Job Seeker", desc: "Find jobs, build profile, track applications" },
@@ -295,10 +295,11 @@ const handleSignup = async () => {
           {/* ── Step 3: Profile ── */}
           {step === 3 && <>
             <button onClick={() => setStep(2)} className="text-xs text-gray-400 hover:text-gray-700 mb-4 flex items-center gap-1">← Back</button>
-            <h2 className="text-2xl font-bold text-gray-900 mb-1">{isSeeker ? "Your profile" : "Company profile"}</h2>
-            <p className="text-sm text-gray-500 mb-6">{isSeeker ? "Tell employers about yourself." : "Tell candidates about your organisation."}</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-1">{isSeeker && isEmployer ? "Your profiles" : isSeeker ? "Your profile" : "Company profile"}</h2>
+            <p className="text-sm text-gray-500 mb-6">{isSeeker && isEmployer ? "Tell us about yourself and your organization." : isSeeker ? "Tell employers about yourself." : "Tell candidates about your organisation."}</p>
             <div className="space-y-4">
-              {isSeeker ? <>
+              {isSeeker && <>
+                {isEmployer && <div className="text-xs font-semibold text-gray-900 uppercase tracking-widest border-b pb-2 mb-4">Job Seeker Profile</div>}
                 <Field label="Profession / Service offered"><Input placeholder="e.g. Graphic Designer, Plumber" value={form.profession} onChange={e => set("profession", e.target.value)}/></Field>
                 <Field label="Location">
                   <Select value={form.location} onChange={e => set("location", e.target.value)}>
@@ -321,7 +322,9 @@ const handleSignup = async () => {
                   <textarea maxLength={200} value={form.bio} onChange={e => set("bio", e.target.value)} placeholder="Describe your experience..." className="w-full border border-gray-200 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-gray-900 transition placeholder:text-gray-400 resize-none h-20"/>
                   <p className="text-xs text-gray-400 mt-1">{form.bio.length}/200</p>
                 </Field>
-              </> : <>
+              </>}
+              {isEmployer && <>
+                {isSeeker && <div className="text-xs font-semibold text-gray-900 uppercase tracking-widest border-b pb-2 mb-4 mt-8">Company Profile</div>}
                 <Field label="Company name"><Input placeholder="e.g. Safaricom PLC" value={form.company} onChange={e => set("company", e.target.value)}/></Field>
                 <Field label="Industry">
                   <Select value={form.industry} onChange={e => set("industry", e.target.value)}>
@@ -344,7 +347,7 @@ const handleSignup = async () => {
                   </Field>
                 </div>
               </>}
-              <PrimaryBtn onClick={() => step3Valid && setStep(4)} className={`w-full h-11 text-sm font-semibold transition ${step3Valid ? "bg-gray-900 text-white hover:bg-gray-700" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}>Continue →</PrimaryBtn>
+              <PrimaryBtn onClick={() => step3Valid && setStep(4)} className={`w-full h-11 text-sm font-semibold transition ${step3Valid ? "bg-gray-900 text-white hover:bg-gray-700" : "bg-gray-200 text-gray-400 cursor-not-allowed"} mt-6`}>Continue →</PrimaryBtn>
             </div>
           </>}
 

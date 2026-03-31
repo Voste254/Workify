@@ -1,9 +1,10 @@
 import { MapPin, Briefcase, TrendingUp, Clock, ChevronRight, Bell, CheckCircle, AlertCircle, FileText, Star } from "lucide-react";
 import JobCard from "./JobCard";
 import BlogPreview from "./BlogPreview";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // TODO: fetch all data from Supabase
-const USER = { name: "Okutah Voste", profession: "Full Stack Developer", location: "Nairobi, Kenya", avatar: "https://randomuser.me/api/portraits/men/32.jpg", profileStrength: 72 };
+const USER = { avatar: "https://randomuser.me/api/portraits/men/32.jpg", profileStrength:50 };
 
 const STATS = [
   { label: "Applications",  value: 12,   sub: "3 this week",      icon: <FileText size={15}/>,  dark: false },
@@ -48,6 +49,12 @@ const Card = ({ children, className = "" }: { children: React.ReactNode; classNa
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 export default function Dashboard() {
+  const { profile } = useAuth();
+
+  const firstName = profile?.first_name ;
+  const profession = profile?.profession ;
+  const location = profile?.seeker_location ;
+
   return (
     <div className="bg-gray-50 min-h-screen">
 
@@ -56,19 +63,12 @@ export default function Dashboard() {
         <div className="flex items-center gap-3">
           <img src={USER.avatar} alt="avatar" className="w-10 h-10 object-cover border-[1.5px] border-gray-200 flex-shrink-0"/>
           <div>
-            <h1 className="text-lg font-bold text-gray-900">Good morning, {USER.name.split(" ")[0]} 👋</h1>
-            <p className="text-sm text-gray-400 font-mono mt-0.5">{USER.profession} · {USER.location}</p>
+            <h1 className="text-lg font-bold text-gray-900">Hello, {firstName} 👋</h1>
+            <p className="text-sm text-gray-400 font-mono mt-0.5">{profession} · {location}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {ALERTS.length > 0 && (
-            <div className="relative">
-              <button className="h-9 w-9 flex items-center justify-center border border-gray-200 bg-white hover:border-gray-400 transition">
-                <Bell size={15} className="text-gray-600"/>
-              </button>
-              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[11px] font-bold flex items-center justify-center rounded-full">{ALERTS.length}</span>
-            </div>
-          )}
+     
           <a href="#" className="h-9 px-4 text-sm font-semibold bg-gray-900 text-white hover:bg-gray-700 transition flex items-center gap-1.5">
             Browse jobs <ChevronRight size={12}/>
           </a>
@@ -188,7 +188,7 @@ export default function Dashboard() {
 
         {/* ── Blog preview ── */}
         <div>
-          <SectionHeader title="From the blog" action="Read all articles" href="#"/>
+          <SectionHeader title="From the blog"/>
           <BlogPreview/>
         </div>
 
