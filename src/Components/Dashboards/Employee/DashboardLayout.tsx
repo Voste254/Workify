@@ -16,7 +16,7 @@ const DashboardLayout = () => {
   const renderContent = () => {
     switch (activePage) {
       case "dashboard":
-        return <DashboardHome />;
+        return <DashboardHome setActivePage={setActivePage} />;
       case "jobs":
         return <FindJobsPage/>;
       case "applications":
@@ -32,7 +32,7 @@ const DashboardLayout = () => {
       case "settings":
         return <Settings/>;
       default:
-        return <DashboardHome />;
+        return <DashboardHome setActivePage={setActivePage} />;
     }
   };
 
