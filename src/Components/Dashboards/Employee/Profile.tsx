@@ -82,7 +82,7 @@ export default function MyProfile() {
               <input disabled={!editMode} value={profile.name} onChange={e => setProfile({ ...profile, name: e.target.value })} style={inputStyle} />
             </div>
             <div>
-               <label style={labelStyle}>Phone Number (M-PESA)</label>
+               <label style={labelStyle}>Phone Number</label>
                <input disabled={!editMode} value={profile.phone} onChange={e => setProfile({ ...profile, phone: e.target.value })} style={{ ...inputStyle, fontFamily: "'DM Mono',monospace" }} />
             </div>
             <div style={{ gridColumn: "1 / -1" }}>

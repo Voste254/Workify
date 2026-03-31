@@ -1,15 +1,60 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "../../../lib/supabaseClient";
 
 export default function Login() {
+  const navigate = useNavigate();
   const [show, setShow] = useState(false);
-  const [err, setErr] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const f = e.target as HTMLFormElement;
-    if (!f.email.value || !f.password.value) { setErr(true); return; }
-    setErr(false);
+    const email = f.email.value.trim();
+    const password = f.password.value;
+
+    if (!email || !password) {
+      setErrorMsg("Please enter your email and password.");
+      return;
+    }
+
+    setLoading(true);
+    setErrorMsg("");
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setErrorMsg(error.message);
+      setLoading(false);
+      return;
+    }
+
+    // Fetch the user's role from the profiles table
+    const userId = data.session?.user?.id;
+    if (userId) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", userId)
+        .single();
+
+      const roles: string[] = profile?.role ?? [];
+
+      if (roles.includes("employer") && !roles.includes("seeker")) {
+        navigate("/EmployerDashboard");
+      } else {
+        // seeker, both roles, or unknown → default to jobs dashboard
+        navigate("/jobs");
+      }
+    } else {
+      navigate("/jobs");
+    }
+
+    setLoading(false);
   };
 
   return (
@@ -43,7 +88,10 @@ export default function Login() {
           <h2 className="text-2xl font-bold text-gray-900 mb-1">Welcome back</h2>
           <p className="text-sm text-gray-500 mb-8">Sign in to your account to continue.</p>
 
-          <button className="w-full flex items-center justify-center gap-3 border border-gray-200 h-11 text-sm font-medium text-gray-700 hover:bg-gray-50 transition mb-6">
+          <button
+            type="button"
+            className="w-full flex items-center justify-center gap-3 border border-gray-200 h-11 text-sm font-medium text-gray-700 hover:bg-gray-50 transition mb-6"
+          >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -59,34 +107,87 @@ export default function Login() {
             <div className="flex-1 h-px bg-gray-200"/>
           </div>
 
-          {err && <div className="bg-red-50 border-l-4 border-red-500 px-4 py-2.5 text-xs text-red-700 mb-4">Please enter your email and password.</div>}
+          {errorMsg && (
+            <div className="bg-red-50 border-l-4 border-red-500 px-4 py-2.5 text-xs text-red-700 mb-4">
+              {errorMsg}
+            </div>
+          )}
 
           <form onSubmit={submit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-widest mb-1.5">Email</label>
-              <input name="email" type="email" placeholder="you@example.com" className="w-full h-11 border border-gray-200 px-3 text-sm text-gray-900 outline-none focus:border-gray-900 transition placeholder:text-gray-400"/>
+              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-widest mb-1.5">
+                Email
+              </label>
+              <input
+                name="email"
+                type="email"
+                placeholder="you@example.com"
+                className="w-full h-11 border border-gray-200 px-3 text-sm text-gray-900 outline-none focus:border-gray-900 transition placeholder:text-gray-400"
+              />
             </div>
             <div>
               <div className="flex justify-between items-center mb-1.5">
-                <label className="text-xs font-semibold text-gray-700 uppercase tracking-widest">Password</label>
-                <button type="button" className="text-xs text-gray-400 hover:text-gray-700">Forgot password?</button>
+                <label className="text-xs font-semibold text-gray-700 uppercase tracking-widest">
+                  Password
+                </label>
+                <button type="button" className="text-xs text-gray-400 hover:text-gray-700">
+                  Forgot password?
+                </button>
               </div>
               <div className="relative">
-                <input name="password" type={show ? "text" : "password"} placeholder="Enter your password" className="w-full h-11 border border-gray-200 px-3 pr-14 text-sm text-gray-900 outline-none focus:border-gray-900 transition placeholder:text-gray-400"/>
-                <button type="button" onClick={() => setShow(!show)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-mono">{show ? "hide" : "show"}</button>
+                <input
+                  name="password"
+                  type={show ? "text" : "password"}
+                  placeholder="Enter your password"
+                  className="w-full h-11 border border-gray-200 px-3 pr-14 text-sm text-gray-900 outline-none focus:border-gray-900 transition placeholder:text-gray-400"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShow(!show)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-mono"
+                >
+                  {show ? "hide" : "show"}
+                </button>
               </div>
             </div>
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" className="accent-gray-900 w-4 h-4"/>
+              <input type="checkbox" className="accent-gray-900 w-4 h-4" />
               <span className="text-sm text-gray-600">Remember me for 30 days</span>
             </label>
-            <Link to='/jobs'> <button type="submit" className="w-full h-11 bg-gray-900 text-white text-sm font-semibold hover:bg-gray-700 transition mt-2">Sign in →</button></Link>
-            </form>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full h-11 bg-gray-900 text-white text-sm font-semibold hover:bg-gray-700 transition mt-2 disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <span
+                    style={{
+                      width: 14,
+                      height: 14,
+                      border: "2px solid rgba(255,255,255,0.3)",
+                      borderTopColor: "#fff",
+                      borderRadius: "50%",
+                      display: "inline-block",
+                      animation: "spin 0.7s linear infinite",
+                    }}
+                  />
+                  <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                  Signing in…
+                </>
+              ) : (
+                "Sign in →"
+              )}
+            </button>
+          </form>
 
           <p className="text-center text-sm text-gray-400 mt-6">
             Don't have an account?{" "}
-            <Link to='/signup'>
-            <button className="text-gray-900 font-semibold hover:underline">Create one free</button></Link>
+            <Link to="/signup">
+              <button className="text-gray-900 font-semibold hover:underline">
+                Create one free
+              </button>
+            </Link>
           </p>
         </div>
       </div>

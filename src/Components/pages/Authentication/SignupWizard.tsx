@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { supabase } from "../../../lib/supabaseClient"; 
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "../../../lib/supabaseClient";
 
 type Role = "seeker" | "employer";
 
@@ -67,6 +67,7 @@ function StepBar({ step }: { step: number }) {
 }
 
 export default function Signup() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [roles, setRoles] = useState<Role[]>([]);
   const [showPw, setShowPw] = useState(false);
@@ -74,6 +75,7 @@ export default function Signup() {
   const [skills, setSkills] = useState<string[]>([]);
   const [skillInput, setSkillInput] = useState("");
   const [done, setDone] = useState(false);
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [authError, setAuthError] = useState("");
 
@@ -122,8 +124,18 @@ export default function Signup() {
       <div className="text-center max-w-sm">
         <div className="w-16 h-16 bg-green-600 flex items-center justify-center text-white text-3xl mx-auto mb-6">✓</div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Account created!</h2>
-        <p className="text-sm text-gray-500 mb-8">Welcome to Workify, {form.fname}! Your profile is live and ready.</p>
-        <Link to='/jobs'><PrimaryBtn >Proceed to Dashboard →</PrimaryBtn></Link>
+        {needsConfirmation ? (
+          <>
+            <p className="text-sm text-gray-500 mb-2">Welcome, {form.fname}! We've sent a confirmation link to <strong>{form.email}</strong>.</p>
+            <p className="text-sm text-gray-400 mb-8">Please check your inbox and confirm your email before signing in.</p>
+            <Link to='/login'><PrimaryBtn>Go to Login →</PrimaryBtn></Link>
+          </>
+        ) : (
+          <>
+            <p className="text-sm text-gray-500 mb-8">Welcome to Workify, {form.fname}! Your profile is live and ready.</p>
+            <PrimaryBtn onClick={() => navigate(roles.includes("employer") && !roles.includes("seeker") ? "/EmployerDashboard" : "/jobs")}>Proceed to Dashboard →</PrimaryBtn>
+          </>
+        )}
       </div>
     </div>
   );
@@ -192,6 +204,8 @@ const handleSignup = async () => {
   }
 
   setSubmitting(false);
+  // If Supabase requires email confirmation, data.session will be null
+  setNeedsConfirmation(!data.session);
   setDone(true);
 };
 
