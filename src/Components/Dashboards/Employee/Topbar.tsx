@@ -2,6 +2,7 @@ import { Bell, LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import NotificationModal from "./NotificationModal";
+import { useAuth } from "../../../contexts/AuthContext";
 
 const TopBar = () => {
   const [open, setOpen] = useState(false);
@@ -9,11 +10,17 @@ const TopBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const { profile, signOut } = useAuth();
+
   // Detect current dashboard
   const isEmployer = location.pathname.includes("Employer");
 
-  const handleLogout = () => {
-    navigate("/");
+  // Check if the user has both roles
+  const hasBothRoles = profile?.role?.includes("seeker") && profile?.role?.includes("employer");
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/login");
   };
 
   const switchToEmployer = () => {
@@ -43,8 +50,9 @@ const TopBar = () => {
       {/* Desktop items */}
       <div className="hidden md:flex items-center gap-6">
 
-        {/* Dashboard Toggle */}
-        <div className="flex bg-gray-200 rounded-full p-2">
+        {/* Dashboard Toggle - Only show if user has both roles */}
+        {hasBothRoles && (
+          <div className="flex bg-gray-200 rounded-full p-2">
           <button
             onClick={switchToJobSeeker}
             className={`px-4 py-1 rounded-full text-base font-medium transition ${
@@ -67,6 +75,7 @@ const TopBar = () => {
             Employer
           </button>
         </div>
+        )}
 
         {/* Notifications */}
         <button
@@ -100,7 +109,8 @@ const TopBar = () => {
       {isMobileMenuOpen && (
         <div className="absolute top-16 left-0 right-0 bg-white border-b shadow-lg p-6 flex flex-col gap-6 md:hidden">
           
-          <div className="flex bg-gray-200 rounded-full p-1 justify-center">
+          {hasBothRoles && (
+            <div className="flex bg-gray-200 rounded-full p-1 justify-center">
             <button
               onClick={switchToJobSeeker}
               className={`flex-1 px-4 py-2 rounded-full text-base font-medium transition ${
@@ -122,6 +132,7 @@ const TopBar = () => {
               Employer
             </button>
           </div>
+          )}
 
           <div className="flex items-center justify-between border-t pt-4">
             <div className="flex items-center gap-3">
