@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "../../../lib/supabaseClient";
-
-type Role = "seeker" | "employer";
+import { signUpUser, type Role, type SignupFormData } from "../../../services/authService";
 
 const STEPS = ["Account", "Role", "Profile", "Confirm"];
 
@@ -79,7 +77,7 @@ export default function Signup() {
   const [submitting, setSubmitting] = useState(false);
   const [authError, setAuthError] = useState("");
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<SignupFormData & { confirm: string }>({
     fname:"", lname:"", email:"", phone:"", password:"", confirm:"",
     profession:"", location:"", emptype:"", pay:"", bio:"",
     company:"", industry:"", size:"", elocation:"",
@@ -144,68 +142,16 @@ const handleSignup = async () => {
   setSubmitting(true);
   setAuthError("");
 
-  // 1. Create the auth user
-  const { data, error } = await supabase.auth.signUp({
-    email: form.email,
-    password: form.password,
-  });
+  const result = await signUpUser({ form, roles, skills });
 
-  if (error) {
-    setAuthError(error.message);   // surface to user, not just console
-    setSubmitting(false);
-    return;
-  }
-
-  const user = data.user;
-  if (!user) {
-    setAuthError("Signup succeeded but no user was returned. Please try again.");
-    setSubmitting(false);
-    return;
-  }
-
-  // 2. Write the profile row
-  const { error: profileError } = await supabase.from("profiles").upsert({
-    id: user.id,                                   // FK → auth.users.id  (required)
-
-    // Step 1
-    email:      form.email,
-    first_name: form.fname,
-    last_name:  form.lname,
-    phone:      form.phone,
-
-    // Step 2 — array of "seeker" | "employer"
-    role: roles,                                   // text[]
-
-    // Step 3a — seeker fields (null/empty when employer-only)
-    profession:                  form.profession   || null,
-    seeker_location:             form.location     || null,
-    employment_type_preference:  form.emptype      || null,
-    expected_pay:                form.pay          || null,
-    bio:                         form.bio          || null,
-    skills:                      skills.length ? skills : [],   // text[]
-
-    // Step 3b — employer fields (null/empty when seeker-only)
-    company_name:     form.company   || null,
-    industry:         form.industry  || null,
-    company_size:     form.size      || null,
-    company_location: form.elocation || null,
-
-    // Step 4
-    terms_accepted:    form.terms,
-    marketing_consent: form.marketing,
-  });
-
-  if (profileError) {
-    // Profile write failed — auth user was created, but profile wasn't saved.
-    // In production you'd want to delete the auth user or retry.
-    setAuthError(`Account created but profile save failed: ${profileError.message}`);
+  if (result.error) {
+    setAuthError(result.error);
     setSubmitting(false);
     return;
   }
 
   setSubmitting(false);
-  // If Supabase requires email confirmation, data.session will be null
-  setNeedsConfirmation(!data.session);
+  setNeedsConfirmation(result.needsConfirmation ?? false);
   setDone(true);
 };
 

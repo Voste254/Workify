@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "../../../lib/supabaseClient";
+import { logInUser } from "../../../services/authService";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -22,35 +22,20 @@ export default function Login() {
     setLoading(true);
     setErrorMsg("");
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const result = await logInUser(email, password);
 
-    if (error) {
-      setErrorMsg(error.message);
+    if (result.error) {
+      setErrorMsg(result.error);
       setLoading(false);
       return;
     }
 
-    // Fetch the user's role from the profiles table
-    const userId = data.session?.user?.id;
-    if (userId) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", userId)
-        .single();
+    const roles = result.roles || [];
 
-      const roles: string[] = profile?.role ?? [];
-
-      if (roles.includes("employer") && !roles.includes("seeker")) {
-        navigate("/EmployerDashboard");
-      } else {
-        // seeker, both roles, or unknown → default to jobs dashboard
-        navigate("/jobs");
-      }
+    if (roles.includes("employer") && !roles.includes("seeker")) {
+      navigate("/EmployerDashboard");
     } else {
+      // seeker, both roles, or unknown → default to jobs dashboard
       navigate("/jobs");
     }
 

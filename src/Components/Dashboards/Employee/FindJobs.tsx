@@ -14,29 +14,28 @@ interface Job {
 
 // Categories from the image
 const CATEGORIES = [
-  { name: "Software Engineer", salary: "$130,988" },
-  { name: "Registered Nurse", salary: "$94,161" },
-  { name: "Accountant", salary: "$67,907" },
-  { name: "Business Analyst", salary: "$89,256" },
-  { name: "Nursing Assistant", salary: "$46,439" },
-  { name: "Sales Executive", salary: "$92,134" },
-  { name: "Human Resources Specialist", salary: "$63,818" },
-  { name: "Customer Service Representative", salary: "$66,829" },
-  { name: "Assistant Store Manager", salary: "$39,248" },
+  { name: "Technology & IT", description: "Software development, data analysis, and IT support" },
+  { name: "Healthcare & Medical", description: "Nursing, clinical roles, and healthcare administration" },
+  { name: "Finance & Accounting", description: "Accounting, auditing, and financial planning" },
+  { name: "Sales & Marketing", description: "Sales executives, marketing managers, and PR" },
+  { name: "Manual & Casual Labor", description: "Construction, cleaning, delivery, and warehousing" },
+  { name: "Customer Support", description: "Customer service representatives and helpdesk" },
+  { name: "Administration", description: "HR, office management, and administrative assistants" },
+  { name: "Engineering & Design", description: "Mechanical, electrical, and civil engineering" },
 ];
 
 const JOBS: Job[] = [
-  { category: "Software Engineer", title: "Senior Frontend Developer", company: "TechCorp Kenya", location: "Nairobi, Kenya", salary: "180,000–250,000", jobType: "Corporate", contractType: "Permanent", rating: 4.8, daysAgo: 4 },
-  { category: "Software Engineer", title: "Backend Engineer", company: "Safaricom PLC", location: "Nairobi, Kenya", salary: "200,000–300,000", jobType: "Corporate", contractType: "Permanent", rating: 4.6, daysAgo: 2 },
-  { category: "Software Engineer", title: "React Developer (6 months)", company: "Africa Fintech", location: "Lagos, Nigeria", salary: "150,000–220,000", jobType: "Corporate", contractType: "Contractual", rating: 4.4, daysAgo: 6 },
-  { category: "Business Analyst", title: "Data Analyst", company: "KCB Group", location: "Nairobi, Kenya", salary: "120,000–180,000", jobType: "Corporate", contractType: "Contractual", rating: 4.2, daysAgo: 5 },
-  { category: "Manual/Casual", title: "Construction Worker", company: "BuildRight Ltd", location: "Nairobi, Kenya", salary: "2,500/day", jobType: "Manual/Casual", contractType: "Daily", rating: 4.1, daysAgo: 1 },
-  { category: "Manual/Casual", title: "Warehouse Loader", company: "QuickLogistics", location: "Mombasa, Kenya", salary: "2,000/day", jobType: "Manual/Casual", contractType: "Daily", rating: 4.0, daysAgo: 3 },
-  { category: "Manual/Casual", title: "House Cleaner", company: "Sparkle Services", location: "Nairobi, Kenya", salary: "500/hr", jobType: "Manual/Casual", contractType: "Hourly", rating: 4.3, daysAgo: 2 },
-  { category: "Manual/Casual", title: "Delivery Rider", company: "SwiftSend", location: "Nairobi, Kenya", salary: "600/hr", jobType: "Manual/Casual", contractType: "Hourly", rating: 4.4, daysAgo: 4 },
-  { category: "Accountant", title: "Senior Accountant", company: "KPMG", location: "Nairobi, Kenya", salary: "150,000–200,000", jobType: "Corporate", contractType: "Permanent", rating: 4.7, daysAgo: 1 },
-  { category: "Registered Nurse", title: "ER Nurse", company: "Aga Khan Hospital", location: "Nairobi, Kenya", salary: "80,000–120,000", jobType: "Corporate", contractType: "Permanent", rating: 4.9, daysAgo: 3 },
-  { category: "Sales Executive", title: "Regional Sales Executive", company: "Coca-Cola", location: "Nairobi, Kenya", salary: "90,000 + Comm", jobType: "Corporate", contractType: "Permanent", rating: 4.5, daysAgo: 2 },
+  { category: "Technology & IT", title: "Senior Frontend Developer", company: "TechCorp Kenya", location: "Nairobi, Kenya", salary: "180,000–250,000", jobType: "Corporate", contractType: "Permanent", rating: 4.8, daysAgo: 4 },
+  { category: "Technology & IT", title: "Backend Engineer", company: "Safaricom PLC", location: "Nairobi, Kenya", salary: "200,000–300,000", jobType: "Corporate", contractType: "Permanent", rating: 4.6, daysAgo: 2 },
+  { category: "Technology & IT", title: "React Developer (6 months)", company: "Africa Fintech", location: "Lagos, Nigeria", salary: "150,000–220,000", jobType: "Corporate", contractType: "Contractual", rating: 4.4, daysAgo: 6 },
+  { category: "Finance & Accounting", title: "Data Analyst", company: "KCB Group", location: "Nairobi, Kenya", salary: "120,000–180,000", jobType: "Corporate", contractType: "Contractual", rating: 4.2, daysAgo: 5 },
+  { category: "Manual & Casual Labor", title: "Construction Worker", company: "BuildRight Ltd", location: "Nairobi, Kenya", salary: "2,500/day", jobType: "Manual/Casual", contractType: "Daily", rating: 4.1, daysAgo: 1 },
+  { category: "Manual & Casual Labor", title: "Warehouse Loader", company: "QuickLogistics", location: "Mombasa, Kenya", salary: "2,000/day", jobType: "Manual/Casual", contractType: "Daily", rating: 4.0, daysAgo: 3 },
+  { category: "Manual & Casual Labor", title: "House Cleaner", company: "Sparkle Services", location: "Nairobi, Kenya", salary: "500/hr", jobType: "Manual/Casual", contractType: "Hourly", rating: 4.3, daysAgo: 2 },
+  { category: "Manual & Casual Labor", title: "Delivery Rider", company: "SwiftSend", location: "Nairobi, Kenya", salary: "600/hr", jobType: "Manual/Casual", contractType: "Hourly", rating: 4.4, daysAgo: 4 },
+  { category: "Finance & Accounting", title: "Senior Accountant", company: "KPMG", location: "Nairobi, Kenya", salary: "150,000–200,000", jobType: "Corporate", contractType: "Permanent", rating: 4.7, daysAgo: 1 },
+  { category: "Healthcare & Medical", title: "ER Nurse", company: "Aga Khan Hospital", location: "Nairobi, Kenya", salary: "80,000–120,000", jobType: "Corporate", contractType: "Permanent", rating: 4.9, daysAgo: 3 },
+  { category: "Sales & Marketing", title: "Regional Sales Executive", company: "Coca-Cola", location: "Nairobi, Kenya", salary: "90,000 + Comm", jobType: "Corporate", contractType: "Permanent", rating: 4.5, daysAgo: 2 },
 ];
 
 const CONTRACT_TYPES = ["All", "Permanent", "Contractual", "Daily", "Hourly"] as const;
@@ -112,41 +111,33 @@ export default function FindJobsPage() {
 
       {!selectedCategory ? (
         /* CATEGORY VIEW */
-        <div style={{ padding: "40px", maxWidth: "1200px", margin: "0 auto" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "16px" }}>
+        <div className="px-6 lg:px-10 py-8 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {CATEGORIES.map((cat, idx) => (
               <div 
                 key={idx} 
                 onClick={() => setSelectedCategory(cat.name)}
-                style={{ backgroundColor: "#ffffff", borderRadius: "8px", border: "1px solid #e5e7eb", padding: "24px", cursor: "pointer", display: "flex", flexDirection: "column", gap: "12px", transition: "box-shadow 0.2s ease" }}
-                onMouseEnter={(e) => (e.currentTarget.style.boxShadow = "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)")}
-                onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "none")}
+                className="bg-white border-[1.5px] border-gray-200 hover:border-gray-900 transition-colors p-6 cursor-pointer flex flex-col gap-3 group"
               >
-                <h3 style={{ fontSize: "16px", fontWeight: "600", margin: "0", color: "#111827" }}>{cat.name}</h3>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", color: "#2563eb", fontWeight: "600", fontSize: "15px" }}>
-                  <span>Average Salary {cat.salary} per year</span>
-                  <ChevronRight size={18} />
-                </div>
-                <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid #f3f4f6" }}>
-                  <span style={{ fontSize: "13px", color: "#6b7280", textDecoration: "underline" }}>Job Openings</span>
+                <h3 className="text-base font-bold text-gray-900 leading-snug m-0">{cat.name}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed flex-1 m-0">{cat.description}</p>
+                <div className="mt-2 pt-3 border-t border-gray-100 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-gray-900 group-hover:text-amber-500 transition-colors">Explore jobs</span>
+                  <ChevronRight size={16} className="text-gray-300 group-hover:text-amber-500 transition-colors" />
                 </div>
               </div>
             ))}
             
-            {/* Catch-All Category item for testing existing jobs without specific matched categories */}
+            {/* Catch-All Category item */}
             <div 
                 onClick={() => setSelectedCategory("Browse All")}
-                style={{ backgroundColor: "#ffffff", borderRadius: "8px", border: "1px solid #e5e7eb", padding: "24px", cursor: "pointer", display: "flex", flexDirection: "column", gap: "12px", transition: "box-shadow 0.2s ease" }}
-                onMouseEnter={(e) => (e.currentTarget.style.boxShadow = "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)")}
-                onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "none")}
+                className="bg-white border-[1.5px] border-gray-200 hover:border-gray-900 transition-colors p-6 cursor-pointer flex flex-col gap-3 group"
               >
-                <h3 style={{ fontSize: "16px", fontWeight: "600", margin: "0", color: "#111827" }}>Browse All Remote & Local</h3>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", color: "#2563eb", fontWeight: "600", fontSize: "15px" }}>
-                  <span>View overall job openings</span>
-                  <ChevronRight size={18} />
-                </div>
-                <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid #f3f4f6" }}>
-                  <span style={{ fontSize: "13px", color: "#6b7280", textDecoration: "underline" }}>View All Jobs</span>
+                <h3 className="text-base font-bold text-gray-900 leading-snug m-0">Browse All Remote & Local</h3>
+                <p className="text-sm text-gray-500 leading-relaxed flex-1 m-0">View our complete catalogue of available positions across all industries.</p>
+                <div className="mt-2 pt-3 border-t border-gray-100 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-gray-900 group-hover:text-amber-500 transition-colors">View All Jobs</span>
+                  <ChevronRight size={16} className="text-gray-300 group-hover:text-amber-500 transition-colors" />
                 </div>
               </div>
           </div>
