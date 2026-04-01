@@ -60,8 +60,31 @@ function CandidateCard({ cand, selected, onSelect, onBookmark }: { cand: Candida
   );
 }
 
+// ── Star Rating Component ────────────────────────────────────────────────────────
+function InteractiveStars({ rating, onRate }: { rating: number, onRate: (r: number) => void }) {
+  const [hover, setHover] = useState(0);
+  return (
+    <div style={{ display: "flex", gap: 2, cursor: "pointer" }} onMouseLeave={() => setHover(0)}>
+      {[1, 2, 3, 4, 5].map(star => {
+        const isFilled = star <= (hover || Math.round(rating));
+        return (
+          <span 
+            key={star} 
+            onMouseEnter={() => setHover(star)} 
+            onClick={() => onRate(star)}
+            style={{ color: isFilled ? "#D97706" : "#E5E7EB", transition: "color 0.1s", display: "flex", alignItems: "center" }}
+            title={`Rate ${star} star${star > 1 ? 's' : ''}`}
+          >
+            {Ico.star}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── Detail Panel ───────────────────────────────────────────────────────────────
-function DetailPanel({ cand, onClose, onBookmark }: { cand: Candidate; onClose: () => void; onBookmark: () => void }) {
+function DetailPanel({ cand, onClose, onBookmark, onRate }: { cand: Candidate; onClose: () => void; onBookmark: () => void; onRate: (r: number) => void }) {
   return (
     <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 10, height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       {/* Header */}
@@ -80,9 +103,10 @@ function DetailPanel({ cand, onClose, onBookmark }: { cand: Candidate; onClose: 
           </div>
         </div>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as const }}>
-          <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 13, fontWeight: 600, padding: "4px 10px", borderRadius: 4, color: "#D97706", background: "#FEF3C7" }}>
-            {Ico.star} {cand.rating} ({cand.reviews} reviews)
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, padding: "4px 10px", borderRadius: 4, color: "#D97706", background: "#FEF3C7" }}>
+            <InteractiveStars rating={cand.rating} onRate={onRate} />
+            <span>{cand.rating.toFixed(1)} ({cand.reviews} reviews)</span>
+          </div>
           <span style={{ fontSize: 13, padding: "4px 10px", borderRadius: 4, color: "#374151", background: "#F3F4F6", fontWeight: 500 }}>{cand.location}</span>
         </div>
       </div>
@@ -138,6 +162,16 @@ export default function FindTalent() {
   const selected = candidates.find(c => c.id === selectedId) || null;
   const toggleBookmark = (id: string) => setCandidates(p => p.map(c => c.id === id ? { ...c, isSaved: !c.isSaved } : c));
 
+  const handleRate = (id: string, newRating: number) => {
+    // Basic logic to average the previous rating with the new one and increment review count locally
+    setCandidates(prev => prev.map(c => {
+      if (c.id !== id) return c;
+      const totalScore = (c.rating * c.reviews) + newRating;
+      const newReviews = c.reviews + 1;
+      return { ...c, rating: Number((totalScore / newReviews).toFixed(1)), reviews: newReviews };
+    }));
+  };
+
   const stats = {
     total: candidates.length,
     saved: candidates.filter(c => c.isSaved).length,
@@ -189,7 +223,7 @@ export default function FindTalent() {
         </div>
         {selected && (
           <div style={{ position: "sticky" as const, top: 20, height: "calc(100vh - 175px)", overflow: "hidden" }}>
-            <DetailPanel cand={selected} onClose={() => setSelectedId(null)} onBookmark={() => toggleBookmark(selected.id)} />
+            <DetailPanel cand={selected} onClose={() => setSelectedId(null)} onBookmark={() => toggleBookmark(selected.id)} onRate={(rating) => handleRate(selected.id, rating)} />
           </div>
         )}
       </div>
