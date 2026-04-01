@@ -11,7 +11,6 @@ export interface SignupFormData {
   profession: string;
   location: string;
   emptype: string;
-  pay: string;
   bio: string;
   company: string;
   industry: string;
@@ -24,10 +23,9 @@ export interface SignupFormData {
 export interface SignupData {
   form: SignupFormData;
   roles: Role[];
-  skills: string[];
 }
 
-export const signUpUser = async ({ form, roles, skills }: SignupData) => {
+export const signUpUser = async ({ form, roles }: SignupData) => {
   // 1. Create the auth user
   const { data, error } = await supabase.auth.signUp({
     email: form.email,
@@ -57,9 +55,7 @@ export const signUpUser = async ({ form, roles, skills }: SignupData) => {
     profession:                  form.profession   || null,
     seeker_location:             form.location     || null,
     employment_type_preference:  form.emptype      || null,
-    expected_pay:                form.pay          || null,
     bio:                         form.bio          || null,
-    skills:                      skills.length ? skills : [],
 
     company_name:     form.company   || null,
     industry:         form.industry  || null,

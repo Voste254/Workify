@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "../../../lib/supabaseClient";
 import Services from "./Services";
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
@@ -13,11 +14,62 @@ const Ico = {
 export default function MyProfile() {
   const [editMode, setEditMode] = useState(false);
   const [profile, setProfile] = useState({
-    name: "Okutah Voste",
-    email: "okutah.voste@example.ke",
-    phone: "0712 345 678",
-    bio: "Experienced data professional and logistics coordinator."
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    bio: ""
   });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUserId(session.user.id);
+        const { data } = await supabase
+          .from("profiles")
+          .select("first_name, last_name, email, phone, bio")
+          .eq("id", session.user.id)
+          .single();
+        
+        if (data) {
+          setProfile({
+            firstName: data.first_name || "",
+            lastName: data.last_name || "",
+            email: data.email || session.user.email || "",
+            phone: data.phone || "",
+            bio: data.bio || ""
+          });
+        }
+      }
+      setLoading(false);
+    };
+    fetchProfile();
+  }, []);
+
+  const handleSave = async () => {
+    if (!userId) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        first_name: profile.firstName,
+        last_name: profile.lastName,
+        phone: profile.phone,
+        bio: profile.bio
+      })
+      .eq("id", userId);
+    
+    setSaving(false);
+    if (!error) {
+      setEditMode(false);
+    } else {
+      alert("Error saving profile: " + error.message);
+    }
+  };
 
   // ── Shared Styles ────────────────────────────────────────────────────────────
   const inputStyle = { width: "100%", padding: "12px 16px", border: "1.5px solid #E5E7EB", borderRadius: 8, fontSize: 14, color: "#111827", background: editMode ? "#fff" : "#F9FAFB", outline: "none", fontFamily: "'DM Sans',sans-serif", marginBottom: 16, transition: "border-color 0.15s, background 0.15s", opacity: editMode ? 1 : 0.8 };
@@ -49,7 +101,9 @@ export default function MyProfile() {
              )}
           </div>
 
-          <h3 style={{ margin: "0 0 4px", fontSize: 20, fontWeight: 700, color: "#111827" }}>{profile.name}</h3>
+          <h3 style={{ margin: "0 0 4px", fontSize: 20, fontWeight: 700, color: "#111827" }}>
+            {loading ? "..." : `${profile.firstName} ${profile.lastName}` || "User"}
+          </h3>
           <p style={{ margin: "0 0 24px", fontSize: 14, color: "#6B7280" }}>Job Seeker Dashboard</p>
 
           {/* Rating */}
@@ -78,27 +132,31 @@ export default function MyProfile() {
           
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             <div>
-              <label style={labelStyle}>Full Name</label>
-              <input disabled={!editMode} value={profile.name} onChange={e => setProfile({ ...profile, name: e.target.value })} style={inputStyle} />
+              <label style={labelStyle}>First Name</label>
+              <input disabled={!editMode || loading} value={profile.firstName} onChange={e => setProfile({ ...profile, firstName: e.target.value })} style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Last Name</label>
+              <input disabled={!editMode || loading} value={profile.lastName} onChange={e => setProfile({ ...profile, lastName: e.target.value })} style={inputStyle} />
             </div>
             <div>
                <label style={labelStyle}>Phone Number</label>
-               <input disabled={!editMode} value={profile.phone} onChange={e => setProfile({ ...profile, phone: e.target.value })} style={{ ...inputStyle, fontFamily: "'DM Mono',monospace" }} />
+               <input disabled={!editMode || loading} value={profile.phone} onChange={e => setProfile({ ...profile, phone: e.target.value })} style={{ ...inputStyle, fontFamily: "'DM Mono',monospace" }} />
             </div>
-            <div style={{ gridColumn: "1 / -1" }}>
-               <label style={labelStyle}>Email Address</label>
-               <input disabled={!editMode} value={profile.email} onChange={e => setProfile({ ...profile, email: e.target.value })} style={inputStyle} />
+            <div>
+               <label style={labelStyle}>Email Address (Read Only)</label>
+               <input disabled={true} value={profile.email} style={inputStyle} />
             </div>
             <div style={{ gridColumn: "1 / -1" }}>
                <label style={labelStyle}>Bio summary</label>
-               <textarea disabled={!editMode} value={profile.bio} onChange={e => setProfile({ ...profile, bio: e.target.value })} style={{ ...inputStyle, minHeight: 80, resize: "vertical" }} />
+               <textarea disabled={!editMode || loading} value={profile.bio} onChange={e => setProfile({ ...profile, bio: e.target.value })} style={{ ...inputStyle, minHeight: 80, resize: "vertical" }} />
             </div>
           </div>
 
           {editMode && (
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
-              <button onClick={() => setEditMode(false)} style={{ padding: "12px 24px", background: "#111827", color: "#fff", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
-                Save Changes
+              <button disabled={saving} onClick={handleSave} style={{ padding: "12px 24px", background: "#111827", color: "#fff", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+                {saving ? "Saving..." : "Save Changes"}
               </button>
             </div>
           )}

@@ -70,8 +70,6 @@ export default function Signup() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [showPw, setShowPw] = useState(false);
   const [pwStrength, setPwStrength] = useState(0);
-  const [skills, setSkills] = useState<string[]>([]);
-  const [skillInput, setSkillInput] = useState("");
   const [done, setDone] = useState(false);
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -79,7 +77,7 @@ export default function Signup() {
 
   const [form, setForm] = useState<SignupFormData & { confirm: string }>({
     fname:"", lname:"", email:"", phone:"", password:"", confirm:"",
-    profession:"", location:"", emptype:"", pay:"", bio:"",
+    profession:"", location:"", emptype:"", bio:"",
     company:"", industry:"", size:"", elocation:"",
     terms: false, marketing: true,
   });
@@ -96,14 +94,6 @@ export default function Signup() {
   };
 
   const toggleRole = (r: Role) => setRoles(p => p.includes(r) ? p.filter(x => x !== r) : [...p, r]);
-
-  const addSkill = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && skillInput.trim()) {
-      e.preventDefault();
-      setSkills(p => [...p, skillInput.trim()]);
-      setSkillInput("");
-    }
-  };
 
   const isSeeker = roles.includes("seeker");
   const isEmployer = roles.includes("employer");
@@ -142,7 +132,7 @@ const handleSignup = async () => {
   setSubmitting(true);
   setAuthError("");
 
-  const result = await signUpUser({ form, roles, skills });
+  const result = await signUpUser({ form, roles });
 
   if (result.error) {
     setAuthError(result.error);
@@ -259,11 +249,6 @@ const handleSignup = async () => {
                     {["Corporate – Permanent","Corporate – Contract","Casual – Daily","Casual – Hourly","Open to all"].map(t => <option key={t}>{t}</option>)}
                   </Select>
                 </Field>
-                <Field label="Skills (press Enter to add)">
-                  <Input placeholder="Type a skill and press Enter" value={skillInput} onChange={e => setSkillInput(e.target.value)} onKeyDown={addSkill}/>
-                  {skills.length > 0 && <div className="flex flex-wrap gap-1.5 mt-2">{skills.map(s => <span key={s} className="flex items-center gap-1 bg-gray-900 text-white text-xs px-2.5 py-1 font-mono">{s}<button onClick={() => setSkills(p => p.filter(x => x !== s))} className="opacity-50 hover:opacity-100">×</button></span>)}</div>}
-                </Field>
-                <Field label="Expected pay rate"><Input placeholder="e.g. KES 80,000/month" value={form.pay} onChange={e => set("pay", e.target.value)}/></Field>
                 <Field label="Brief bio (optional)">
                   <textarea maxLength={200} value={form.bio} onChange={e => set("bio", e.target.value)} placeholder="Describe your experience..." className="w-full border border-gray-200 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-gray-900 transition placeholder:text-gray-400 resize-none h-20"/>
                   <p className="text-xs text-gray-400 mt-1">{form.bio.length}/200</p>

@@ -8,7 +8,7 @@ const Ico = {
 };
 
 const COUNTIES = ["Nairobi", "Mombasa", "Kisumu", "Nakuru", "Eldoret", "Remote"];
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const DAYS = ["Sun","Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 interface Service {
   id: number;
