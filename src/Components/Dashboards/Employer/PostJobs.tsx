@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CATEGORIES } from "../Employee/FindJobs";
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 const I = (d: string, s = 14, fill = "none") => <svg width={s} height={s} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: d }} />;
@@ -20,7 +21,8 @@ const inputStyle = { width: "100%", padding: "10px 14px 10px 36px", border: "1.5
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function PostJobs() {
   const [isSaved, setIsSaved] = useState(false);
-  const [jobCategory, setJobCategory] = useState("Corporate");
+  const [jobCategory, setJobCategory] = useState(CATEGORIES[0]);
+  const [jobType, setJobType] = useState("Permanent");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,21 +49,24 @@ export default function PostJobs() {
         <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 10, overflow: "hidden" }}>
           
           <form onSubmit={handleSubmit} style={{ padding: 30 }}>
-            <h3 style={{ margin: "0 0 20px", fontSize: 18, fontWeight: 700, color: "#111827", borderBottom: "1px solid #E5E7EB", paddingBottom: 10 }}>Job Category & Type</h3>
-            
-            {/* Category Toggle */}
-            <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
-              {(["Corporate", "Casual/Manual"] as const).map(cat => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => setJobCategory(cat)}
-                  style={{ flex: 1, padding: "12px 14px", border: `1.5px solid ${jobCategory === cat ? "#111827" : "#E5E7EB"}`, borderRadius: 8, background: jobCategory === cat ? "#111827" : "#fff", color: jobCategory === cat ? "#fff" : "#374151", fontSize: 16, fontWeight: 600, cursor: "pointer", display: "flex", gap: 8, alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans',sans-serif", transition: "all 0.15s" }}
+            <h3 style={{ margin: "0 0 20px", fontSize: 18, fontWeight: 700, color: "#111827", borderBottom: "1px solid #E5E7EB", paddingBottom: 10 }}>Job Category &amp; Type</h3>
+
+            {/* Category Dropdown */}
+            <div style={{ marginBottom: 24 }}>
+              <label style={labelStyle}>Job Category</label>
+              <div style={inputOuter}>
+                <span style={inputIcon}>{Ico.briefcase}</span>
+                <select
+                  value={jobCategory}
+                  onChange={e => setJobCategory(e.target.value)}
+                  style={{ ...inputStyle, cursor: "pointer", appearance: "none" }}
+                  required
                 >
-                  {cat === "Corporate" ? Ico.briefcase : Ico.tool}
-                  {cat}
-                </button>
-              ))}
+                  {CATEGORIES.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
@@ -69,26 +74,24 @@ export default function PostJobs() {
                  <label style={labelStyle}>Job Title</label>
                  <div style={inputOuter}>
                     <span style={inputIcon}>{Ico.briefcase}</span>
-                    <input type="text" placeholder={jobCategory === "Corporate" ? "e.g. Senior Data Analyst" : "e.g. Construction Foreman"} style={inputStyle} required />
+                    <input type="text" placeholder="e.g. Senior Data Analyst" style={inputStyle} required />
                  </div>
+
               </div>
 
               <div>
                  <label style={labelStyle}>Job Type</label>
-                 <select style={{ ...inputStyle, paddingLeft: 14, cursor: "pointer", appearance: "none" }}>
-                   {jobCategory === "Corporate" ? (
-                     <>
-                       <option>Permanent</option>
-                       <option>Contract</option>
-                       <option>Internship</option>
-                     </>
-                   ) : (
-                     <>
-                       <option>Daily / Day-Labor</option>
-                       <option>Hourly / Shift</option>
-                       <option>Gig / Project-Based</option>
-                     </>
-                   )}
+                 <select
+                   value={jobType}
+                   onChange={e => setJobType(e.target.value)}
+                   style={{ ...inputStyle, paddingLeft: 14, cursor: "pointer", appearance: "none" }}
+                 >
+                   <option value="Permanent">Permanent</option>
+                   <option value="Contract">Contract</option>
+                   <option value="Internship">Internship</option>
+                   <option value="Daily / Day-Labor">Daily / Day-Labor</option>
+                   <option value="Hourly / Shift">Hourly / Shift</option>
+                   <option value="Gig / Project-Based">Gig / Project-Based</option>
                  </select>
               </div>
             </div>
