@@ -121,7 +121,7 @@ export default function Signup() {
         ) : (
           <>
             <p className="text-sm text-gray-500 mb-8">Welcome to Workify, {form.fname}! Your profile is live and ready.</p>
-            <PrimaryBtn onClick={() => navigate(roles.includes("employer") && !roles.includes("seeker") ? "/EmployerDashboard" : "/jobs")}>Proceed to Dashboard →</PrimaryBtn>
+            <PrimaryBtn onClick={() => navigate(roles.includes("employer") && !roles.includes("seeker") ? "/EmployerDashboard" : "/dashboard")}>Proceed to Dashboard →</PrimaryBtn>
           </>
         )}
       </div>

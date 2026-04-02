@@ -20,7 +20,7 @@ const Hero = () => {
         <div className="flex-1 z-10">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 leading-tight">
             Transform Your{" "}
-            <span className="text-blue-600 underline-offset-auto">Career</span> with Workify
+            <span className="text-green-600 underline-offset-auto">Career</span> with Workify
           </h1>
 
           <p className="mt-6 text-gray-500 max-w-lg">
@@ -31,12 +31,12 @@ const Hero = () => {
 
           {/* BUTTONS */}
           <div className="flex items-center gap-6 mt-8">
-            <button className="bg-blue-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-700 transition">
+            <button className="bg-green-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-green-700 transition">
               Get Started
             </button>
 
             <div className="flex items-center gap-3 cursor-pointer">
-            <button className="bg-blue-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-700 transition">
+            <button className="bg-green-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-green-700 transition">
               Learn more
             </button>
               

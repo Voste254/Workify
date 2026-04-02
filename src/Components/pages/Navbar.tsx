@@ -10,7 +10,7 @@ const Navbar = () => {
     { name: "Home", items: [], hasDropdown: false },
     { name: "Find Jobs", items: ["All Jobs", "By Category", "By Location"], hasDropdown: true },
     { name: "Employers", items: ["Post a Job", "Employer Dashboard"], hasDropdown: true },
-    { name: "Candidates", items: ["Browse Candidates", "Candidate Dashboard"], hasDropdown: true },
+    { name: "Job Seekers", items: ["Browse Job Seekers", "Job seekers' Dashboard"], hasDropdown: true },
     { name: "Blog", items: [], hasDropdown: false },
     { name: "Pages", items: ["About Us", "Contact", "FAQ"], hasDropdown: true },
   ];

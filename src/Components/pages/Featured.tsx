@@ -147,7 +147,7 @@ export default function FeaturedJobs() {
 
       {/* Button */}
       <div className="flex justify-center mt-12">
-        <Link to='/jobs'>
+        <Link to='/dashboard'>
         <button className="px-8 py-3  border border-green-800 bg-white hover:bg-green-700 text-green-600 hover:text-white rounded-lg text-lg font-semibold transition">
           See More Jobs
         </button>

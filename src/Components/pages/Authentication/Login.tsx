@@ -36,7 +36,7 @@ export default function Login() {
       navigate("/EmployerDashboard");
     } else {
       // seeker, both roles, or unknown → default to jobs dashboard
-      navigate("/jobs");
+      navigate("/dashboard");
     }
 
     setLoading(false);
