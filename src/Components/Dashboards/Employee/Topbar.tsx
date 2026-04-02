@@ -29,7 +29,7 @@ const TopBar = () => {
   };
 
   const switchToJobSeeker = () => {
-    navigate("/jobs");
+    navigate("/dashboard");
     setIsMobileMenuOpen(false);
   };
 
