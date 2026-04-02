@@ -8,7 +8,8 @@ const Ico = {
   edit: I('<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>', 16),
   upload: I('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>', 16),
   star: I('<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>', 16, "currentColor"),
-  starHalf: I('<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>', 16)
+  starHalf: I('<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>', 16),
+  user: I('<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>', 64, "none")
 };
 
 export default function MyProfile() {
@@ -18,7 +19,8 @@ export default function MyProfile() {
     lastName: "",
     email: "",
     phone: "",
-    bio: ""
+    bio: "",
+    profession: ""
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -31,7 +33,7 @@ export default function MyProfile() {
         setUserId(session.user.id);
         const { data } = await supabase
           .from("profiles")
-          .select("first_name, last_name, email, phone, bio")
+          .select("first_name, last_name, email, phone, bio, profession")
           .eq("id", session.user.id)
           .single();
         
@@ -41,7 +43,8 @@ export default function MyProfile() {
             lastName: data.last_name || "",
             email: data.email || session.user.email || "",
             phone: data.phone || "",
-            bio: data.bio || ""
+            bio: data.bio || "",
+            profession: data.profession || ""
           });
         }
       }
@@ -93,7 +96,9 @@ export default function MyProfile() {
         <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 12, padding: 32, display: "flex", flexDirection: "column", alignItems: "center" }}>
           
           <div style={{ position: "relative", marginBottom: 16 }}>
-             <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="avatar" style={{ width: 120, height: 120, borderRadius: 60, objectFit: "cover", border: "4px solid #F9FAFB" }} />
+             <div style={{ width: 120, height: 120, borderRadius: 60, border: "4px solid #F9FAFB", background: "#F3F4F6", color: "#9CA3AF", display: "flex", alignItems: "center", justifyContent: "center" }}>
+               {Ico.user}
+             </div>
              {editMode && (
                <button style={{ position: "absolute", bottom: 0, right: 0, width: 36, height: 36, borderRadius: 18, background: "#111827", color: "#fff", border: "2px solid #fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
                  {Ico.upload}
@@ -104,7 +109,7 @@ export default function MyProfile() {
           <h3 style={{ margin: "0 0 4px", fontSize: 20, fontWeight: 700, color: "#111827" }}>
             {loading ? "..." : `${profile.firstName} ${profile.lastName}` || "User"}
           </h3>
-          <p style={{ margin: "0 0 24px", fontSize: 14, color: "#6B7280" }}>Job Seeker Dashboard</p>
+          <p style={{ margin: "0 0 24px", fontSize: 14, color: "#6B7280" }}>{profile.profession || "Job Seeker"}</p>
 
           {/* Rating */}
           <div style={{ width: "100%", background: "#F9FAFB", border: "1.5px solid #E5E7EB", borderRadius: 8, padding: 16, textAlign: "center", marginBottom: 24 }}>

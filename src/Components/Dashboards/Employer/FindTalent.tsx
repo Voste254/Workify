@@ -153,6 +153,7 @@ export default function FindTalent() {
   const [selectedId, setSelectedId] = useState<string | null>("1");
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState("all");
+  const [ratedIds, setRatedIds] = useState<string[]>([]);
 
   const q = search.toLowerCase();
   const filtered = useMemo(() => candidates
@@ -163,6 +164,9 @@ export default function FindTalent() {
   const toggleBookmark = (id: string) => setCandidates(p => p.map(c => c.id === id ? { ...c, isSaved: !c.isSaved } : c));
 
   const handleRate = (id: string, newRating: number) => {
+    if (ratedIds.includes(id)) return;
+    
+    setRatedIds(prev => [...prev, id]);
     // Basic logic to average the previous rating with the new one and increment review count locally
     setCandidates(prev => prev.map(c => {
       if (c.id !== id) return c;
