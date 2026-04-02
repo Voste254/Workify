@@ -16,7 +16,7 @@ interface Service {
   title: string;
   description: string;
   rate: string;
-  rateType: "day" | "hour";
+  rateType: "day" | "hour" | "month" | "year";
   rate_type?: string; 
   skills: string[];
   availability: string[];
@@ -199,8 +199,10 @@ export default function ServicesSection() {
                     <div style={{ display: "flex", gap: 8 }}>
                       <input placeholder="e.g. 2500" value={service.rate || ""} onChange={e => updateService(service.id, "rate", e.target.value)} style={{ ...inputStyle, fontFamily: "'DM Mono',monospace", flex: 1 }} />
                       <select value={service.rateType || "day"} onChange={e => updateService(service.id, "rateType", e.target.value)} style={{ ...inputStyle, width: "auto" }}>
-                        <option value="day">per day</option>
                         <option value="hour">per hour</option>
+                        <option value="day">per day</option>
+                        <option value="month">per month</option>
+                        <option value="year">per year</option>
                       </select>
                     </div>
                   </div>
