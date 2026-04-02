@@ -40,7 +40,7 @@ function App() {
 
         {/* Protected routes — must be logged in */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/jobs" element={<Employee />} />
+          <Route path="/dashboard" element={<Employee />} />
           <Route path="/EmployerDashboard" element={<Employer />} />
         </Route>
       </Routes>

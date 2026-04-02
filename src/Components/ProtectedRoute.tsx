@@ -52,7 +52,7 @@ export default function ProtectedRoute({
     // Send employers to employer dashboard and seekers to jobs
     const fallback = profile.role.includes("employer")
       ? "/EmployerDashboard"
-      : "/jobs";
+      : "/dashboard";
     return <Navigate to={fallback} replace />;
   }
 
