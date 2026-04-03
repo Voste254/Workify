@@ -5,225 +5,282 @@ import { supabase } from "../../../lib/supabaseClient";
 const I = (d: string, s = 14, fill = "none") => <svg width={s} height={s} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: d }} />;
 const Ico = {
   edit:     I('<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>', 16),
-  building: I('<rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/>', 64, "none"),
   location: I('<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>', 14),
-  industry: I('<path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7-6H4a2 2 0 0 0-2 2v16Z"/><path d="M14 2v6h6"/>', 14),
+  industry: I('<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>', 14),
   users:    I('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>', 14),
+  mail:     I('<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>', 14),
+  phone:    I('<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 17z"/>', 14),
+  globe:    I('<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>', 14),
+  check:    I('<path d="M20 6 9 17l-5-5"/>', 14),
 };
 
 const INDUSTRIES = ["Technology","Finance & Banking","Telecommunications","Construction","Hospitality","Healthcare","Media & Creative","Logistics","Agriculture","Education","Other"];
 const COMPANY_SIZES = ["1–10","11–50","51–200","201–1,000","1,000+"];
-const LOCATIONS = ["Nairobi","Mombasa","Kisumu","Nakuru","Nationwide"];
+const LOCATIONS = ["Nairobi","Mombasa","Kisumu","Nakuru","Nationwide","Remote / Flexible"];
+
+interface CompanyData {
+  companyName: string;
+  industry: string;
+  companySize: string;
+  companyLocation: string;
+  companyEmail: string;
+  companyPhone: string;
+  website: string;
+}
+
+interface ContactData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+}
 
 export default function EmployerProfile() {
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
-  const [profile, setProfile] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    companyName: "",
-    industry: "",
-    companySize: "",
-    companyLocation: "",
+  const [contact, setContact] = useState<ContactData>({ firstName: "", lastName: "", email: "", phone: "" });
+  const [company, setCompany] = useState<CompanyData>({
+    companyName: "", industry: "", companySize: "",
+    companyLocation: "", companyEmail: "", companyPhone: "", website: "",
   });
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchAll = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUserId(session.user.id);
-        const { data } = await supabase
-          .from("profiles")
-          .select("first_name, last_name, email, phone, company_name, industry, company_size, company_location")
-          .eq("id", session.user.id)
-          .single();
+      if (!session?.user) { setLoading(false); return; }
+      const uid = session.user.id;
+      setUserId(uid);
 
-        if (data) {
-          setProfile({
-            firstName:       data.first_name       || "",
-            lastName:        data.last_name        || "",
-            email:           data.email            || session.user.email || "",
-            phone:           data.phone            || "",
-            companyName:     data.company_name     || "",
-            industry:        data.industry         || "",
-            companySize:     data.company_size     || "",
-            companyLocation: data.company_location || "",
-          });
-        }
+      // Fetch personal contact info from profiles
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("first_name, last_name, email, phone")
+        .eq("id", uid)
+        .single();
+
+      if (profileData) {
+        setContact({
+          firstName: profileData.first_name      || "",
+          lastName:  profileData.last_name       || "",
+          email:     profileData.email           || session.user.email || "",
+          phone:     profileData.phone           || "",
+        });
       }
+
+      // Fetch company data from companies table
+      const { data: companyData } = await supabase
+        .from("companies")
+        .select("*")
+        .eq("owner_id", uid)
+        .single();
+
+      if (companyData) {
+        setCompany({
+          companyName:     companyData.company_name     || "",
+          industry:        companyData.industry         || "",
+          companySize:     companyData.company_size     || "",
+          companyLocation: companyData.company_location || "",
+          companyEmail:    companyData.company_email    || "",
+          companyPhone:    companyData.company_phone    || "",
+          website:         companyData.website          || "",
+        });
+      }
+
       setLoading(false);
     };
-    fetchProfile();
+    fetchAll();
   }, []);
 
   const handleSave = async () => {
     if (!userId) return;
     setSaving(true);
-    const { error } = await supabase
+
+    // Update personal info in profiles
+    const { error: profileError } = await supabase
       .from("profiles")
-      .update({
-        first_name:       profile.firstName,
-        last_name:        profile.lastName,
-        phone:            profile.phone,
-        company_name:     profile.companyName,
-        industry:         profile.industry,
-        company_size:     profile.companySize,
-        company_location: profile.companyLocation,
-      })
+      .update({ first_name: contact.firstName, last_name: contact.lastName, phone: contact.phone })
       .eq("id", userId);
 
+    // Upsert company info into companies table
+    const { error: companyError } = await supabase
+      .from("companies")
+      .upsert({
+        owner_id:         userId,
+        company_name:     company.companyName,
+        industry:         company.industry,
+        company_size:     company.companySize,
+        company_location: company.companyLocation,
+        company_email:    company.companyEmail,
+        company_phone:    company.companyPhone,
+        website:          company.website,
+      }, { onConflict: "owner_id" });
+
     setSaving(false);
-    if (!error) {
-      setEditMode(false);
+
+    if (profileError || companyError) {
+      alert("Error saving: " + (profileError?.message || companyError?.message));
     } else {
-      alert("Error saving profile: " + error.message);
+      setSaveSuccess(true);
+      setEditMode(false);
+      setTimeout(() => setSaveSuccess(false), 3000);
     }
   };
 
   // ── Shared Styles ────────────────────────────────────────────────────────────
-  const inputStyle = { width: "100%", padding: "12px 16px", border: "1.5px solid #E5E7EB", borderRadius: 8, fontSize: 14, color: "#111827", background: editMode ? "#fff" : "#F9FAFB", outline: "none", fontFamily: "'DM Sans',sans-serif", marginBottom: 16, transition: "border-color 0.15s, background 0.15s", opacity: editMode ? 1 : 0.85 };
-  const labelStyle = { display: "block", fontSize: 13, fontWeight: 700, color: "#374151", marginBottom: 6, fontFamily: "'DM Sans',sans-serif" } as const;
+  const inp = (editable = true) => ({
+    width: "100%", padding: "10px 14px", border: "1.5px solid #E5E7EB", borderRadius: 8,
+    fontSize: 14, color: "#111827", background: (editMode && editable) ? "#fff" : "#F9FAFB",
+    outline: "none", fontFamily: "'DM Sans',sans-serif", marginBottom: 0,
+    transition: "border-color 0.15s, background 0.15s",
+    opacity: (editMode && editable) ? 1 : 0.8,
+    cursor: (editMode && editable) ? "text" : "default",
+  });
+  const lbl: React.CSSProperties = { display: "block", fontSize: 12, fontWeight: 700, color: "#9CA3AF", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.06em", fontFamily: "'DM Sans',sans-serif" };
+  const field = (label: string, node: React.ReactNode) => (
+    <div>
+      <label style={lbl}>{label}</label>
+      {node}
+    </div>
+  );
 
-  const initials = loading ? "..." : `${profile.firstName.charAt(0)}${profile.lastName.charAt(0)}`.toUpperCase() || "EM";
+  const initials = loading ? "…" : `${contact.firstName.charAt(0)}${contact.lastName.charAt(0)}`.toUpperCase() || "EM";
 
   return (
-    <div style={{ fontFamily: "'DM Sans','Segoe UI',sans-serif", background: "#F9FAFB", minHeight: "100vh", padding: "32px", display: "flex", flexDirection: "column" }}>
+    <div style={{ fontFamily: "'DM Sans','Segoe UI',sans-serif", background: "#F9FAFB", minHeight: "100vh", padding: "32px" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap');*{box-sizing:border-box}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:4px}`}</style>
 
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
-        <h2 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: "#111827" }}>Company Profile</h2>
-        <button
-          onClick={() => editMode ? setEditMode(false) : setEditMode(true)}
-          style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 16px", background: editMode ? "#F3F4F6" : "#fff", border: "1.5px solid #111827", color: "#111827", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer", transition: "all 0.1s" }}
-        >
-          {Ico.edit} {editMode ? "Cancel Editing" : "Edit Profile"}
-        </button>
+        <div>
+          <h2 style={{ margin: "0 0 4px", fontSize: 24, fontWeight: 700, color: "#111827" }}>Company Profile</h2>
+          <p style={{ margin: 0, fontSize: 14, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>Manage your company and contact information</p>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          {saveSuccess && (
+            <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, color: "#059669", fontWeight: 600 }}>
+              {Ico.check} Saved successfully
+            </span>
+          )}
+          <button
+            onClick={() => { editMode ? setEditMode(false) : setEditMode(true); }}
+            style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", background: editMode ? "#F3F4F6" : "#fff", border: "1.5px solid #111827", color: "#111827", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer" }}
+          >
+            {Ico.edit} {editMode ? "Cancel" : "Edit Profile"}
+          </button>
+        </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 32, alignItems: "start" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", gap: 28, alignItems: "start" }}>
 
-        {/* LEFT PANEL */}
-        <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 12, padding: 32, display: "flex", flexDirection: "column", alignItems: "center" }}>
+        {/* ── LEFT PANEL ── */}
+        <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 12, padding: 28, display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
 
-          {/* Company Avatar / Initials */}
-          <div style={{ width: 120, height: 120, borderRadius: 16, border: "4px solid #F9FAFB", background: "#111827", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, fontWeight: 700, fontFamily: "'DM Mono',monospace", marginBottom: 16, letterSpacing: 2 }}>
+          {/* Initials Avatar */}
+          <div style={{ width: 100, height: 100, borderRadius: 14, background: "#111827", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30, fontWeight: 700, fontFamily: "'DM Mono',monospace", marginBottom: 16, letterSpacing: 2 }}>
             {initials}
           </div>
 
-          <h3 style={{ margin: "0 0 4px", fontSize: 20, fontWeight: 700, color: "#111827", textAlign: "center" }}>
-            {loading ? "..." : profile.companyName || "Your Company"}
+          <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 700, color: "#111827", textAlign: "center" }}>
+            {loading ? "Loading..." : company.companyName || "Your Company"}
           </h3>
-          <p style={{ margin: "0 0 6px", fontSize: 14, color: "#6B7280", textAlign: "center" }}>
-            {profile.industry || "Industry not set"}
-          </p>
-          <p style={{ margin: "0 0 24px", fontSize: 13, color: "#9CA3AF", display: "flex", alignItems: "center", gap: 4, textAlign: "center" as const }}>
-            {Ico.location} {profile.companyLocation || "Location not set"}
+          <p style={{ margin: "0 0 20px", fontSize: 13, color: "#6B7280", textAlign: "center" }}>
+            {contact.firstName} {contact.lastName}
           </p>
 
-          {/* Company Stats */}
-          <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12 }}>
+          {/* Quick info list */}
+          <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10 }}>
             {[
-              { icon: Ico.users,    label: "Company Size", value: profile.companySize ? `${profile.companySize} employees` : "—" },
-              { icon: Ico.industry, label: "Industry",     value: profile.industry     || "—" },
-              { icon: Ico.location, label: "Location",     value: profile.companyLocation || "—" },
-            ].map(({ icon, label, value }) => (
-              <div key={label} style={{ padding: "12px 14px", background: "#F9FAFB", border: "1.5px solid #E5E7EB", borderRadius: 8, display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ color: "#6B7280" }}>{icon}</span>
-                <div>
-                  <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</p>
-                  <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#111827" }}>{value}</p>
-                </div>
+              { icon: Ico.industry, label: company.industry        || "Industry not set" },
+              { icon: Ico.location, label: company.companyLocation || "Location not set" },
+              { icon: Ico.users,    label: company.companySize ? `${company.companySize} employees` : "Size not set" },
+              { icon: Ico.mail,     label: company.companyEmail    || "Company email not set" },
+              { icon: Ico.phone,    label: company.companyPhone    || "Company phone not set" },
+              { icon: Ico.globe,    label: company.website         || "Website not set" },
+            ].map(({ icon, label }) => (
+              <div key={label} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 8 }}>
+                <span style={{ color: "#6B7280", flexShrink: 0 }}>{icon}</span>
+                <span style={{ fontSize: 13, color: "#374151", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* RIGHT PANEL */}
-        <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 12, padding: 32 }}>
+        {/* ── RIGHT PANEL ── */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
 
           {/* Contact Details */}
-          <h3 style={{ margin: "0 0 24px", fontSize: 18, fontWeight: 700, color: "#111827", borderBottom: "1.5px solid #F3F4F6", paddingBottom: 16 }}>Contact Details</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            <div>
-              <label style={labelStyle}>First Name</label>
-              <input disabled={!editMode || loading} value={profile.firstName} onChange={e => setProfile(p => ({ ...p, firstName: e.target.value }))} style={inputStyle} />
-            </div>
-            <div>
-              <label style={labelStyle}>Last Name</label>
-              <input disabled={!editMode || loading} value={profile.lastName} onChange={e => setProfile(p => ({ ...p, lastName: e.target.value }))} style={inputStyle} />
-            </div>
-            <div>
-              <label style={labelStyle}>Phone Number</label>
-              <input disabled={!editMode || loading} value={profile.phone} onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))} style={{ ...inputStyle, fontFamily: "'DM Mono',monospace" }} />
-            </div>
-            <div>
-              <label style={labelStyle}>Email Address (Read Only)</label>
-              <input disabled value={profile.email} style={inputStyle} />
+          <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 12, padding: 28 }}>
+            <h3 style={{ margin: "0 0 20px", fontSize: 16, fontWeight: 700, color: "#111827", borderBottom: "1.5px solid #F3F4F6", paddingBottom: 14 }}>Contact Person</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              {field("First Name", <input disabled={!editMode} value={contact.firstName} onChange={e => setContact(p => ({ ...p, firstName: e.target.value }))} style={inp()} />)}
+              {field("Last Name",  <input disabled={!editMode} value={contact.lastName}  onChange={e => setContact(p => ({ ...p, lastName: e.target.value }))}  style={inp()} />)}
+              {field("Personal Phone", <input disabled={!editMode} value={contact.phone} onChange={e => setContact(p => ({ ...p, phone: e.target.value }))} style={{ ...inp(), fontFamily: "'DM Mono',monospace" }} />)}
+              {field("Email (Read Only)", <input disabled value={contact.email} style={inp(false)} />)}
             </div>
           </div>
 
           {/* Company Details */}
-          <h3 style={{ margin: "32px 0 24px", fontSize: 18, fontWeight: 700, color: "#111827", borderBottom: "1.5px solid #F3F4F6", paddingBottom: 16 }}>Company Details</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            <div style={{ gridColumn: "1 / -1" }}>
-              <label style={labelStyle}>Company Name</label>
-              <input disabled={!editMode || loading} value={profile.companyName} onChange={e => setProfile(p => ({ ...p, companyName: e.target.value }))} placeholder="e.g. Safaricom PLC" style={inputStyle} />
-            </div>
-            <div>
-              <label style={labelStyle}>Industry</label>
-              <select
-                disabled={!editMode || loading}
-                value={profile.industry}
-                onChange={e => setProfile(p => ({ ...p, industry: e.target.value }))}
-                style={{ ...inputStyle, cursor: editMode ? "pointer" : "default", appearance: "none" }}
-              >
-                <option value="">Select industry</option>
-                {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={labelStyle}>Company Location</label>
-              <select
-                disabled={!editMode || loading}
-                value={profile.companyLocation}
-                onChange={e => setProfile(p => ({ ...p, companyLocation: e.target.value }))}
-                style={{ ...inputStyle, cursor: editMode ? "pointer" : "default", appearance: "none" }}
-              >
-                <option value="">Select location</option>
-                {LOCATIONS.map(l => <option key={l} value={l}>{l}</option>)}
-              </select>
-            </div>
-            <div style={{ gridColumn: "1 / -1" }}>
-              <label style={labelStyle}>Company Size</label>
-              <select
-                disabled={!editMode || loading}
-                value={profile.companySize}
-                onChange={e => setProfile(p => ({ ...p, companySize: e.target.value }))}
-                style={{ ...inputStyle, cursor: editMode ? "pointer" : "default", appearance: "none" }}
-              >
-                <option value="">Select size</option>
-                {COMPANY_SIZES.map(s => <option key={s} value={s}>{s} employees</option>)}
-              </select>
+          <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 12, padding: 28 }}>
+            <h3 style={{ margin: "0 0 20px", fontSize: 16, fontWeight: 700, color: "#111827", borderBottom: "1.5px solid #F3F4F6", paddingBottom: 14 }}>Company Details</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+
+              {field("Company Name",
+                <input disabled={!editMode} value={company.companyName} onChange={e => setCompany(p => ({ ...p, companyName: e.target.value }))} placeholder="e.g. Safaricom PLC" style={inp()} />
+              )}
+
+              {field("Industry",
+                <select disabled={!editMode} value={company.industry} onChange={e => setCompany(p => ({ ...p, industry: e.target.value }))} style={{ ...inp(), cursor: editMode ? "pointer" : "default", appearance: "none" }}>
+                  <option value="">Select industry</option>
+                  {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
+                </select>
+              )}
+
+              {field("Company Location",
+                <select disabled={!editMode} value={company.companyLocation} onChange={e => setCompany(p => ({ ...p, companyLocation: e.target.value }))} style={{ ...inp(), cursor: editMode ? "pointer" : "default", appearance: "none" }}>
+                  <option value="">Select location</option>
+                  {LOCATIONS.map(l => <option key={l} value={l}>{l}</option>)}
+                </select>
+              )}
+
+              {field("Company Size",
+                <select disabled={!editMode} value={company.companySize} onChange={e => setCompany(p => ({ ...p, companySize: e.target.value }))} style={{ ...inp(), cursor: editMode ? "pointer" : "default", appearance: "none" }}>
+                  <option value="">Select size</option>
+                  {COMPANY_SIZES.map(s => <option key={s} value={s}>{s} employees</option>)}
+                </select>
+              )}
+
+              {field("Company Email",
+                <input type="email" disabled={!editMode} value={company.companyEmail} onChange={e => setCompany(p => ({ ...p, companyEmail: e.target.value }))} placeholder="e.g. info@company.com" style={inp()} />
+              )}
+
+              {field("Company Phone",
+                <input type="tel" disabled={!editMode} value={company.companyPhone} onChange={e => setCompany(p => ({ ...p, companyPhone: e.target.value }))} placeholder="e.g. +254 700 000 000" style={{ ...inp(), fontFamily: "'DM Mono',monospace" }} />
+              )}
+
+              {field("Website",
+                <input type="url" disabled={!editMode} value={company.website} onChange={e => setCompany(p => ({ ...p, website: e.target.value }))} placeholder="e.g. https://company.com" style={inp()} />
+              )}
+
             </div>
           </div>
 
+          {/* Save Button */}
           {editMode && (
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
               <button
-                disabled={saving}
+                disabled={saving || loading}
                 onClick={handleSave}
-                style={{ padding: "12px 24px", background: "#111827", color: "#fff", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", fontFamily: "'DM Sans',sans-serif", opacity: saving ? 0.7 : 1 }}
+                style={{ padding: "12px 28px", background: "#111827", color: "#fff", border: "none", borderRadius: 8, fontSize: 15, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", fontFamily: "'DM Sans',sans-serif", opacity: saving ? 0.7 : 1, transition: "opacity 0.15s" }}
               >
                 {saving ? "Saving..." : "Save Changes"}
               </button>
             </div>
           )}
+
         </div>
       </div>
     </div>
