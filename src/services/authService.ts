@@ -57,17 +57,33 @@ export const signUpUser = async ({ form, roles }: SignupData) => {
     employment_type_preference:  form.emptype      || null,
     bio:                         form.bio          || null,
 
-    company_name:     form.company   || null,
-    industry:         form.industry  || null,
-    company_size:     form.size      || null,
-    company_location: form.elocation || null,
-
     terms_accepted:    form.terms,
     marketing_consent: form.marketing,
   });
 
   if (profileError) {
     return { error: `Account created but profile save failed: ${profileError.message}` };
+  }
+
+  // 3. If the user is an employer, also seed the companies table with signup data.
+  //    Fields not collected at signup (company_email, company_phone, website) are
+  //    left null and can be filled in later via the Employer Profile dashboard.
+  if (roles.includes("employer") && form.company) {
+    const { error: companyError } = await supabase.from("companies").upsert({
+      owner_id:         user.id,
+      company_name:     form.company   || null,
+      industry:         form.industry  || null,
+      company_size:     form.size      || null,
+      company_location: form.elocation || null,
+      company_email:    null,
+      company_phone:    null,
+      website:          null,
+    }, { onConflict: "owner_id" });
+
+    if (companyError) {
+      // Non-fatal: profile was created successfully; dashboard can fix this
+      console.warn("Company row seed failed:", companyError.message);
+    }
   }
 
   return { 
