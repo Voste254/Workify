@@ -11,7 +11,8 @@ import {
   Settings,
   FileText,
   PanelLeftClose,
-  PanelLeft
+  PanelLeft,
+  User
 } from "lucide-react";
 import { useState } from "react";
 
@@ -26,6 +27,7 @@ type ActivePage =
   | "Notifications"
   | "Saved"
   | "Blog"
+  | "Profile"
   | "Settings";
 
 type SidebarProps = {
@@ -57,6 +59,7 @@ const communicationMenu: MenuItem[] = [
 const otherMenu: MenuItem[] = [
   { name: "Saved", icon: Bookmark },
   { name: "Blog", icon: FileText },
+  { name: "Profile", icon: User },
   { name: "Settings", icon: Settings },
 ];
 

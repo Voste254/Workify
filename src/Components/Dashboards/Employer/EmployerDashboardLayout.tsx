@@ -12,6 +12,7 @@ import Applicants from "./Applicants";
 import Notifications from "./Notifications";
 import EmployerSaved from "./EmployerSaved";
 import EmployerBlog from "./EmployerBlog";
+import EmployerProfile from "./EmployerProfile";
 
 /* match sidebar types */
 type ActivePage =
@@ -25,6 +26,7 @@ type ActivePage =
   | "Notifications"
   | "Saved"
   | "Blog"
+  | "Profile"
   | "Settings";
 
 const EmployerDashboardLayout = () => {
@@ -62,6 +64,9 @@ const EmployerDashboardLayout = () => {
 
       case "Blog":
         return <EmployerBlog/>;
+
+      case "Profile":
+        return <EmployerProfile/>;
 
       case "Settings":
         return <Settings/>;
