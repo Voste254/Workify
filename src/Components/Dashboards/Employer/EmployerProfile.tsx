@@ -16,7 +16,6 @@ const Ico = {
 
 const INDUSTRIES = ["Technology","Finance & Banking","Telecommunications","Construction","Hospitality","Healthcare","Media & Creative","Logistics","Agriculture","Education","Other"];
 const COMPANY_SIZES = ["1–10","11–50","51–200","201–1,000","1,000+"];
-const LOCATIONS = ["Nairobi","Mombasa","Kisumu","Nakuru","Nationwide","Remote / Flexible"];
 
 interface CompanyData {
   companyName: string;
@@ -240,10 +239,7 @@ export default function EmployerProfile() {
               )}
 
               {field("Company Location",
-                <select disabled={!editMode} value={company.companyLocation} onChange={e => setCompany(p => ({ ...p, companyLocation: e.target.value }))} style={{ ...inp(), cursor: editMode ? "pointer" : "default", appearance: "none" }}>
-                  <option value="">Select location</option>
-                  {LOCATIONS.map(l => <option key={l} value={l}>{l}</option>)}
-                </select>
+                <input disabled={!editMode} value={company.companyLocation} onChange={e => setCompany(p => ({ ...p, companyLocation: e.target.value }))} placeholder="e.g. Nairobi, Kenya or Remote" style={inp()} />
               )}
 
               {field("Company Size",

@@ -1,19 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { supabase } from "../../../lib/supabaseClient";
 
 // ── Types & Config ─────────────────────────────────────────────────────────────
 interface Candidate {
   id: string; name: string; role: string; location: string; rate: string;
   rating: number; reviews: number; skills: string[]; image: string; isSaved: boolean; available: string;
 }
-
-const MOCK_CANDIDATES: Candidate[] = [
-  { id: "1", name: "Alex Johnson", role: "Senior Full Stack Engineer", location: "Remote", rate: "$55/hr", rating: 4.9, reviews: 124, skills: ["React", "Node.js", "TypeScript", "AWS"], image: "https://i.pravatar.cc/150?img=11", isSaved: true, available: "Immediate" },
-  { id: "2", name: "Maria Garcia", role: "UX/UI Designer", location: "New York, USA", rate: "$45/hr", rating: 4.8, reviews: 89, skills: ["Figma", "Prototyping", "User Research"], image: "https://i.pravatar.cc/150?img=5", isSaved: false, available: "2 Weeks" },
-  { id: "3", name: "David Smith", role: "Backend Python Developer", location: "London, UK", rate: "$50/hr", rating: 4.7, reviews: 67, skills: ["Python", "Django", "PostgreSQL", "Docker"], image: "https://i.pravatar.cc/150?img=12", isSaved: false, available: "Immediate" },
-  { id: "4", name: "Emily Chen", role: "Mobile App Developer", location: "Toronto, Canada", rate: "$60/hr", rating: 5.0, reviews: 210, skills: ["Flutter", "React Native", "iOS", "Android"], image: "https://i.pravatar.cc/150?img=9", isSaved: true, available: "1 Month" },
-  { id: "5", name: "Samuel Osei", role: "DevOps Engineer", location: "Remote", rate: "$70/hr", rating: 4.9, reviews: 156, skills: ["Kubernetes", "AWS", "CI/CD", "Terraform"], image: "https://i.pravatar.cc/150?img=14", isSaved: false, available: "Immediate" },
-  { id: "6", name: "Sophia Martinez", role: "Frontend Specialist", location: "Madrid, Spain", rate: "$40/hr", rating: 4.6, reviews: 45, skills: ["Vue.js", "JavaScript", "Tailwind CSS"], image: "https://i.pravatar.cc/150?img=20", isSaved: false, available: "Immediate" },
-];
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 const I = (d: string, s = 14, fill = "none") => <svg width={s} height={s} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: d }} />;
@@ -51,8 +43,8 @@ function CandidateCard({ cand, selected, onSelect, onBookmark }: { cand: Candida
             {cand.skills.map(s => <span key={s} style={{ fontSize: 12, color: "#374151", background: "#F3F4F6", padding: "2px 6px", borderRadius: 4, fontWeight: 500 }}>{s}</span>)}
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
-             <span style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{cand.rate}</span>
-             <span style={{ fontSize: 12, color: "#059669", background: "#D1FAE5", padding: "2px 6px", borderRadius: 4, fontWeight: 600, textTransform: "uppercase" as const }}>{cand.available}</span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{cand.rate}</span>
+            <span style={{ fontSize: 12, color: "#059669", background: "#D1FAE5", padding: "2px 6px", borderRadius: 4, fontWeight: 600, textTransform: "uppercase" as const }}>{cand.available}</span>
           </div>
         </div>
       </div>
@@ -68,9 +60,9 @@ function InteractiveStars({ rating, onRate }: { rating: number, onRate: (r: numb
       {[1, 2, 3, 4, 5].map(star => {
         const isFilled = star <= (hover || Math.round(rating));
         return (
-          <span 
-            key={star} 
-            onMouseEnter={() => setHover(star)} 
+          <span
+            key={star}
+            onMouseEnter={() => setHover(star)}
             onClick={() => onRate(star)}
             style={{ color: isFilled ? "#D97706" : "#E5E7EB", transition: "color 0.1s", display: "flex", alignItems: "center" }}
             title={`Rate ${star} star${star > 1 ? 's' : ''}`}
@@ -113,7 +105,7 @@ function DetailPanel({ cand, onClose, onBookmark, onRate }: { cand: Candidate; o
 
       {/* Body */}
       <div style={{ flex: 1, overflowY: "auto", padding: "18px 20px" }}>
-        
+
         <p style={sectionLabel}>Quick Actions</p>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 20 }}>
           <button style={{ padding: "8px", background: "#111827", color: "#fff", border: "none", borderRadius: 6, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
@@ -149,11 +141,39 @@ function DetailPanel({ cand, onClose, onBookmark, onRate }: { cand: Candidate; o
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function FindTalent() {
-  const [candidates, setCandidates] = useState(MOCK_CANDIDATES);
-  const [selectedId, setSelectedId] = useState<string | null>("1");
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState("all");
   const [ratedIds, setRatedIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data, error } = await supabase
+        .from("services")
+        .select(`id, title, rate, rate_type, skills, availability, location, rating, number_of_reviews, profiles(first_name, last_name)`);
+      if (error) { console.error("FindTalent:", error.message); return; }
+      const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='1.5'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
+      setCandidates((data || []).map((s: any) => {
+        const p = s.profiles;
+        const days: string[] = s.availability || [];
+        const available = days.length > 0 ? days.map((d: string) => d.slice(0, 3)).join(", ") : "—";
+        return {
+          id:       s.id,
+          name:     `${p?.first_name ?? ""} ${p?.last_name ?? ""}`.trim() || "Unknown",
+          role:     s.title || "Unnamed Service",
+          location: s.location || "",
+          rate:     s.rate ? `KES ${Number(s.rate).toLocaleString()} / ${s.rate_type ?? "day"}` : "—",
+          rating:   s.rating ?? 0,
+          reviews:  s.number_of_reviews ?? 0,
+          skills:   s.skills || [],
+          image:    PLACEHOLDER,
+          available,
+          isSaved:  false,
+        };
+      }));
+    })();
+  }, []);
 
   const q = search.toLowerCase();
   const filtered = useMemo(() => candidates
@@ -165,7 +185,7 @@ export default function FindTalent() {
 
   const handleRate = (id: string, newRating: number) => {
     if (ratedIds.includes(id)) return;
-    
+
     setRatedIds(prev => [...prev, id]);
     // Basic logic to average the previous rating with the new one and increment review count locally
     setCandidates(prev => prev.map(c => {
