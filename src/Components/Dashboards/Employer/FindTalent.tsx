@@ -4,7 +4,7 @@ import { supabase } from "../../../lib/supabaseClient";
 // ── Types & Config ─────────────────────────────────────────────────────────────
 interface Candidate {
   id: string; name: string; role: string; location: string; rate: string;
-  rating: number; reviews: number; skills: string[]; image: string; isSaved: boolean; available: string;
+  rating: number; reviews: number; skills: string[]; image: string; isSaved: boolean; available: string; bio: string;
 }
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
@@ -116,7 +116,10 @@ function DetailPanel({ cand, onClose, onBookmark, onRate }: { cand: Candidate; o
 
         <p style={sectionLabel}>About</p>
         <p style={{ margin: "0 0 20px", fontSize: 14, color: "#374151", lineHeight: 1.6 }}>
-          {cand.name} is a highly experienced {cand.role.toLowerCase()} with a proven track record of delivering scalable solutions. Available {cand.available.toLowerCase()} for new opportunities.
+          {cand.bio
+            ? cand.bio
+            : `${cand.name} is a highly experienced ${cand.role.toLowerCase()} with a proven track record of delivering scalable solutions. Available ${cand.available.toLowerCase()} for new opportunities.`
+          }
         </p>
 
         <p style={sectionLabel}>Skills</p>
@@ -151,24 +154,31 @@ export default function FindTalent() {
     (async () => {
       const { data, error } = await supabase
         .from("services")
-        .select(`id, title, rate, rate_type, skills, availability, location, rating, number_of_reviews, profiles(first_name, last_name)`);
+        .select(`id, title, rate, rate_type, skills, availability, location, rating, number_of_reviews, profiles(first_name, last_name, bio)`);
       if (error) { console.error("FindTalent:", error.message); return; }
       const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='1.5'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
       setCandidates((data || []).map((s: any) => {
-        const p = s.profiles;
+        // Supabase may return profiles as an array (one-to-many) or object (one-to-one)
+        const p = Array.isArray(s.profiles) ? s.profiles[0] : s.profiles;
         const days: string[] = s.availability || [];
         const available = days.length > 0 ? days.map((d: string) => d.slice(0, 3)).join(", ") : "—";
+        // Strip any non-numeric characters (commas, currency symbols, spaces) before parsing
+        const numericRate = parseFloat(String(s.rate ?? "").replace(/[^0-9.]/g, ""));
+        const rateLabel = !isNaN(numericRate) && s.rate
+          ? `KES ${numericRate.toLocaleString()} / ${s.rate_type ?? "day"}`
+          : "—";
         return {
           id:       s.id,
-          name:     `${p?.first_name ?? ""} ${p?.last_name ?? ""}`.trim() || "Unknown",
+          name:     `${p?.first_name ?? ""} ${p?.last_name ?? ""}`.trim() || "Service Provider",
           role:     s.title || "Unnamed Service",
           location: s.location || "",
-          rate:     s.rate ? `KES ${Number(s.rate).toLocaleString()} / ${s.rate_type ?? "day"}` : "—",
+          rate:     rateLabel,
           rating:   s.rating ?? 0,
           reviews:  s.number_of_reviews ?? 0,
           skills:   s.skills || [],
           image:    PLACEHOLDER,
           available,
+          bio:      p?.bio || "",
           isSaved:  false,
         };
       }));
