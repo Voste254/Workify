@@ -190,14 +190,32 @@ const handleSignup = async () => {
                   <Input type={showPw ? "text" : "password"} placeholder="Min. 8 characters" value={form.password} onChange={e => { set("password", e.target.value); setPwStrength(strength(e.target.value)); }}/>
                   <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-mono">{showPw ? "hide" : "show"}</button>
                 </div>
-                {form.password && (
-                  <div className="mt-2">
-                    <div className="flex gap-1">
-                      {[1,2,3,4].map(i => <div key={i} className={`flex-1 h-1 transition ${i <= pwStrength ? pwStrength <= 1 ? "bg-red-500" : pwStrength <= 2 ? "bg-amber-400" : "bg-green-500" : "bg-gray-100"}`}/>)}
+                {form.password && (() => {
+                  const pw = form.password;
+                  const rules = [
+                    { label: "At least 8 characters", met: pw.length >= 8 },
+                    { label: "One uppercase letter (A–Z)", met: /[A-Z]/.test(pw) },
+                    { label: "One lowercase letter (a–z)", met: /[a-z]/.test(pw) },
+                    { label: "One number (0–9)", met: /[0-9]/.test(pw) },
+                    { label: "One special character (!@#…)", met: /[^A-Za-z0-9]/.test(pw) },
+                  ];
+                  return (
+                    <div className="mt-3 space-y-1.5">
+                      {rules.map(({ label, met }) => (
+                        <div key={label} className="flex items-center gap-2">
+                          <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-200 ${met ? "bg-green-500 border-green-500" : "border-gray-300 bg-white"}`}>
+                            {met && (
+                              <svg className="w-2 h-2" viewBox="0 0 10 8" fill="none">
+                                <path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            )}
+                          </div>
+                          <span className={`text-xs transition-colors duration-200 ${met ? "text-green-600 font-medium" : "text-gray-400"}`}>{label}</span>
+                        </div>
+                      ))}
                     </div>
-                    <p className="text-xs mt-1 text-gray-400">{pwStrength <= 1 ? "Weak" : pwStrength <= 2 ? "Medium" : "Strong"}</p>
-                  </div>
-                )}
+                  );
+                })()}
               </Field>
               <Field label="Confirm password">
                 <div className="relative">
