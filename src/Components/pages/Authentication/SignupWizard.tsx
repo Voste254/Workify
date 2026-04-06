@@ -24,10 +24,11 @@ const Divider = () => (
   </div>
 );
 
-const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
+const Field = ({ label, error, children }: { label: string; error?: string | false; children: React.ReactNode }) => (
   <div>
     <label className="block text-xs font-semibold text-gray-700 uppercase tracking-widest mb-1.5">{label}</label>
     {children}
+    {error && <p className="text-xs text-red-500 mt-1.5">{error}</p>}
   </div>
 );
 
@@ -74,6 +75,7 @@ export default function Signup() {
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [attemptedSteps, setAttemptedSteps] = useState({ 1: false, 2: false, 3: false });
 
   const [form, setForm] = useState<SignupFormData & { confirm: string }>({
     fname:"", lname:"", email:"", phone:"", password:"", confirm:"",
@@ -98,9 +100,10 @@ export default function Signup() {
   const isSeeker = roles.includes("seeker");
   const isEmployer = roles.includes("employer");
 
-  const step1Valid = form.fname && form.lname && form.email.includes("@") && form.phone && form.password.length >= 8 && form.password === form.confirm;
+  const pwValid = form.password.length >= 8 && /[A-Z]/.test(form.password) && /[a-z]/.test(form.password) && /[0-9]/.test(form.password) && /[^A-Za-z0-9]/.test(form.password);
+  const step1Valid = form.fname && form.lname && form.email.includes("@") && form.phone && pwValid && form.password === form.confirm;
   const step2Valid = roles.length > 0;
-  const step3Valid = (!isSeeker || (form.profession && form.location)) && (!isEmployer || (form.company && form.industry));
+  const step3Valid = (!isSeeker || (form.profession && form.location)) && (!isEmployer || (form.company && form.industry && form.elocation));
 
   const roleCards: { role: Role; icon: string; title: string; desc: string }[] = [
     { role: "seeker", icon: "🔍", title: "Job Seeker", desc: "Find jobs, build profile, track applications" },
@@ -180,12 +183,12 @@ const handleSignup = async () => {
             <GoogleBtn/><Divider/>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
-                <Field label="First name"><Input placeholder="John" value={form.fname} onChange={e => set("fname", e.target.value)}/></Field>
-                <Field label="Last name"><Input placeholder="Doe" value={form.lname} onChange={e => set("lname", e.target.value)}/></Field>
+                <Field label="First name" error={attemptedSteps[1] && !form.fname && "Required"}><Input placeholder="John" value={form.fname} onChange={e => set("fname", e.target.value.replace(/[^a-zA-Z\s-]/g, ""))}/></Field>
+                <Field label="Last name" error={attemptedSteps[1] && !form.lname && "Required"}><Input placeholder="Doe" value={form.lname} onChange={e => set("lname", e.target.value.replace(/[^a-zA-Z\s-]/g, ""))}/></Field>
               </div>
-              <Field label="Email"><Input type="email" placeholder="you@example.com" required value={form.email} onChange={e => set("email", e.target.value)}/></Field>
-              <Field label="Phone"><Input type="tel" placeholder="+254 7xx xxx xxx" value={form.phone} onChange={e => set("phone", e.target.value)}/></Field>
-              <Field label="Password">
+              <Field label="Email" error={attemptedSteps[1] && !form.email.includes("@") && "Valid email required"}><Input type="email" placeholder="you@example.com" required value={form.email} onChange={e => set("email", e.target.value)}/></Field>
+              <Field label="Phone" error={attemptedSteps[1] && !form.phone && "Required"}><Input type="tel" placeholder="+254 7xx xxx xxx" value={form.phone} onChange={e => set("phone", e.target.value.replace(/[^0-9+\s-]/g, ""))}/></Field>
+              <Field label="Password" error={attemptedSteps[1] && !pwValid && "Password must meet all rules below"}>
                 <div className="relative">
                   <Input type={showPw ? "text" : "password"} placeholder="Min. 8 characters" value={form.password} onChange={e => { set("password", e.target.value); setPwStrength(strength(e.target.value)); }}/>
                   <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-mono">{showPw ? "hide" : "show"}</button>
@@ -217,13 +220,13 @@ const handleSignup = async () => {
                   );
                 })()}
               </Field>
-              <Field label="Confirm password">
+              <Field label="Confirm password" error={attemptedSteps[1] && form.password !== form.confirm && "Passwords must match"}>
                 <div className="relative">
                   <Input type="password" placeholder="Repeat your password" value={form.confirm} onChange={e => set("confirm", e.target.value)}/>
                   {form.confirm && <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono ${form.confirm === form.password ? "text-green-600" : "text-red-500"}`}>{form.confirm === form.password ? "✓" : "✗"}</span>}
                 </div>
               </Field>
-              <PrimaryBtn onClick={() => step1Valid && setStep(2)} className={`w-full h-11 text-sm font-semibold transition ${step1Valid ? "bg-gray-900 text-white hover:bg-gray-700" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}>Continue →</PrimaryBtn>
+              <PrimaryBtn onClick={() => { setAttemptedSteps(p => ({ ...p, 1: true })); if (step1Valid) setStep(2); }} className="w-full h-11 text-sm font-semibold transition bg-gray-900 text-white hover:bg-gray-700">Continue →</PrimaryBtn>
             </div>
           </>}
 
@@ -243,7 +246,8 @@ const handleSignup = async () => {
               ))}
             </div>
             {isSeeker && isEmployer && <p className="text-xs text-gray-500 bg-gray-50 border border-gray-200 px-3 py-2.5 mb-4">You'll have a single dashboard to toggle between seeking work and hiring talent — perfect for freelancers and contractors.</p>}
-            <PrimaryBtn onClick={() => step2Valid && setStep(3)} className={`w-full h-11 text-sm font-semibold transition ${step2Valid ? "bg-gray-900 text-white hover:bg-gray-700" : "bg-gray-200 text-gray-400 cursor-not-allowed"}`}>Continue →</PrimaryBtn>
+            {attemptedSteps[2] && !step2Valid && <p className="text-xs text-red-500 mb-4">Please select at least one role to continue.</p>}
+            <PrimaryBtn onClick={() => { setAttemptedSteps(p => ({ ...p, 2: true })); if (step2Valid) setStep(3); }} className="w-full h-11 text-sm font-semibold transition bg-gray-900 text-white hover:bg-gray-700">Continue →</PrimaryBtn>
           </>}
 
           {/* ── Step 3: Profile ── */}
@@ -254,12 +258,9 @@ const handleSignup = async () => {
             <div className="space-y-4">
               {isSeeker && <>
                 {isEmployer && <div className="text-xs font-semibold text-gray-900 uppercase tracking-widest border-b pb-2 mb-4">Job Seeker Profile</div>}
-                <Field label="Profession / Service offered"><Input placeholder="e.g. Graphic Designer, Plumber" value={form.profession} onChange={e => set("profession", e.target.value)}/></Field>
-                <Field label="Location">
-                  <Select value={form.location} onChange={e => set("location", e.target.value)}>
-                    <option value="">Select city / county</option>
-                    {["Nairobi","Mombasa","Kisumu","Nakuru","Eldoret","Thika","Remote / Flexible"].map(c => <option key={c}>{c}</option>)}
-                  </Select>
+                <Field label="Profession / Service offered" error={attemptedSteps[3] && !form.profession && "Required"}><Input placeholder="e.g. Graphic Designer, Plumber" value={form.profession} onChange={e => set("profession", e.target.value)}/></Field>
+                <Field label="Location" error={attemptedSteps[3] && !form.location && "Required"}>
+                  <Input placeholder="e.g. Nairobi, Kenya or remote" value={form.location} onChange={e => set("location", e.target.value)} />
                 </Field>
                 <Field label="Employment type preference">
                   <Select value={form.emptype} onChange={e => set("emptype", e.target.value)}>
@@ -274,8 +275,8 @@ const handleSignup = async () => {
               </>}
               {isEmployer && <>
                 {isSeeker && <div className="text-xs font-semibold text-gray-900 uppercase tracking-widest border-b pb-2 mb-4 mt-8">Company Profile</div>}
-                <Field label="Company name"><Input placeholder="e.g. Safaricom PLC" value={form.company} onChange={e => set("company", e.target.value)}/></Field>
-                <Field label="Industry">
+                <Field label="Company name" error={attemptedSteps[3] && !form.company && "Required"}><Input placeholder="e.g. Safaricom PLC" value={form.company} onChange={e => set("company", e.target.value)}/></Field>
+                <Field label="Industry" error={attemptedSteps[3] && !form.industry && "Required"}>
                   <Select value={form.industry} onChange={e => set("industry", e.target.value)}>
                     <option value="">Select industry</option>
                     {["Technology","Finance & Banking","Telecommunications","Construction","Hospitality","Healthcare","Media & Creative","Logistics","Agriculture","Education","Other"].map(i => <option key={i}>{i}</option>)}
@@ -288,15 +289,12 @@ const handleSignup = async () => {
                       {["1–10","11–50","51–200","201–1,000","1,000+"].map(s => <option key={s}>{s} employees</option>)}
                     </Select>
                   </Field>
-                  <Field label="Location">
-                    <Select value={form.elocation} onChange={e => set("elocation", e.target.value)}>
-                      <option value="">Select</option>
-                      {["Nairobi","Mombasa","Kisumu","Nakuru","Nationwide"].map(c => <option key={c}>{c}</option>)}
-                    </Select>
+                  <Field label="Location" error={attemptedSteps[3] && !form.elocation && "Required"}>
+                    <Input placeholder="e.g. Nairobi, Kenya or remote" value={form.elocation} onChange={e => set("elocation", e.target.value)} />
                   </Field>
                 </div>
               </>}
-              <PrimaryBtn onClick={() => step3Valid && setStep(4)} className={`w-full h-11 text-sm font-semibold transition ${step3Valid ? "bg-gray-900 text-white hover:bg-gray-700" : "bg-gray-200 text-gray-400 cursor-not-allowed"} mt-6`}>Continue →</PrimaryBtn>
+              <PrimaryBtn onClick={() => { setAttemptedSteps(p => ({ ...p, 3: true })); if (step3Valid) setStep(4); }} className="w-full h-11 text-sm font-semibold transition bg-gray-900 text-white hover:bg-gray-700 mt-6">Continue →</PrimaryBtn>
             </div>
           </>}
 
