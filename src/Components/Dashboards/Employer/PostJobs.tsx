@@ -23,6 +23,11 @@ export default function PostJobs() {
   const [isSaved, setIsSaved] = useState(false);
   const [jobCategory, setJobCategory] = useState(CATEGORIES[0]);
   const [jobType, setJobType] = useState("Permanent");
+  const [title, setTitle] = useState("");
+  const [location, setLocation] = useState("");
+  const [salary, setSalary] = useState("");
+  const [description, setDescription] = useState("");
+  const [isUrgent, setIsUrgent] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,7 +79,7 @@ export default function PostJobs() {
                  <label style={labelStyle}>Job Title</label>
                  <div style={inputOuter}>
                     <span style={inputIcon}>{Ico.briefcase}</span>
-                    <input type="text" placeholder="e.g. Senior Data Analyst" style={inputStyle} required />
+                    <input type="text" placeholder="e.g. Senior Data Analyst" style={inputStyle} value={title} onChange={e => setTitle(e.target.value)} required />
                  </div>
 
               </div>
@@ -103,7 +108,7 @@ export default function PostJobs() {
                  <label style={labelStyle}>Location (Kenya)</label>
                  <div style={inputOuter}>
                     <span style={inputIcon}>{Ico.pin}</span>
-                    <input type="text" placeholder="e.g. Nairobi, Mombasa, Kisumu" style={inputStyle} required />
+                    <input type="text" placeholder="e.g. Nairobi, Mombasa, Kisumu" style={inputStyle} value={location} onChange={e => setLocation(e.target.value)} required />
                  </div>
               </div>
 
@@ -111,7 +116,7 @@ export default function PostJobs() {
                  <label style={labelStyle}>Salary / Rate (KES)</label>
                  <div style={inputOuter}>
                     <span style={inputIcon}>{Ico.coins}</span>
-                    <input type="text" placeholder={jobCategory === "Corporate" ? "e.g. KES 150,000/mo" : "e.g. KES 2,000/day"} style={inputStyle} required />
+                    <input type="text" placeholder={jobCategory === "Corporate" ? "e.g. KES 150,000/mo" : "e.g. KES 2,000/day"} style={inputStyle} value={salary} onChange={e => setSalary(e.target.value)} required />
                  </div>
               </div>
             </div>
@@ -121,11 +126,11 @@ export default function PostJobs() {
             <div style={{ marginBottom: 20 }}>
               <label style={labelStyle}>Description & Requirements</label>
               <textarea rows={6} placeholder={jobCategory === "Corporate" ? "Detail the required skills, degree, and exact corporate responsibilities..." : "Detail the physical requirements, required tools, and exact task location..."}
-                style={{ ...inputStyle, paddingLeft: 14, resize: "vertical" }} required />
+                style={{ ...inputStyle, paddingLeft: 14, resize: "vertical" }} value={description} onChange={e => setDescription(e.target.value)} required />
             </div>
 
             <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 30 }}>
-               <input type="checkbox" id="urgent" style={{ width: 16, height: 16, cursor: "pointer" }} />
+               <input type="checkbox" id="urgent" checked={isUrgent} onChange={e => setIsUrgent(e.target.checked)} style={{ width: 16, height: 16, cursor: "pointer" }} />
                <label htmlFor="urgent" style={{ fontSize: 15, color: "#111827", fontWeight: 600, cursor: "pointer", userSelect: "none" }}>Mark as urgent (Immediate start required)</label>
             </div>
 
