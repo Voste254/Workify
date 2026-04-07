@@ -36,6 +36,7 @@ const Ico = {
   users: I('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>', 12),
   close: I('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>', 14),
   edit: I('<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>', 12),
+  trash: I('<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>', 14),
   fire: I('<path d="M15.2 3a2 2 0 0 1 1.4.6 2 2 0 0 1 .6 1.4c0 1.2-1.2 2.8-2.6 4.3C13.2 10.8 12 12.3 12 14c0 1.7 1.3 3 3 3s3-1.3 3-3c0-.6-.2-1.2-.5-1.7a2 2 0 0 1 2.3-2.8c1.3.4 2.2 1.6 2.2 3C22 18 17.5 22 12 22S2 18 2 12.5c0-4.6 3-8 6.5-9.5a2 2 0 0 1 2.5 1c.5 1 1 2 1 3.5 0 1.2-.5 2.5-1.5 4-.6 1-1.5 2.3-1.5 3.5 0 1.4 1 2.5 2.5 2.5s2.5-1.1 2.5-2.5c0-1.2-.3-2.5-1.3-4C11.5 9 10 7.2 10 5c0-2.3 1.8-4.2 4-4.8a2 2 0 0 1 1.2 2.8z"/>', 12, "#EF4444")
 };
 
@@ -79,7 +80,7 @@ function JobCard({ job, selected, onSelect }: { job: Job; selected: boolean; onS
 }
 
 // ── Detail Panel ───────────────────────────────────────────────────────────────
-function DetailPanel({ job, onClose }: { job: Job; onClose: () => void }) {
+function DetailPanel({ job, onClose, onDelete }: { job: Job; onClose: () => void; onDelete: (id: string) => void }) {
   const cfg = STATUS_CONFIG[job.status];
   return (
     <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 10, height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -93,6 +94,7 @@ function DetailPanel({ job, onClose }: { job: Job; onClose: () => void }) {
             <p style={{ margin: 0, fontSize: 14, color: "#6B7280" }}>{job.department} · {job.location}</p>
           </div>
           <div style={{ display: "flex", gap: 6 }}>
+            <button onClick={() => onDelete(job.id)} style={{ ...iconBtn("#EF4444"), borderColor: "#FCA5A5", background: "#FEF2F2" }} title="Delete Job">{Ico.trash}</button>
             <button style={iconBtn()}>{Ico.edit}</button>
             <button onClick={onClose} style={iconBtn()}>{Ico.close}</button>
           </div>
@@ -147,10 +149,11 @@ function DetailPanel({ job, onClose }: { job: Job; onClose: () => void }) {
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function MyJobs() {
-  const [jobs] = useState(MOCK_JOBS);
+  const [jobs, setJobs] = useState(MOCK_JOBS);
   const [selectedId, setSelectedId] = useState<string | null>("1");
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<JobStatus | "all">("all");
+  const [jobToDelete, setJobToDelete] = useState<string | null>(null);
 
   const q = search.toLowerCase();
   const filtered = useMemo(() => jobs
@@ -214,10 +217,29 @@ export default function MyJobs() {
         </div>
         {selected && (
           <div style={{ position: "sticky" as const, top: 20, height: "calc(100vh - 175px)", overflow: "hidden" }}>
-            <DetailPanel job={selected} onClose={() => setSelectedId(null)} />
+            <DetailPanel job={selected} onClose={() => setSelectedId(null)} onDelete={(id) => setJobToDelete(id)} />
           </div>
         )}
       </div>
+
+      {/* Delete Modal */}
+      {jobToDelete && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, padding: 20 }}>
+          <div style={{ background: "#fff", width: "100%", maxWidth: 400, borderRadius: 12, padding: 24, boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)" }}>
+            <h3 style={{ margin: "0 0 10px", fontSize: 18, fontWeight: 700, color: "#111827" }}>Delete Job Posting</h3>
+            <p style={{ margin: "0 0 24px", fontSize: 14, color: "#4B5563", lineHeight: 1.5 }}>Are you sure you want to delete this job posting? This action cannot be undone and all associated applicants will be removed.</p>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
+              <button onClick={() => setJobToDelete(null)} style={{ padding: "8px 16px", background: "#fff", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 14, fontWeight: 600, color: "#374151", cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>Cancel</button>
+              <button onClick={() => {
+                // supabase.from("jobs").delete().eq("id", jobToDelete);
+                setJobs(j => j.filter(x => x.id !== jobToDelete));
+                if (selectedId === jobToDelete) setSelectedId(null);
+                setJobToDelete(null);
+              }} style={{ padding: "8px 16px", background: "#EF4444", border: "none", borderRadius: 6, fontSize: 14, fontWeight: 600, color: "#fff", cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>Delete Job</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
