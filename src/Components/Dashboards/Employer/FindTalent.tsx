@@ -193,17 +193,33 @@ export default function FindTalent() {
   const selected = candidates.find(c => c.id === selectedId) || null;
   const toggleBookmark = (id: string) => setCandidates(p => p.map(c => c.id === id ? { ...c, isSaved: !c.isSaved } : c));
 
-  const handleRate = (id: string, newRating: number) => {
+  const handleRate = async (id: string, newRating: number) => {
     if (ratedIds.includes(id)) return;
 
+    const cand = candidates.find(c => c.id === id);
+    if (!cand) return;
+
     setRatedIds(prev => [...prev, id]);
-    // Basic logic to average the previous rating with the new one and increment review count locally
-    setCandidates(prev => prev.map(c => {
-      if (c.id !== id) return c;
-      const totalScore = (c.rating * c.reviews) + newRating;
-      const newReviews = c.reviews + 1;
-      return { ...c, rating: Number((totalScore / newReviews).toFixed(1)), reviews: newReviews };
-    }));
+
+    // Calculate new average
+    const totalScore = (cand.rating * cand.reviews) + newRating;
+    const newReviews = cand.reviews + 1;
+    const finalRating = Number((totalScore / newReviews).toFixed(1));
+
+    // Optimistically update UI
+    setCandidates(prev => prev.map(c => 
+      c.id === id ? { ...c, rating: finalRating, reviews: newReviews } : c
+    ));
+
+    // Persist to database
+    const { error } = await supabase
+      .from("services")
+      .update({ rating: finalRating, number_of_reviews: newReviews })
+      .eq("id", id);
+      
+    if (error) {
+      console.error("Error saving rating:", error.message);
+    }
   };
 
   const stats = {
