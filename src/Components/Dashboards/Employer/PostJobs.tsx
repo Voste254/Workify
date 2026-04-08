@@ -2,7 +2,7 @@ import { useState } from "react";
 import { CATEGORIES } from "../Employee/FindJobs";
 import { supabase } from "../../../lib/supabaseClient";
 import { useAuth } from "../../../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 const I = (d: string, s = 14, fill = "none") => <svg width={s} height={s} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: d }} />;
@@ -24,7 +24,7 @@ const inputStyle = { width: "100%", padding: "10px 14px 10px 36px", border: "1.5
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function PostJobs() {
   const { user } = useAuth();
-  const navigate = useNavigate();
+
   const [isSaved, setIsSaved] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +52,7 @@ export default function PostJobs() {
     setError(null);
 
     try {
-      const { data, error: dbError } = await supabase.from("jobs").insert([
+      const { error: dbError } = await supabase.from("jobs").insert([
         {
           employer_id: user.id,
           title,
