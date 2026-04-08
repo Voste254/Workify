@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { supabase } from "../../../lib/supabaseClient";
 
 // ── Types & Config ─────────────────────────────────────────────────────────────
 type JobStatus = "active" | "closed" | "draft";
@@ -231,7 +232,7 @@ export default function MyJobs() {
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
               <button onClick={() => setJobToDelete(null)} style={{ padding: "8px 16px", background: "#fff", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 14, fontWeight: 600, color: "#374151", cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>Cancel</button>
               <button onClick={() => {
-                // supabase.from("jobs").delete().eq("id", jobToDelete);
+                supabase.from("jobs").delete().eq("id", jobToDelete);
                 setJobs(j => j.filter(x => x.id !== jobToDelete));
                 if (selectedId === jobToDelete) setSelectedId(null);
                 setJobToDelete(null);

@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { CATEGORIES } from "../Employee/FindJobs";
+import { supabase } from "../../../lib/supabaseClient";
+import { useAuth } from "../../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 const I = (d: string, s = 14, fill = "none") => <svg width={s} height={s} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: d }} />;
@@ -20,7 +23,12 @@ const inputStyle = { width: "100%", padding: "10px 14px 10px 36px", border: "1.5
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function PostJobs() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [isSaved, setIsSaved] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
   const [jobCategory, setJobCategory] = useState(CATEGORIES[0]);
   const [jobType, setJobType] = useState("Permanent");
   const [title, setTitle] = useState("");
@@ -29,10 +37,63 @@ export default function PostJobs() {
   const [description, setDescription] = useState("");
   const [isUrgent, setIsUrgent] = useState(false);
 
+  const submitJob = async (status: "active" | "draft") => {
+    if (!title || !location || !salary || !description) {
+      setError("Please fill out all required fields.");
+      return;
+    }
+
+    if (!user) {
+      setError("You must be logged in to post a job.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const { data, error: dbError } = await supabase.from("jobs").insert([
+        {
+          employer_id: user.id,
+          title,
+          category: jobCategory,
+          type: jobType,
+          location,
+          salary,
+          description,
+          status,
+          is_hot: isUrgent,
+        }
+      ]);
+
+      if (dbError) throw dbError;
+
+      setIsSaved(true);
+      setTimeout(() => {
+        setIsSaved(false);
+        navigate("/employer/my-jobs");
+      }, 2000);
+      
+      // Reset form
+      setTitle("");
+      setLocation("");
+      setSalary("");
+      setDescription("");
+      setIsUrgent(false);
+      setJobCategory(CATEGORIES[0]);
+      setJobType("Permanent");
+      
+    } catch (err: any) {
+      console.error("Error posting job:", err);
+      setError(err.message || "Failed to post job. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 3000);
+    submitJob("active");
   };
 
   return (
@@ -54,6 +115,12 @@ export default function PostJobs() {
         <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 10, overflow: "hidden" }}>
           
           <form onSubmit={handleSubmit} style={{ padding: 30 }}>
+            {error && (
+              <div style={{ marginBottom: 20, padding: 12, borderRadius: 8, background: "#FEF2F2", border: "1px solid #FCA5A5", color: "#EF4444", fontSize: 14 }}>
+                {error}
+              </div>
+            )}
+            
             <h3 style={{ margin: "0 0 20px", fontSize: 18, fontWeight: 700, color: "#111827", borderBottom: "1px solid #E5E7EB", paddingBottom: 10 }}>Job Category &amp; Type</h3>
 
             {/* Category Dropdown */}
@@ -105,10 +172,10 @@ export default function PostJobs() {
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
               <div>
-                 <label style={labelStyle}>Location (Kenya)</label>
+                 <label style={labelStyle}>Location</label>
                  <div style={inputOuter}>
                     <span style={inputIcon}>{Ico.pin}</span>
-                    <input type="text" placeholder="e.g. Nairobi, Mombasa, Kisumu" style={inputStyle} value={location} onChange={e => setLocation(e.target.value)} required />
+                    <input type="text" placeholder="e.g. Nairobi, Moscow, Cairo" style={inputStyle} value={location} onChange={e => setLocation(e.target.value)} required />
                  </div>
               </div>
 
@@ -125,7 +192,7 @@ export default function PostJobs() {
 
             <div style={{ marginBottom: 20 }}>
               <label style={labelStyle}>Description & Requirements</label>
-              <textarea rows={6} placeholder={jobCategory === "Corporate" ? "Detail the required skills, degree, and exact corporate responsibilities..." : "Detail the physical requirements, required tools, and exact task location..."}
+              <textarea rows={6} placeholder={jobCategory === "Corporate" ? "Detail the required skills, degree, and exact corporate responsibilities..." : "Detail the required skills, qualificatons and expected roles..."}
                 style={{ ...inputStyle, paddingLeft: 14, resize: "vertical" }} value={description} onChange={e => setDescription(e.target.value)} required />
             </div>
 
@@ -135,11 +202,11 @@ export default function PostJobs() {
             </div>
 
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, borderTop: "1px solid #E5E7EB", paddingTop: 20 }}>
-               <button type="button" style={{ padding: "10px 20px", background: "#fff", color: "#6B7280", border: "1.5px solid #E5E7EB", borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+               <button type="button" onClick={() => submitJob("draft")} disabled={isSubmitting} style={{ padding: "10px 20px", background: "#fff", color: "#6B7280", border: "1.5px solid #E5E7EB", borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: isSubmitting ? "not-allowed" : "pointer", opacity: isSubmitting ? 0.7 : 1, fontFamily: "'DM Sans',sans-serif" }}>
                  Save as Draft
                </button>
-               <button type="submit" style={{ padding: "10px 20px", background: "#111827", color: "#fff", border: "none", borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
-                 Publish Job
+               <button type="submit" disabled={isSubmitting} style={{ padding: "10px 20px", background: "#111827", color: "#fff", border: "none", borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: isSubmitting ? "not-allowed" : "pointer", opacity: isSubmitting ? 0.7 : 1, fontFamily: "'DM Sans',sans-serif" }}>
+                 {isSubmitting ? "Publishing..." : "Publish Job"}
                </button>
             </div>
 
