@@ -7,22 +7,22 @@ type JobStatus = "active" | "closed" | "draft";
 interface Job {
   id: string; title: string; location: string; type: string;
   createdAt: string; lastUpdated: string; applicantsCount: number;
-  status: JobStatus; department: string; isHot: boolean;
+  status: JobStatus; department: string;
 }
 
 const STATUS_CONFIG: Record<JobStatus, { label: string; color: string; bg: string }> = {
   active: { label: "Active", color: "#059669", bg: "#D1FAE5" },
   closed: { label: "Closed", color: "#FFFFFF", bg: "#DC2626" },
-  draft:  { label: "Draft", color: "#6B7280", bg: "#F3F4F6" },
+  draft:  { label: "Draft",  color: "#6B7280", bg: "#F3F4F6" },
 };
 
 // ── Mock Data ──────────────────────────────────────────────────────────────────
 const MOCK_JOBS: Job[] = [
-  { id: "1", title: "Senior Frontend Developer", location: "San Francisco, CA (Remote)", type: "Full-time", createdAt: "2025-02-15", lastUpdated: "2025-03-08", applicantsCount: 45, status: "active", department: "Engineering", isHot: true },
-  { id: "2", title: "Product Designer", location: "New York, NY", type: "Contract", createdAt: "2025-02-20", lastUpdated: "2025-03-05", applicantsCount: 12, status: "active", department: "Design", isHot: false },
-  { id: "3", title: "Backend Engineer", location: "Remote", type: "Full-time", createdAt: "2025-01-10", lastUpdated: "2025-02-28", applicantsCount: 89, status: "closed", department: "Engineering", isHot: false },
-  { id: "4", title: "Marketing Manager", location: "Chicago, IL", type: "Full-time", createdAt: "2025-03-09", lastUpdated: "2025-03-09", applicantsCount: 0, status: "draft", department: "Marketing", isHot: false },
-  { id: "5", title: "Data Analyst", location: "Austin, TX", type: "Full-time", createdAt: "2025-02-25", lastUpdated: "2025-03-02", applicantsCount: 34, status: "active", department: "Data", isHot: false },
+  { id: "1", title: "Senior Frontend Developer", location: "San Francisco, CA (Remote)", type: "Full-time",  createdAt: "2025-02-15", lastUpdated: "2025-03-08", applicantsCount: 45, status: "active", department: "Engineering" },
+  { id: "2", title: "Product Designer",          location: "New York, NY",              type: "Contract",   createdAt: "2025-02-20", lastUpdated: "2025-03-05", applicantsCount: 12, status: "active", department: "Design"      },
+  { id: "3", title: "Backend Engineer",          location: "Remote",                    type: "Full-time",  createdAt: "2025-01-10", lastUpdated: "2025-02-28", applicantsCount: 89, status: "closed", department: "Engineering" },
+  { id: "4", title: "Marketing Manager",         location: "Chicago, IL",               type: "Full-time",  createdAt: "2025-03-09", lastUpdated: "2025-03-09", applicantsCount: 0,  status: "draft",  department: "Marketing"   },
+  { id: "5", title: "Data Analyst",              location: "Austin, TX",                type: "Full-time",  createdAt: "2025-02-25", lastUpdated: "2025-03-02", applicantsCount: 34, status: "active", department: "Data"        },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -32,13 +32,12 @@ const daysAgo = (d: string) => { const n = Math.floor((Date.now() - new Date(d).
 // ── Icons ──────────────────────────────────────────────────────────────────────
 const I = (d: string, s = 14, fill = "none") => <svg width={s} height={s} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: d }} />;
 const Ico = {
-  search: I('<circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>', 14),
+  search:   I('<circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>', 14),
   location: I('<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>', 12),
-  users: I('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>', 12),
-  close: I('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>', 14),
-  edit: I('<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>', 12),
-  trash: I('<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>', 14),
-  fire: I('<path d="M15.2 3a2 2 0 0 1 1.4.6 2 2 0 0 1 .6 1.4c0 1.2-1.2 2.8-2.6 4.3C13.2 10.8 12 12.3 12 14c0 1.7 1.3 3 3 3s3-1.3 3-3c0-.6-.2-1.2-.5-1.7a2 2 0 0 1 2.3-2.8c1.3.4 2.2 1.6 2.2 3C22 18 17.5 22 12 22S2 18 2 12.5c0-4.6 3-8 6.5-9.5a2 2 0 0 1 2.5 1c.5 1 1 2 1 3.5 0 1.2-.5 2.5-1.5 4-.6 1-1.5 2.3-1.5 3.5 0 1.4 1 2.5 2.5 2.5s2.5-1.1 2.5-2.5c0-1.2-.3-2.5-1.3-4C11.5 9 10 7.2 10 5c0-2.3 1.8-4.2 4-4.8a2 2 0 0 1 1.2 2.8z"/>', 12, "#EF4444")
+  users:    I('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>', 12),
+  close:    I('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>', 14),
+  edit:     I('<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>', 12),
+  trash:    I('<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>', 14),
 };
 
 // ── Shared styles ──────────────────────────────────────────────────────────────
@@ -50,19 +49,15 @@ const iconBtn = (color = "#6B7280") => ({ background: "none", border: "1px solid
 function JobCard({ job, selected, onSelect }: { job: Job; selected: boolean; onSelect: () => void }) {
   const cfg = STATUS_CONFIG[job.status];
   return (
-    <div onClick={onSelect} style={{ background: "#fff", border: `1.5px solid ${selected ? "#111827" : "#E5E7EB"}`, borderRadius: 8, padding: "16px 18px", cursor: "pointer", opacity: job.status === "closed" ? 0.7 : 1, transition: "border-color 0.15s", position: "relative" as const }}>
-      {job.isHot && <div style={{ position: "absolute", top: 12, right: 12, color: "#EF4444" }}>{Ico.fire}</div>}
+    <div onClick={onSelect} style={{ background: "#fff", border: `1.5px solid ${selected ? "#111827" : "#E5E7EB"}`, borderRadius: 8, padding: "16px 18px", cursor: "pointer", opacity: job.status === "closed" ? 0.7 : 1, transition: "border-color 0.15s" }}>
       <div style={{ display: "flex", gap: 12 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2, paddingRight: 20 }}>
-            <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: "#111827" }}>{job.title}</p>
-          </div>
+          <p style={{ margin: "0 0 2px", fontSize: 16, fontWeight: 600, color: "#111827" }}>{job.title}</p>
           <p style={{ margin: 0, fontSize: 14, color: "#6B7280" }}>{job.department}</p>
           <div style={{ display: "flex", gap: 10, marginTop: 8, flexWrap: "wrap" as const }}>
             <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 13, color: "#9CA3AF" }}>{Ico.location} {job.location}</span>
             <span style={{ fontSize: 13, color: "#6B7280", padding: "2px 7px", background: "#F3F4F6", borderRadius: 3, fontWeight: 500 }}>{job.type}</span>
           </div>
-          
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginTop: 14 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.05em", padding: "3px 8px", borderRadius: 4, textTransform: "uppercase" as const, color: cfg.color, background: cfg.bg }}>{cfg.label}</span>
@@ -89,9 +84,7 @@ function DetailPanel({ job, onClose, onDelete }: { job: Job; onClose: () => void
       <div style={{ padding: "18px 20px", borderBottom: "1px solid #E5E7EB" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
           <div>
-            <p style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#111827", display: "flex", gap: 6, alignItems: "center" }}>
-              {job.title} {job.isHot && <span style={{ color: "#EF4444" }}>{Ico.fire}</span>}
-            </p>
+            <p style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#111827" }}>{job.title}</p>
             <p style={{ margin: 0, fontSize: 14, color: "#6B7280" }}>{job.department} · {job.location}</p>
           </div>
           <div style={{ display: "flex", gap: 6 }}>
@@ -131,15 +124,12 @@ function DetailPanel({ job, onClose, onDelete }: { job: Job; onClose: () => void
           <>
             <p style={sectionLabel}>Applicant Pipeline</p>
             <div style={{ padding: "12px 14px", borderRadius: 6, border: "1px solid #E5E7EB", marginBottom: 20, background: "#FAFAFA" }}>
-               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 14 }}>
-                 <span style={{ color: "#6B7280" }}>Applied</span> <strong style={{ color: "#111827" }}>24</strong>
-               </div>
-               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 14 }}>
-                 <span style={{ color: "#6B7280" }}>Interviewing</span> <strong style={{ color: "#111827" }}>15</strong>
-               </div>
-               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
-                 <span style={{ color: "#6B7280" }}>Offered</span> <strong style={{ color: "#111827" }}>6</strong>
-               </div>
+              {[["Applied", 24], ["Interviewing", 15], ["Offered", 6]].map(([label, value], i, arr) => (
+                <div key={label as string} style={{ display: "flex", justifyContent: "space-between", marginBottom: i < arr.length - 1 ? 8 : 0, fontSize: 14 }}>
+                  <span style={{ color: "#6B7280" }}>{label}</span>
+                  <strong style={{ color: "#111827" }}>{value}</strong>
+                </div>
+              ))}
             </div>
           </>
         )}
@@ -163,11 +153,10 @@ export default function MyJobs() {
     [jobs, q, filterStatus]);
 
   const selected = jobs.find(a => a.id === selectedId) || null;
-
   const stats = {
-    active: jobs.filter(j => j.status === "active").length,
-    closed: jobs.filter(j => j.status === "closed").length,
-    draft: jobs.filter(j => j.status === "draft").length,
+    active:    jobs.filter(j => j.status === "active").length,
+    closed:    jobs.filter(j => j.status === "closed").length,
+    draft:     jobs.filter(j => j.status === "draft").length,
     totalApps: jobs.reduce((sum, j) => sum + j.applicantsCount, 0),
   };
 
@@ -188,7 +177,7 @@ export default function MyJobs() {
               <p style={{ margin: 0, fontSize: 12, color: dark ? "#9CA3AF" : "#6B7280", textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>{label}</p>
             </div>
           ))}
-          <button style={{ marginLeft: 8, padding: "0 16px", background: "#059669", color: "#fff", border: "none", borderRadius: 6, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+          <button style={{ marginLeft: 8, padding: "0 16px", background: "#111827", color: "#fff", border: "none", borderRadius: 6, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
             Post Job
           </button>
         </div>
@@ -218,7 +207,7 @@ export default function MyJobs() {
         </div>
         {selected && (
           <div style={{ position: "sticky" as const, top: 20, height: "calc(100vh - 175px)", overflow: "hidden" }}>
-            <DetailPanel job={selected} onClose={() => setSelectedId(null)} onDelete={(id) => setJobToDelete(id)} />
+            <DetailPanel job={selected} onClose={() => setSelectedId(null)} onDelete={setJobToDelete} />
           </div>
         )}
       </div>
@@ -226,7 +215,7 @@ export default function MyJobs() {
       {/* Delete Modal */}
       {jobToDelete && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, padding: 20 }}>
-          <div style={{ background: "#fff", width: "100%", maxWidth: 400, borderRadius: 12, padding: 24, boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)" }}>
+          <div style={{ background: "#fff", width: "100%", maxWidth: 400, borderRadius: 12, padding: 24 }}>
             <h3 style={{ margin: "0 0 10px", fontSize: 18, fontWeight: 700, color: "#111827" }}>Delete Job Posting</h3>
             <p style={{ margin: "0 0 24px", fontSize: 14, color: "#4B5563", lineHeight: 1.5 }}>Are you sure you want to delete this job posting? This action cannot be undone and all associated applicants will be removed.</p>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
