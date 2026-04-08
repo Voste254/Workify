@@ -67,9 +67,6 @@ export default function PostJobs() {
       if (dbError) throw dbError;
 
       setIsSaved(true);
-      setTimeout(() => {
-        setIsSaved(false);
-      }, 2500);
       
       // Reset form
       setTitle("");
@@ -119,7 +116,10 @@ export default function PostJobs() {
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
                 </div>
                 <p style={{ marginTop: 20, fontSize: 18, fontWeight: 700, color: "#111827", fontFamily: "'DM Sans',sans-serif", textAlign: "center" }}>Job Posted!</p>
-                <p style={{ marginTop: 6, fontSize: 14, color: "#4B5563", fontFamily: "'DM Sans',sans-serif", textAlign: "center" }}>Your job is now live on the platform.</p>
+                <p style={{ marginTop: 6, fontSize: 14, color: "#4B5563", fontFamily: "'DM Sans',sans-serif", textAlign: "center", marginBottom: 20 }}>Your job is now live on the platform.</p>
+                <button type="button" onClick={() => setIsSaved(false)} style={{ width: "100%", padding: "10px", background: "#059669", color: "#fff", border: "none", borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+                  OK
+                </button>
               </>
             ) : null}
           </div>
