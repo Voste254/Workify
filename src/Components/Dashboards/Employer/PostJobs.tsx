@@ -57,12 +57,12 @@ export default function PostJobs() {
           employer_id: user.id,
           title,
           category: jobCategory,
-          type: jobType,
+          job_type: jobType,
           location,
-          salary,
+          salary_rate: salary,
           description,
           status,
-          is_hot: isUrgent,
+          is_urgent: isUrgent,
         }
       ]);
 
@@ -71,7 +71,7 @@ export default function PostJobs() {
       setIsSaved(true);
       setTimeout(() => {
         setIsSaved(false);
-        navigate("/employer/my-jobs");
+        alert("Job posted successfully!");
       }, 2000);
       
       // Reset form
