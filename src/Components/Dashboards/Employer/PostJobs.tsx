@@ -35,7 +35,6 @@ export default function PostJobs() {
   const [location, setLocation] = useState("");
   const [salary, setSalary] = useState("");
   const [description, setDescription] = useState("");
-  const [isUrgent, setIsUrgent] = useState(false);
 
   const submitJob = async (status: "active" | "draft") => {
     if (!title || !location || !salary || !description) {
@@ -62,7 +61,6 @@ export default function PostJobs() {
           salary_rate: salary,
           description,
           status,
-          is_urgent: isUrgent,
         }
       ]);
 
@@ -71,15 +69,13 @@ export default function PostJobs() {
       setIsSaved(true);
       setTimeout(() => {
         setIsSaved(false);
-        alert("Job posted successfully!");
-      }, 2000);
+      }, 2500);
       
       // Reset form
       setTitle("");
       setLocation("");
       setSalary("");
       setDescription("");
-      setIsUrgent(false);
       setJobCategory(CATEGORIES[0]);
       setJobType("Permanent");
       
@@ -98,7 +94,37 @@ export default function PostJobs() {
 
   return (
     <div style={{ fontFamily: "'DM Sans','Segoe UI',sans-serif", background: "#F9FAFB", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap');*{box-sizing:border-box}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:4px}`}</style>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap');
+        *{box-sizing:border-box}
+        ::-webkit-scrollbar{width:4px}
+        ::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:4px}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes pop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+      `}</style>
+      
+      {/* Modal */}
+      {(isSubmitting || isSaved) && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", transition: "opacity 0.2s" }}>
+          <div style={{ background: "#fff", padding: "40px", borderRadius: "16px", display: "flex", flexDirection: "column", alignItems: "center", width: "300px", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)" }}>
+            {isSubmitting ? (
+              <>
+                <div style={{ width: 44, height: 44, border: "4px solid #F3F4F6", borderTop: "4px solid #111827", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+                <p style={{ marginTop: 24, fontSize: 16, fontWeight: 600, color: "#111827", fontFamily: "'DM Sans',sans-serif" }}>Publishing Job...</p>
+                <p style={{ marginTop: 4, fontSize: 13, color: "#6B7280", fontFamily: "'DM Sans',sans-serif" }}>Please wait a moment</p>
+              </>
+            ) : isSaved ? (
+              <>
+                <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#D1FAE5", display: "flex", alignItems: "center", justifyContent: "center", color: "#059669", animation: "pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards" }}>
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </div>
+                <p style={{ marginTop: 20, fontSize: 18, fontWeight: 700, color: "#111827", fontFamily: "'DM Sans',sans-serif", textAlign: "center" }}>Job Posted!</p>
+                <p style={{ marginTop: 6, fontSize: 14, color: "#4B5563", fontFamily: "'DM Sans',sans-serif", textAlign: "center" }}>Your job is now live on the platform.</p>
+              </>
+            ) : null}
+          </div>
+        </div>
+      )}
 
       {/* Top bar */}
       <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -190,15 +216,10 @@ export default function PostJobs() {
 
             <h3 style={{ margin: "30px 0 20px", fontSize: 18, fontWeight: 700, color: "#111827", borderBottom: "1px solid #E5E7EB", paddingBottom: 10 }}>Job Specifics</h3>
 
-            <div style={{ marginBottom: 20 }}>
+            <div style={{ marginBottom: 30 }}>
               <label style={labelStyle}>Description & Requirements</label>
               <textarea rows={6} placeholder={jobCategory === "Corporate" ? "Detail the required skills, degree, and exact corporate responsibilities..." : "Detail the required skills, qualificatons and expected roles..."}
                 style={{ ...inputStyle, paddingLeft: 14, resize: "vertical" }} value={description} onChange={e => setDescription(e.target.value)} required />
-            </div>
-
-            <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 30 }}>
-               <input type="checkbox" id="urgent" checked={isUrgent} onChange={e => setIsUrgent(e.target.checked)} style={{ width: 16, height: 16, cursor: "pointer" }} />
-               <label htmlFor="urgent" style={{ fontSize: 15, color: "#111827", fontWeight: 600, cursor: "pointer", userSelect: "none" }}>Mark as urgent (Immediate start required)</label>
             </div>
 
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, borderTop: "1px solid #E5E7EB", paddingTop: 20 }}>
