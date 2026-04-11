@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { supabase } from "../../../lib/supabaseClient";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // ── Types & Config ─────────────────────────────────────────────────────────────
 type JobStatus = "active" | "closed" | "draft";
@@ -16,14 +17,7 @@ const STATUS_CONFIG: Record<JobStatus, { label: string; color: string; bg: strin
   draft:  { label: "Draft",  color: "#6B7280", bg: "#F3F4F6" },
 };
 
-// ── Mock Data ──────────────────────────────────────────────────────────────────
-const MOCK_JOBS: Job[] = [
-  { id: "1", title: "Senior Frontend Developer", location: "San Francisco, CA (Remote)", type: "Full-time",  createdAt: "2025-02-15", lastUpdated: "2025-03-08", applicantsCount: 45, status: "active", department: "Engineering" },
-  { id: "2", title: "Product Designer",          location: "New York, NY",              type: "Contract",   createdAt: "2025-02-20", lastUpdated: "2025-03-05", applicantsCount: 12, status: "active", department: "Design"      },
-  { id: "3", title: "Backend Engineer",          location: "Remote",                    type: "Full-time",  createdAt: "2025-01-10", lastUpdated: "2025-02-28", applicantsCount: 89, status: "closed", department: "Engineering" },
-  { id: "4", title: "Marketing Manager",         location: "Chicago, IL",               type: "Full-time",  createdAt: "2025-03-09", lastUpdated: "2025-03-09", applicantsCount: 0,  status: "draft",  department: "Marketing"   },
-  { id: "5", title: "Data Analyst",              location: "Austin, TX",                type: "Full-time",  createdAt: "2025-02-25", lastUpdated: "2025-03-02", applicantsCount: 34, status: "active", department: "Data"        },
-];
+// ── Mock Data removed – data fetched from Supabase ────────────────────────────
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 const fmtDate = (d: string) => new Date(d).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" });
@@ -140,11 +134,76 @@ function DetailPanel({ job, onClose, onDelete }: { job: Job; onClose: () => void
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function MyJobs({ setActivePage }: { setActivePage?: (page: string) => void } = {}) {
-  const [jobs, setJobs] = useState(MOCK_JOBS);
-  const [selectedId, setSelectedId] = useState<string | null>("1");
+  const { user } = useAuth();
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<JobStatus | "all">("all");
   const [jobToDelete, setJobToDelete] = useState<string | null>(null);
+
+  // ── Fetch jobs from Supabase ───────────────────────────────────────────────
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchJobs = async () => {
+      setLoading(true);
+      setFetchError(null);
+
+      try {
+        // 1. Fetch all jobs for this employer
+        const { data: jobRows, error: jobErr } = await supabase
+          .from("jobs")
+          .select("id, title, location, job_type, created_at, updated_at, status, category")
+          .eq("employer_id", user.id)
+          .order("updated_at", { ascending: false });
+
+        if (jobErr) throw jobErr;
+        if (!jobRows) { setJobs([]); return; }
+
+        // 2. Fetch applicant counts per job
+        const jobIds = jobRows.map(j => j.id);
+        let countMap: Record<string, number> = {};
+
+        if (jobIds.length > 0) {
+          const { data: appRows, error: appErr } = await supabase
+            .from("applications")
+            .select("job_id")
+            .in("job_id", jobIds);
+
+          if (!appErr && appRows) {
+            appRows.forEach(row => {
+              countMap[row.job_id] = (countMap[row.job_id] || 0) + 1;
+            });
+          }
+        }
+
+        // 3. Map DB rows → Job interface
+        const mapped: Job[] = jobRows.map(row => ({
+          id: row.id,
+          title: row.title,
+          location: row.location ?? "",
+          type: row.job_type ?? "",
+          createdAt: row.created_at,
+          lastUpdated: row.updated_at ?? row.created_at,
+          status: (row.status as JobStatus) ?? "draft",
+          department: row.category ?? "",
+          applicantsCount: countMap[row.id] ?? 0,
+        }));
+
+        setJobs(mapped);
+        if (mapped.length > 0) setSelectedId(mapped[0].id);
+      } catch (err: any) {
+        console.error("MyJobs fetch error:", err);
+        setFetchError(err.message || "Failed to load jobs.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, [user]);
 
   const q = search.toLowerCase();
   const filtered = useMemo(() => jobs
@@ -159,6 +218,25 @@ export default function MyJobs({ setActivePage }: { setActivePage?: (page: strin
     draft:     jobs.filter(j => j.status === "draft").length,
     totalApps: jobs.reduce((sum, j) => sum + j.applicantsCount, 0),
   };
+
+  // ── Loading / error states ─────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <div style={{ fontFamily: "'DM Sans','Segoe UI',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh", flexDirection: "column", gap: 12 }}>
+        <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap');@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}`}</style>
+        <div style={{ width: 36, height: 36, border: "4px solid #F3F4F6", borderTop: "4px solid #111827", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+        <p style={{ margin: 0, fontSize: 15, color: "#9CA3AF" }}>Loading your jobs…</p>
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div style={{ fontFamily: "'DM Sans','Segoe UI',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh", flexDirection: "column", gap: 12 }}>
+        <p style={{ margin: 0, fontSize: 15, color: "#EF4444" }}>⚠ {fetchError}</p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ fontFamily: "'DM Sans','Segoe UI',sans-serif", background: "#F9FAFB", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
