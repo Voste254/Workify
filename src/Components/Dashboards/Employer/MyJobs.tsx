@@ -3,9 +3,9 @@ import { supabase } from "../../../lib/supabaseClient";
 import { useAuth } from "../../../contexts/AuthContext";
 
 // ── Types & Config ─────────────────────────────────────────────────────────────
-type JobStatus = "active" | "closed" | "draft";
+export type JobStatus = "active" | "closed" | "draft";
 
-interface Job {
+export interface Job {
   id: string; title: string; location: string; type: string;
   createdAt: string; lastUpdated: string; applicantsCount: number;
   status: JobStatus; department: string;
@@ -70,7 +70,7 @@ function JobCard({ job, selected, onSelect }: { job: Job; selected: boolean; onS
 }
 
 // ── Detail Panel ───────────────────────────────────────────────────────────────
-function DetailPanel({ job, onClose, onDelete }: { job: Job; onClose: () => void; onDelete: (id: string) => void }) {
+function DetailPanel({ job, onClose, onDelete, onEdit }: { job: Job; onClose: () => void; onDelete: (id: string) => void; onEdit: (job: Job) => void }) {
   const cfg = STATUS_CONFIG[job.status];
   return (
     <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 10, height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -83,7 +83,7 @@ function DetailPanel({ job, onClose, onDelete }: { job: Job; onClose: () => void
           </div>
           <div style={{ display: "flex", gap: 6 }}>
             <button onClick={() => onDelete(job.id)} style={{ ...iconBtn("#EF4444"), borderColor: "#FCA5A5", background: "#FEF2F2" }} title="Delete Job">{Ico.trash}</button>
-            <button style={iconBtn()}>{Ico.edit}</button>
+            <button onClick={() => onEdit(job)} style={iconBtn()} title="Edit Job">{Ico.edit}</button>
             <button onClick={onClose} style={iconBtn()}>{Ico.close}</button>
           </div>
         </div>
@@ -133,7 +133,7 @@ function DetailPanel({ job, onClose, onDelete }: { job: Job; onClose: () => void
 }
 
 // ── Main ───────────────────────────────────────────────────────────────────────
-export default function MyJobs({ setActivePage }: { setActivePage?: (page: string) => void } = {}) {
+export default function MyJobs({ setActivePage, onEditJob }: { setActivePage?: (page: string) => void; onEditJob?: (job: Job) => void } = {}) {
   const { user } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
@@ -285,7 +285,7 @@ export default function MyJobs({ setActivePage }: { setActivePage?: (page: strin
         </div>
         {selected && (
           <div style={{ position: "sticky" as const, top: 20, height: "calc(100vh - 175px)", overflow: "hidden" }}>
-            <DetailPanel job={selected} onClose={() => setSelectedId(null)} onDelete={setJobToDelete} />
+            <DetailPanel job={selected} onClose={() => setSelectedId(null)} onDelete={setJobToDelete} onEdit={(job) => { onEditJob?.(job); setActivePage?.("Post Job"); }} />
           </div>
         )}
       </div>

@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CATEGORIES } from "../Employee/FindJobs";
 import { supabase } from "../../../lib/supabaseClient";
 import { useAuth } from "../../../contexts/AuthContext";
+import type { Job } from "./MyJobs";
 
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
@@ -22,7 +23,7 @@ const inputIcon = { position: "absolute" as const, left: 12, color: "#9CA3AF" };
 const inputStyle = { width: "100%", padding: "10px 14px 10px 36px", border: "1.5px solid #E5E7EB", borderRadius: 8, fontSize: 16, color: "#111827", background: "#fff", outline: "none", fontFamily: "'DM Sans',sans-serif", transition: "border-color 0.15s" };
 
 // ── Main ───────────────────────────────────────────────────────────────────────
-export default function PostJobs() {
+export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | null; onSaved?: () => void } = {}) {
   const { user } = useAuth();
 
   const [isSaved, setIsSaved] = useState(false);
@@ -36,8 +37,30 @@ export default function PostJobs() {
   const [salary, setSalary] = useState("");
   const [description, setDescription] = useState("");
 
+  // Pre-fill form when an editingJob is provided
+  useEffect(() => {
+    if (editingJob) {
+      setTitle(editingJob.title);
+      setLocation(editingJob.location);
+      setJobType(editingJob.type || "Permanent");
+      setJobCategory(editingJob.department || CATEGORIES[0]);
+      // salary_rate is not in the Job interface, will stay empty unless we add it
+      setSalary("");
+      setDescription("");
+    } else {
+      // Reset form for a fresh post
+      setTitle("");
+      setLocation("");
+      setSalary("");
+      setDescription("");
+      setJobCategory(CATEGORIES[0]);
+      setJobType("Permanent");
+    }
+  }, [editingJob]);
+
   const submitJob = async (status: "active" | "draft") => {
-    if (!title || !location || !salary || !description) {
+    const isEdit = !!editingJob;
+    if (!title || !location || (!isEdit && (!salary || !description))) {
       setError("Please fill out all required fields.");
       return;
     }
@@ -51,30 +74,53 @@ export default function PostJobs() {
     setError(null);
 
     try {
-      const { error: dbError } = await supabase.from("jobs").insert([
-        {
-          employer_id: user.id,
-          title,
-          category: jobCategory,
-          job_type: jobType,
-          location,
-          salary_rate: salary,
-          description,
-          status,
-        }
-      ]);
+      if (editingJob) {
+        // UPDATE existing job
+        const { error: dbError } = await supabase
+          .from("jobs")
+          .update({
+            title,
+            category: jobCategory,
+            job_type: jobType,
+            location,
+            ...(salary ? { salary_rate: salary } : {}),
+            ...(description ? { description } : {}),
+            status,
+          })
+          .eq("id", editingJob.id);
 
-      if (dbError) throw dbError;
+        if (dbError) throw dbError;
+      } else {
+        // INSERT new job
+        if (!user) { setError("You must be logged in to post a job."); setIsSubmitting(false); return; }
+
+        const { error: dbError } = await supabase.from("jobs").insert([
+          {
+            employer_id: user.id,
+            title,
+            category: jobCategory,
+            job_type: jobType,
+            location,
+            salary_rate: salary,
+            description,
+            status,
+          }
+        ]);
+
+        if (dbError) throw dbError;
+      }
 
       setIsSaved(true);
       
-      // Reset form
-      setTitle("");
-      setLocation("");
-      setSalary("");
-      setDescription("");
-      setJobCategory(CATEGORIES[0]);
-      setJobType("Permanent");
+      if (!editingJob) {
+        // Reset form only for new posts
+        setTitle("");
+        setLocation("");
+        setSalary("");
+        setDescription("");
+        setJobCategory(CATEGORIES[0]);
+        setJobType("Permanent");
+      }
       
     } catch (err: any) {
       console.error("Error posting job:", err);
@@ -115,9 +161,9 @@ export default function PostJobs() {
                 <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#D1FAE5", display: "flex", alignItems: "center", justifyContent: "center", color: "#059669", animation: "pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards" }}>
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
                 </div>
-                <p style={{ marginTop: 20, fontSize: 18, fontWeight: 700, color: "#111827", fontFamily: "'DM Sans',sans-serif", textAlign: "center" }}>Job Posted!</p>
-                <p style={{ marginTop: 6, fontSize: 14, color: "#4B5563", fontFamily: "'DM Sans',sans-serif", textAlign: "center", marginBottom: 20 }}>Your job is now live on the platform.</p>
-                <button type="button" onClick={() => setIsSaved(false)} style={{ width: "100%", padding: "10px", background: "#059669", color: "#fff", border: "none", borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+                <p style={{ marginTop: 20, fontSize: 18, fontWeight: 700, color: "#111827", fontFamily: "'DM Sans',sans-serif", textAlign: "center" }}>{editingJob ? "Job Updated!" : "Job Posted!"}</p>
+                <p style={{ marginTop: 6, fontSize: 14, color: "#4B5563", fontFamily: "'DM Sans',sans-serif", textAlign: "center", marginBottom: 20 }}>{editingJob ? "Your changes have been saved." : "Your job is now live on the platform."}</p>
+                <button type="button" onClick={() => { setIsSaved(false); onSaved?.(); }} style={{ width: "100%", padding: "10px", background: "#059669", color: "#fff", border: "none", borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
                   OK
                 </button>
               </>
@@ -129,8 +175,8 @@ export default function PostJobs() {
       {/* Top bar */}
       <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#111827" }}>Post a New Job</h1>
-          <p style={{ margin: 0, fontSize: 14, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>Find Top Talent & Casual Labor in Kenya</p>
+          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#111827" }}>{editingJob ? "Edit Job" : "Post a New Job"}</h1>
+          <p style={{ margin: 0, fontSize: 14, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>{editingJob ? `Editing: ${editingJob.title}` : "Find Top Talent & Casual Labor in Kenya"}</p>
         </div>
         <div>
           {isSaved && <span style={{ marginRight: 16, fontSize: 15, color: "#059669", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 6 }}>{Ico.check} Job Posted Successfully</span>}
@@ -227,7 +273,7 @@ export default function PostJobs() {
                  Save as Draft
                </button>
                <button type="submit" disabled={isSubmitting} style={{ padding: "10px 20px", background: "#111827", color: "#fff", border: "none", borderRadius: 8, fontSize: 16, fontWeight: 600, cursor: isSubmitting ? "not-allowed" : "pointer", opacity: isSubmitting ? 0.7 : 1, fontFamily: "'DM Sans',sans-serif" }}>
-                 {isSubmitting ? "Publishing..." : "Publish Job"}
+                 {isSubmitting ? (editingJob ? "Saving..." : "Publishing...") : (editingJob ? "Save Changes" : "Publish Job")}
                </button>
             </div>
 

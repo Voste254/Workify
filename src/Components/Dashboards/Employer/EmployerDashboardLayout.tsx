@@ -4,6 +4,7 @@ import TopBar from "../Employee/Topbar";
 import Home from "./EmployerDashboardHome";
 import PostJobs from "./PostJobs";
 import MyJobs from "./MyJobs";
+import type { Job } from "./MyJobs";
 import FindTalent from "./FindTalent";
 import Reports from "./Reports";
 import Messages from "./Messages";
@@ -30,8 +31,14 @@ type ActivePage =
   | "Settings";
 
 const EmployerDashboardLayout = () => {
-  const [activePage, setActivePage] =
-    useState<ActivePage>("Dashboard");
+  const [activePage, setActivePage] = useState<ActivePage>("Dashboard");
+  const [editingJob, setEditingJob] = useState<Job | null>(null);
+
+  const navigate = (page: ActivePage) => {
+    // Clear editingJob when going anywhere other than Post Job
+    if (page !== "Post Job") setEditingJob(null);
+    setActivePage(page);
+  };
 
   const renderContent = () => {
     switch (activePage) {
@@ -39,10 +46,15 @@ const EmployerDashboardLayout = () => {
         return <Home/>;
 
       case "My Jobs":
-        return <MyJobs setActivePage={(page) => setActivePage(page as ActivePage)} />;
+        return (
+          <MyJobs
+            setActivePage={(page) => navigate(page as ActivePage)}
+            onEditJob={(job) => { setEditingJob(job); }}
+          />
+        );
 
       case "Post Job":
-        return <PostJobs/>;
+        return <PostJobs editingJob={editingJob} onSaved={() => { setEditingJob(null); navigate("My Jobs"); }} />;
 
       case "Applicants":
         return <Applicants/> ;
@@ -80,7 +92,7 @@ const EmployerDashboardLayout = () => {
     <div className="flex h-screen bg-gray-100">
       <EmployerSidebar
         activeComponent={activePage}
-        setActiveComponent={setActivePage}
+        setActiveComponent={navigate}
       />
 
       <div className="flex-1 flex flex-col">
