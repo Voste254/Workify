@@ -33,6 +33,7 @@ const Ico = {
   close:    I('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>', 14),
   edit:     I('<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>', 12),
   trash:    I('<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>', 14),
+  salary:   I('<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/>', 12),
 };
 
 // ── Shared styles ──────────────────────────────────────────────────────────────
@@ -52,6 +53,9 @@ function JobCard({ job, selected, onSelect }: { job: Job; selected: boolean; onS
           <div style={{ display: "flex", gap: 10, marginTop: 8, flexWrap: "wrap" as const }}>
             <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 13, color: "#9CA3AF" }}>{Ico.location} {job.location}</span>
             <span style={{ fontSize: 13, color: "#6B7280", padding: "2px 7px", background: "#F3F4F6", borderRadius: 3, fontWeight: 500 }}>{job.type}</span>
+            {job.salaryRate && (
+              <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 13, color: "#059669", fontWeight: 600, fontFamily: "'DM Mono',monospace" }}>{Ico.salary} {job.salaryRate}</span>
+            )}
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginTop: 14 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -107,10 +111,16 @@ function DetailPanel({ job, onClose, onDelete, onEdit }: { job: Job; onClose: ()
 
         <p style={sectionLabel}>Overview</p>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 20 }}>
-          {[["Posted Date", fmtDate(job.createdAt)], ["Last Update", fmtDate(job.lastUpdated)], ["Department", job.department], ["Job Type", job.type]].map(([label, value]) => (
+          {([
+            ["Posted Date", fmtDate(job.createdAt)],
+            ["Last Update", fmtDate(job.lastUpdated)],
+            ["Department",  job.department],
+            ["Job Type",    job.type],
+            ...(job.salaryRate ? [["Salary / Rate", job.salaryRate]] : []),
+          ] as [string, string][]).map(([label, value]) => (
             <div key={label} style={{ padding: "10px 12px", borderRadius: 6, background: "#F9FAFB", border: "1px solid #E5E7EB" }}>
               <p style={{ margin: "0 0 2px", fontSize: 12, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</p>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#111827", fontFamily: label.includes("Date") || label.includes("Update") ? "'DM Mono',monospace" : "inherit" }}>{value}</p>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: label === "Salary / Rate" ? "#059669" : "#111827", fontFamily: label.includes("Date") || label.includes("Update") || label === "Salary / Rate" ? "'DM Mono',monospace" : "inherit" }}>{value}</p>
             </div>
           ))}
         </div>
