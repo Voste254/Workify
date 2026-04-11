@@ -9,6 +9,7 @@ export interface Job {
   id: string; title: string; location: string; type: string;
   createdAt: string; lastUpdated: string; applicantsCount: number;
   status: JobStatus; department: string;
+  salaryRate: string; description: string;
 }
 
 const STATUS_CONFIG: Record<JobStatus, { label: string; color: string; bg: string }> = {
@@ -155,7 +156,7 @@ export default function MyJobs({ setActivePage, onEditJob }: { setActivePage?: (
         // 1. Fetch all jobs for this employer
         const { data: jobRows, error: jobErr } = await supabase
           .from("jobs")
-          .select("id, title, location, job_type, created_at, updated_at, status, category")
+          .select("id, title, location, job_type, created_at, updated_at, status, category, salary_rate, description")
           .eq("employer_id", user.id)
           .order("updated_at", { ascending: false });
 
@@ -190,6 +191,8 @@ export default function MyJobs({ setActivePage, onEditJob }: { setActivePage?: (
           status: (row.status as JobStatus) ?? "draft",
           department: row.category ?? "",
           applicantsCount: countMap[row.id] ?? 0,
+          salaryRate: row.salary_rate ?? "",
+          description: row.description ?? "",
         }));
 
         setJobs(mapped);

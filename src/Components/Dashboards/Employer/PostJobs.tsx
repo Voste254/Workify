@@ -44,9 +44,8 @@ export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | n
       setLocation(editingJob.location);
       setJobType(editingJob.type || "Permanent");
       setJobCategory(editingJob.department || CATEGORIES[0]);
-      // salary_rate is not in the Job interface, will stay empty unless we add it
-      setSalary("");
-      setDescription("");
+      setSalary(editingJob.salaryRate ?? "");
+      setDescription(editingJob.description ?? "");
     } else {
       // Reset form for a fresh post
       setTitle("");
@@ -86,6 +85,7 @@ export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | n
             ...(salary ? { salary_rate: salary } : {}),
             ...(description ? { description } : {}),
             status,
+            updated_at: new Date().toISOString(),
           })
           .eq("id", editingJob.id);
 
