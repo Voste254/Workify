@@ -79,6 +79,7 @@ const EmployerDashboardLayout = () => {
   return (
     <div className="flex h-screen bg-gray-100">
       <EmployerSidebar
+        activeComponent={activePage}
         setActiveComponent={setActivePage}
       />
 

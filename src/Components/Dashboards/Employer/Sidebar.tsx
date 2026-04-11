@@ -31,6 +31,7 @@ type ActivePage =
   | "Settings";
 
 type SidebarProps = {
+  activeComponent: ActivePage;
   setActiveComponent: (page: ActivePage) => void;
 };
 
@@ -63,12 +64,10 @@ const otherMenu: MenuItem[] = [
   { name: "Settings", icon: Settings },
 ];
 
-const EmployerSidebar = ({ setActiveComponent }: SidebarProps) => {
-  const [active, setActive] = useState<ActivePage>("Dashboard");
+const EmployerSidebar = ({ activeComponent, setActiveComponent }: SidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
 
   const handleClick = (page: ActivePage) => {
-    setActive(page);
     setActiveComponent(page);
   };
 
@@ -79,7 +78,7 @@ const EmployerSidebar = ({ setActiveComponent }: SidebarProps) => {
         onClick={() => handleClick(item.name)}
         title={collapsed ? item.name : undefined}
         className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition ${
-          active === item.name
+          activeComponent === item.name
             ? "bg-green-50 text-green-600 shadow-sm"
             : "text-gray-600 hover:bg-gray-100"
         } ${collapsed ? "justify-center px-0" : ""}`}
@@ -87,7 +86,7 @@ const EmployerSidebar = ({ setActiveComponent }: SidebarProps) => {
         <item.icon
           size={20}
           className={`shrink-0 ${
-            active === item.name
+            activeComponent === item.name
               ? "text-green-600"
               : "text-gray-400"
           }`}
