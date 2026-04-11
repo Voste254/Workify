@@ -39,7 +39,7 @@ const EmployerDashboardLayout = () => {
         return <Home/>;
 
       case "My Jobs":
-        return <MyJobs/>;
+        return <MyJobs setActivePage={(page) => setActivePage(page as ActivePage)} />;
 
       case "Post Job":
         return <PostJobs/>;

@@ -139,7 +139,7 @@ function DetailPanel({ job, onClose, onDelete }: { job: Job; onClose: () => void
 }
 
 // ── Main ───────────────────────────────────────────────────────────────────────
-export default function MyJobs() {
+export default function MyJobs({ setActivePage }: { setActivePage?: (page: string) => void } = {}) {
   const [jobs, setJobs] = useState(MOCK_JOBS);
   const [selectedId, setSelectedId] = useState<string | null>("1");
   const [search, setSearch] = useState("");
@@ -177,7 +177,7 @@ export default function MyJobs() {
               <p style={{ margin: 0, fontSize: 12, color: dark ? "#9CA3AF" : "#6B7280", textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>{label}</p>
             </div>
           ))}
-          <button style={{ marginLeft: 8, padding: "0 16px", background: "#111827", color: "#fff", border: "none", borderRadius: 6, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+          <button onClick={() => setActivePage?.("Post Job")} style={{ marginLeft: 8, padding: "0 16px", background: "#111827", color: "#fff", border: "none", borderRadius: 6, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
             Post Job
           </button>
         </div>
