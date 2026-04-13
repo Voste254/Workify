@@ -7,12 +7,12 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const menus = [
-    { name: "Home", items: [], hasDropdown: false },
-    { name: "Find Jobs", items: ["All Jobs", "By Category", "By Location"], hasDropdown: true },
-    { name: "Employers", items: ["Post a Job", "Employer Dashboard"], hasDropdown: true },
-    { name: "Job Seekers", items: ["Browse Job Seekers", "Job seekers' Dashboard"], hasDropdown: true },
-    { name: "Blog", items: [], hasDropdown: false },
-    { name: "Pages", items: ["About Us", "Contact", "FAQ"], hasDropdown: true },
+    { name: "Home",        items: [],                                             hasDropdown: false, href: "/"    },
+    { name: "Find Jobs",   items: ["All Jobs", "By Category", "By Location"],     hasDropdown: true,  href: null  },
+    { name: "Employers",   items: ["Post a Job", "Employer Dashboard"],           hasDropdown: true,  href: null  },
+    { name: "Job Seekers", items: ["Browse Job Seekers", "Job seekers' Dashboard"], hasDropdown: true, href: null  },
+    { name: "Blog",        items: [],                                             hasDropdown: false, href: "/#blog" },
+    { name: "FAQ",         items: [],                                             hasDropdown: false, href: "/faq" },
   ];
 
   return (
@@ -38,18 +38,23 @@ const Navbar = () => {
               onMouseEnter={() => menu.hasDropdown && setOpenMenu(index)}
               onMouseLeave={() => menu.hasDropdown && setOpenMenu(null)}
             >
-              <button className="flex items-center gap-1 text-gray-700 hover:text-green-600 font-medium transition">
-                {menu.name}
-
-                {/* Only show arrow if menu has dropdown */}
-                {menu.hasDropdown && (
+              {menu.hasDropdown ? (
+                <button className="flex items-center gap-1 text-gray-700 hover:text-green-600 font-medium transition">
+                  {menu.name}
                   <ChevronDown
                     className={`h-4 w-4 transition-transform duration-200 ${
                       openMenu === index ? "rotate-180 text-green-600" : ""
                     }`}
                   />
-                )}
-              </button>
+                </button>
+              ) : (
+                <Link
+                  to={menu.href ?? "/"}
+                  className="text-gray-700 hover:text-green-600 font-medium transition"
+                >
+                  {menu.name}
+                </Link>
+              )}
 
               {/* Dropdown */}
               {menu.hasDropdown && openMenu === index && (
@@ -104,39 +109,43 @@ const Navbar = () => {
         <div className="lg:hidden bg-white border-t shadow-md">
           {menus.map((menu, index) => (
             <div key={index} className="border-b">
-              <button
-                onClick={() => 
-                  menu.hasDropdown
-                    ? setOpenMenu(openMenu === index ? null : index)
-                    : undefined
-                }
-                className="w-full text-left px-4 py-3 text-gray-700 font-medium hover:bg-green-50 hover:text-green-600 flex justify-between items-center"
-              >
-                <span>{menu.name}</span>
-
-                {/* Only show arrow for dropdown items */}
-                {menu.hasDropdown && (
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform duration-200 ${
-                      openMenu === index ? "rotate-180 text-green-600" : ""
-                    }`}
-                  />
-                )}
-              </button>
-
-              {/* Mobile dropdown */}
-              {menu.hasDropdown && openMenu === index && (
-                <div className="pl-6 pb-2 transition-all duration-300">
-                  {menu.items.map((item, i) => (
-                    <a
-                      key={i}
-                      href="#"
-                      className="block px-2 py-2 text-gray-600 hover:text-green-600 transition"
-                    >
-                      {item}
-                    </a>
-                  ))}
-                </div>
+              {menu.hasDropdown ? (
+                <>
+                  <button
+                    onClick={() =>
+                      setOpenMenu(openMenu === index ? null : index)
+                    }
+                    className="w-full text-left px-4 py-3 text-gray-700 font-medium hover:bg-green-50 hover:text-green-600 flex justify-between items-center"
+                  >
+                    <span>{menu.name}</span>
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform duration-200 ${
+                        openMenu === index ? "rotate-180 text-green-600" : ""
+                      }`}
+                    />
+                  </button>
+                  {openMenu === index && (
+                    <div className="pl-6 pb-2 transition-all duration-300">
+                      {menu.items.map((item, i) => (
+                        <a
+                          key={i}
+                          href="#"
+                          className="block px-2 py-2 text-gray-600 hover:text-green-600 transition"
+                        >
+                          {item}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <Link
+                  to={menu.href ?? "/"}
+                  onClick={() => setMobileOpen(false)}
+                  className="block w-full text-left px-4 py-3 text-gray-700 font-medium hover:bg-green-50 hover:text-green-600 transition"
+                >
+                  {menu.name}
+                </Link>
               )}
             </div>
           ))}

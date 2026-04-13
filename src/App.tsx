@@ -7,6 +7,7 @@ import Navbar from "./Components/pages/Navbar";
 import Offer from "./Components/pages/Offer";
 import Partners from "./Components/pages/Partners";
 import Services from "./Components/pages/Services";
+import FAQ from "./Components/pages/FAQ";
 import { Route, Routes } from "react-router-dom";
 import Login from "./Components/pages/Authentication/Login";
 import Signup from "./Components/pages/Authentication/SignupWizard";
@@ -37,6 +38,7 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/faq" element={<><Navbar /><FAQ /></>} />
 
         {/* Protected routes — must be logged in */}
         <Route element={<ProtectedRoute />}>
