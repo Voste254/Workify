@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ChevronDown, Search, HelpCircle, Briefcase, Users, Shield, CreditCard, Star } from "lucide-react";
+import { supabase } from "../../lib/supabaseClient";
 
 // ── Data ────────────────────────────────────────────────────────────────────────
 const CATEGORIES = [
@@ -12,132 +13,12 @@ const CATEGORIES = [
   { id: "billing",   label: "Billing",         icon: CreditCard },
 ];
 
-const FAQS = [
-  // General
-  {
-    id:       1,
-    category: "general",
-    question: "What is Workify?",
-    answer:
-      "Workify is a modern job marketplace that connects job seekers with employers across Kenya and beyond. We support everything from permanent corporate roles to daily casual labour, gig work, and internships — all in one platform.",
-  },
-  {
-    id:       2,
-    category: "general",
-    question: "Is Workify free to use?",
-    answer:
-      "Workify is free for job seekers. Employers enjoy a free tier with limited job postings and can upgrade to premium plans for unlimited postings, advanced analytics, and featured placement.",
-  },
-  {
-    id:       3,
-    category: "general",
-    question: "What types of jobs can I find on Workify?",
-    answer:
-      "You can find a wide range of jobs including Permanent, Contract, Internship, Daily/Day-Labor, Hourly/Shift, and Gig/Project-Based roles across many industries and locations.",
-  },
-  {
-    id:       4,
-    category: "general",
-    question: "How does Workify match candidates with employers?",
-    answer:
-      "Workify uses a smart matching engine that considers your skills, location, expected pay, and availability to surface the most relevant jobs. Employers also benefit from AI-assisted candidate recommendations.",
-  },
-  // Job Seekers
-  {
-    id:       5,
-    category: "jobseeker",
-    question: "How do I create a job seeker profile?",
-    answer:
-      "Click 'Sign Up', select 'Job Seeker', and complete the multi-step wizard. You'll add your personal details, skills, work preferences, and expected pay rate. Your profile is immediately searchable by employers.",
-  },
-  {
-    id:       6,
-    category: "jobseeker",
-    question: "Can I apply for multiple jobs at once?",
-    answer:
-      "Yes. Browse listings and hit 'Apply' on any job. You can track all your applications in one place under your dashboard's 'Applications' tab, with real-time status updates.",
-  },
-  {
-    id:       7,
-    category: "jobseeker",
-    question: "How do I get notified about new job matches?",
-    answer:
-      "Enable notifications in your profile settings. You'll receive real-time alerts via the platform notification bell and optionally by email whenever a job matching your profile is posted.",
-  },
-  {
-    id:       8,
-    category: "jobseeker",
-    question: "Can employers contact me directly?",
-    answer:
-      "Yes. If your profile is set to discoverable, employers running 'Find Talent' searches can message you directly through the Workify messaging system without sharing your personal contact details.",
-  },
-  // Employers
-  {
-    id:       9,
-    category: "employer",
-    question: "How do I post a job on Workify?",
-    answer:
-      "Log in to your Employer Dashboard, click 'Post Job', fill in the job title, category, type, location, salary, and description, then click 'Publish Job'. Your listing goes live immediately.",
-  },
-  {
-    id:       10,
-    category: "employer",
-    question: "Can I edit or delete a job I've posted?",
-    answer:
-      "Absolutely. Head to 'My Jobs' in your dashboard, select the job, and click the edit (pencil) icon to modify it or the delete (trash) icon to remove it. Changes are saved back to our database instantly.",
-  },
-  {
-    id:       11,
-    category: "employer",
-    question: "How do I review and manage applicants?",
-    answer:
-      "Your 'Applicants' dashboard shows every candidate who applied to your listings. You can filter by job, review profiles, move candidates through stages (Applied → Interviewing → Offered), and message them directly.",
-  },
-  {
-    id:       12,
-    category: "employer",
-    question: "Can I save a job as a draft before publishing?",
-    answer:
-      "Yes. On the Post Job form, click 'Save as Draft' instead of 'Publish Job'. Drafts appear in your My Jobs list with a 'Draft' badge and can be published at any time.",
-  },
-  // Account
-  {
-    id:       13,
-    category: "account",
-    question: "How do I reset my password?",
-    answer:
-      "On the Login page, click 'Forgot password?', enter your registered email, and you'll receive a secure reset link within a few minutes. The link expires after 24 hours.",
-  },
-  {
-    id:       14,
-    category: "account",
-    question: "Can I have both a Job Seeker and Employer profile?",
-    answer:
-      "Yes. During sign-up you can select both roles. Both dashboards are accessible from a single account, letting you hire talent and search for work simultaneously.",
-  },
-  {
-    id:       15,
-    category: "account",
-    question: "How do I delete my account?",
-    answer:
-      "Go to Settings → Account → Danger Zone and click 'Delete Account'. This action is irreversible and will permanently remove all your data, job listings, and applications from Workify.",
-  },
-  // Billing
-  {
-    id:       16,
-    category: "billing",
-    question: "What payment methods does Workify accept?",
-    answer:
-      "We accept M-Pesa, Visa, Mastercard, and major mobile money providers. All transactions are secured with 256-bit SSL encryption.",
-  },
-  {
-    id:       17,
-    category: "billing",
-    question: "Can I cancel my subscription at any time?",
-    answer:
-      "Yes. You can cancel your paid plan from Settings → Billing at any time. Your premium features remain active until the end of the current billing period, after which you revert to the free tier.",
-  },
-];
+export interface FAQItem {
+  id: number;
+  category: string;
+  question: string;
+  answer: string;
+}
 
 // ── Accordion Item ───────────────────────────────────────────────────────────────
 function AccordionItem({
@@ -145,7 +26,7 @@ function AccordionItem({
   isOpen,
   onToggle,
 }: {
-  faq: (typeof FAQS)[0];
+  faq: FAQItem;
   isOpen: boolean;
   onToggle: () => void;
 }) {
@@ -194,18 +75,44 @@ function AccordionItem({
 
 // ── Main ─────────────────────────────────────────────────────────────────────────
 export default function FAQ() {
+  const [faqs, setFaqs]             = useState<FAQItem[]>([]);
+  const [loading, setLoading]       = useState(true);
   const [openId, setOpenId]         = useState<number | null>(null);
   const [activeCategory, setActive] = useState("all");
   const [search, setSearch]         = useState("");
 
+  useEffect(() => {
+    async function fetchFaqs() {
+      try {
+        const { data, error } = await supabase
+          .from('faqs')
+          .select('id, category, question, answer')
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true });
+          
+        if (error) throw error;
+        
+        if (data) {
+          setFaqs(data);
+        }
+      } catch (err) {
+        console.error("Error fetching FAQs:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchFaqs();
+  }, []);
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
-    return FAQS.filter((f) => {
+    return faqs.filter((f) => {
       const matchCat  = activeCategory === "all" || f.category === activeCategory;
       const matchText = !q || f.question.toLowerCase().includes(q) || f.answer.toLowerCase().includes(q);
       return matchCat && matchText;
     });
-  }, [activeCategory, search]);
+  }, [activeCategory, search, faqs]);
 
   const toggle = (id: number) => setOpenId((prev) => (prev === id ? null : id));
 
@@ -246,7 +153,7 @@ export default function FAQ() {
           {/* Stats strip */}
           <div className="flex-1 z-10 grid grid-cols-2 gap-4 w-full max-w-sm">
             {[
-              { value: `${FAQS.length}+`,  label: "Questions Answered" },
+              { value: loading ? "..." : `${faqs.length}+`,  label: "Questions Answered" },
               { value: "5",                label: "Topic Categories" },
               { value: "24/7",             label: "Support Available" },
               { value: "< 2 min",          label: "Avg. Read Time" },
@@ -312,7 +219,11 @@ export default function FAQ() {
         </div>
 
         {/* FAQ list */}
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="w-8 h-8 rounded-full border-4 border-green-200 border-t-green-600 animate-spin" />
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="text-center py-20">
             <HelpCircle size={48} className="text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 text-base font-medium">No questions match your search.</p>
