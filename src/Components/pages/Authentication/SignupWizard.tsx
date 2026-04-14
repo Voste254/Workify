@@ -70,7 +70,6 @@ export default function Signup() {
   const [step, setStep] = useState(1);
   const [roles, setRoles] = useState<Role[]>([]);
   const [showPw, setShowPw] = useState(false);
-  const [pwStrength, setPwStrength] = useState(0);
   const [done, setDone] = useState(false);
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -85,15 +84,6 @@ export default function Signup() {
   });
 
   const set = (k: string, v: string | boolean) => setForm(p => ({ ...p, [k]: v }));
-
-  const strength = (pw: string) => {
-    let s = 0;
-    if (pw.length >= 8) s++;
-    if (/[A-Z]/.test(pw)) s++;
-    if (/[0-9]/.test(pw)) s++;
-    if (/[^A-Za-z0-9]/.test(pw)) s++;
-    return s;
-  };
 
   const toggleRole = (r: Role) => setRoles(p => p.includes(r) ? p.filter(x => x !== r) : [...p, r]);
 
@@ -190,7 +180,7 @@ const handleSignup = async () => {
               <Field label="Phone" error={attemptedSteps[1] && !form.phone && "Required"}><Input type="tel" placeholder="+254 7xx xxx xxx" value={form.phone} onChange={e => set("phone", e.target.value.replace(/[^0-9+\s-]/g, ""))}/></Field>
               <Field label="Password" error={attemptedSteps[1] && !pwValid && "Password must meet all rules below"}>
                 <div className="relative">
-                  <Input type={showPw ? "text" : "password"} placeholder="Min. 8 characters" value={form.password} onChange={e => { set("password", e.target.value); setPwStrength(strength(e.target.value)); }}/>
+                  <Input type={showPw ? "text" : "password"} placeholder="Min. 8 characters" value={form.password} onChange={e => set("password", e.target.value)}/>
                   <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-mono">{showPw ? "hide" : "show"}</button>
                 </div>
                 {form.password && (() => {
