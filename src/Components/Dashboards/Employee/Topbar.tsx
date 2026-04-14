@@ -20,7 +20,7 @@ const TopBar = () => {
 
   const handleLogout = async () => {
     await signOut();
-    navigate("/login");
+    navigate("/");
   };
 
   const switchToEmployer = () => {
