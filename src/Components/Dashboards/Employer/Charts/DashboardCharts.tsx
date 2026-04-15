@@ -100,7 +100,7 @@ export default function DashboardCharts({ lineData, barData, pieData }: Dashboar
                     dataKey="value"
                     stroke="none"
                   >
-                    {pieData.map((entry, index) => (
+                    {pieData.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
