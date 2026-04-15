@@ -43,7 +43,7 @@ const EmployerDashboardLayout = () => {
   const renderContent = () => {
     switch (activePage) {
       case "Dashboard":
-        return <Home/>;
+        return <Home setActivePage={(page) => navigate(page as ActivePage)} />;
 
       case "My Jobs":
         return (
