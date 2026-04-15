@@ -62,7 +62,7 @@ export default function EmployerDashboardHome({ setActivePage }: EmployerDashboa
   return (
     <div className="font-sans min-h-screen bg-gray-50 flex flex-col p-6 gap-8">
       {/* ── Welcome Header ── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6" style={{ border: "1.5px solid #E5E7EB", borderRadius: 10 }}>
         <div>
            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
              Good morning, {profile?.first_name || "Employer"}! 👋
@@ -72,13 +72,15 @@ export default function EmployerDashboardHome({ setActivePage }: EmployerDashboa
         <div className="flex gap-3 w-full md:w-auto">
           <button 
             onClick={() => setActivePage?.("Find Talent")}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 px-4 py-2.5 rounded-xl font-medium text-sm hover:bg-gray-50 transition shadow-sm"
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white text-gray-700 px-4 py-2.5 font-medium text-sm hover:bg-gray-50 transition"
+            style={{ border: "1px solid #E5E7EB", borderRadius: 6 }}
           >
             {Ico.search} Browse Talent
           </button>
           <button 
             onClick={() => setActivePage?.("Post Job")}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-gray-900 text-white px-4 py-2.5 rounded-xl font-medium text-sm hover:bg-gray-800 transition shadow-sm"
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-gray-900 text-white px-4 py-2.5 font-medium text-sm hover:bg-gray-800 transition"
+            style={{ border: "none", borderRadius: 6 }}
           >
             {Ico.plus} Post a Job
           </button>
@@ -88,14 +90,14 @@ export default function EmployerDashboardHome({ setActivePage }: EmployerDashboa
       {/* ── Key Metrics (KPIs) ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {STATS.map((stat, i) => (
-          <div key={i} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+          <div key={i} className="bg-white p-5 cursor-pointer" style={{ border: "1.5px solid #E5E7EB", borderRadius: 10 }}>
             <div className="flex justify-between items-start mb-4">
               <div style={{ backgroundColor: stat.bg, color: stat.text }} className="p-3 rounded-xl flex items-center justify-center">
                 {stat.icon}
               </div>
             </div>
-            <p className="text-sm font-medium text-gray-500 mb-1">{stat.title}</p>
-            <p className="text-2xl font-bold text-gray-900 font-mono tracking-tight">{stat.value}</p>
+            <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 700, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.1em" }}>{stat.title}</p>
+            <p style={{ margin: 0, fontSize: 24, fontWeight: 700, color: "#111827", fontFamily: "'DM Mono', monospace" }}>{stat.value}</p>
           </div>
         ))}
       </div>
@@ -106,8 +108,8 @@ export default function EmployerDashboardHome({ setActivePage }: EmployerDashboa
       </div>
 
       {/* ── Recent Activity / Candidates Pipeline ── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-6">
-         <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-white">
+      <div className="bg-white overflow-hidden mb-6" style={{ border: "1.5px solid #E5E7EB", borderRadius: 10 }}>
+         <div className="px-6 py-5 flex justify-between items-center bg-white" style={{ borderBottom: "1px solid #E5E7EB" }}>
             <h3 className="text-lg font-bold text-gray-900">Recent Applications</h3>
             <button 
                onClick={() => setActivePage?.("Applicants")}
