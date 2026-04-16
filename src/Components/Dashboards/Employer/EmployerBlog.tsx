@@ -22,38 +22,37 @@ const EmployerBlog = () => {
   const [content, setContent] = useState("");
 
   return (
-    <div style={{ background: "#F9FAFB", minHeight: "100vh", padding: "40px", maxWidth: "1152px", margin: "0 auto", fontFamily: "'DM Sans','Segoe UI',sans-serif", color: "#111827", display: "flex", flexDirection: "column", gap: "40px", boxSizing: "border-box" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap');*{box-sizing:border-box}`}</style>
+    <div className="bg-gray-50 min-h-screen p-10 max-w-[1152px] mx-auto font-sans text-gray-900 flex flex-col gap-10">
       
       {/* Header */}
       <div>
-        <h1 style={{ fontSize: "30px", fontWeight: "700", margin: "0 0 8px 0" }}>Blog & Insights</h1>
-        <p style={{ color: "#6b7280", margin: "0", fontSize: "16px" }}>Publish articles, share industry insights, and connect with job seekers.</p>
+        <h1 className="text-[30px] font-bold m-0 mb-2">Blog & Insights</h1>
+        <p className="text-gray-500 m-0 text-base">Publish articles, share industry insights, and connect with job seekers.</p>
       </div>
 
       {/* Editor Section */}
-      <div style={{ backgroundColor: "#ffffff", padding: "32px", borderRadius: "16px", border: "1px solid #e5e7eb", boxShadow: "0 1px 2px rgba(0,0,0,0.05)", boxSizing: "border-box" }}>
-        <h2 style={{ fontSize: "20px", fontWeight: "600", margin: "0 0 24px 0" }}>Create New Post</h2>
+      <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
+        <h2 className="text-[20px] font-semibold m-0 mb-6">Create New Post</h2>
         
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <label style={{ fontSize: "14px", fontWeight: "500", color: "#374151" }}>Post Title</label>
+        <div className="flex flex-col gap-6">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-6">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-gray-700">Post Title</label>
               <input 
                 type="text" 
                 placeholder="Enter an engaging title..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                style={{ width: "100%", padding: "10px 16px", backgroundColor: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "8px", fontFamily: "inherit", fontSize: "15px", boxSizing: "border-box", outline: "none", color: "#111827" }}
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-[15px] outline-none text-gray-900 focus:border-gray-300 transition-colors duration-200"
               />
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <label style={{ fontSize: "14px", fontWeight: "500", color: "#374151" }}>Category</label>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-gray-700">Category</label>
               <select 
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                style={{ width: "100%", padding: "10px 16px", backgroundColor: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "8px", fontFamily: "inherit", fontSize: "15px", boxSizing: "border-box", outline: "none", color: "#111827", cursor: "pointer" }}
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-[15px] outline-none text-gray-900 cursor-pointer focus:border-gray-300 transition-colors duration-200"
               >
                 {CATEGORIES.map(cat => (
                   <option key={cat} value={cat}>{cat}</option>
@@ -62,45 +61,45 @@ const EmployerBlog = () => {
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <label style={{ fontSize: "14px", fontWeight: "500", color: "#374151" }}>Cover Image</label>
-            <label style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "100%", height: "128px", border: "2px dashed #d1d5db", borderRadius: "8px", backgroundColor: "#f9fafb", cursor: "pointer" }}>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "20px", paddingBottom: "24px" }}>
-                <ImageIcon style={{ width: "32px", height: "32px", marginBottom: "12px", color: "#9ca3af" }} />
-                <p style={{ margin: "0 0 8px 0", fontSize: "14px", color: "#6b7280" }}><strong style={{ fontWeight: "600", color: "#374151" }}>Click to upload</strong> or drag and drop</p>
-                <p style={{ margin: 0, fontSize: "12px", color: "#9ca3af" }}>SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-gray-700">Cover Image</label>
+            <label className="flex flex-col items-center justify-center w-full h-[128px] border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors duration-200">
+              <div className="flex flex-col items-center pt-5 pb-6">
+                <ImageIcon className="w-8 h-8 mb-3 text-gray-400" />
+                <p className="m-0 mb-2 text-sm text-gray-500"><strong className="font-semibold text-gray-700">Click to upload</strong> or drag and drop</p>
+                <p className="m-0 text-xs text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
               </div>
-              <input type="file" style={{ display: "none" }} accept="image/*" />
+              <input type="file" className="hidden" accept="image/*" />
             </label>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <label style={{ fontSize: "14px", fontWeight: "500", color: "#374151" }}>Content</label>
-            <div style={{ border: "1px solid #e5e7eb", borderRadius: "8px", backgroundColor: "#f9fafb", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-              <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "8px", padding: "8px 12px", borderBottom: "1px solid #e5e7eb", backgroundColor: "#ffffff" }}>
-                <button style={{ background: "none", border: "none", padding: "6px", cursor: "pointer", color: "#6b7280", borderRadius: "4px" }}><Bold size={16} /></button>
-                <button style={{ background: "none", border: "none", padding: "6px", cursor: "pointer", color: "#6b7280", borderRadius: "4px" }}><Italic size={16} /></button>
-                <div style={{ width: "1px", height: "16px", backgroundColor: "#d1d5db", margin: "0 4px" }}></div>
-                <button style={{ background: "none", border: "none", padding: "6px", cursor: "pointer", color: "#6b7280", borderRadius: "4px" }}><Link2 size={16} /></button>
-                <button style={{ background: "none", border: "none", padding: "6px", cursor: "pointer", color: "#6b7280", borderRadius: "4px" }}><List size={16} /></button>
-                <button style={{ background: "none", border: "none", padding: "6px", cursor: "pointer", color: "#6b7280", borderRadius: "4px" }}><ImageIcon size={16} /></button>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-gray-700">Content</label>
+            <div className="border border-gray-200 rounded-lg bg-gray-50 overflow-hidden flex flex-col focus-within:border-gray-300 transition-colors duration-200">
+              <div className="flex items-center flex-wrap gap-2 px-3 py-2 border-b border-gray-200 bg-white">
+                <button className="bg-transparent border-none p-1.5 cursor-pointer text-gray-500 rounded hover:bg-gray-100 transition-colors"><Bold size={16} /></button>
+                <button className="bg-transparent border-none p-1.5 cursor-pointer text-gray-500 rounded hover:bg-gray-100 transition-colors"><Italic size={16} /></button>
+                <div className="w-[1px] h-4 bg-gray-300 mx-1"></div>
+                <button className="bg-transparent border-none p-1.5 cursor-pointer text-gray-500 rounded hover:bg-gray-100 transition-colors"><Link2 size={16} /></button>
+                <button className="bg-transparent border-none p-1.5 cursor-pointer text-gray-500 rounded hover:bg-gray-100 transition-colors"><List size={16} /></button>
+                <button className="bg-transparent border-none p-1.5 cursor-pointer text-gray-500 rounded hover:bg-gray-100 transition-colors"><ImageIcon size={16} /></button>
               </div>
               <textarea 
                 rows={8}
                 placeholder="Write your insights here..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                style={{ width: "100%", padding: "16px", backgroundColor: "transparent", border: "none", outline: "none", fontFamily: "'DM Mono', monospace", fontSize: "14px", resize: "vertical", boxSizing: "border-box", color: "#111827" }}
+                className="w-full p-4 bg-transparent border-none outline-none font-mono text-sm resize-y text-gray-900 min-h-[150px]"
               />
             </div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", flexWrap: "wrap", gap: "12px", paddingTop: "8px" }}>
-            <button style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 20px", backgroundColor: "#f3f4f6", color: "#374151", border: "none", borderRadius: "8px", fontFamily: "inherit", fontWeight: "500", cursor: "pointer", fontSize: "14px" }}>
+          <div className="flex items-center justify-end flex-wrap gap-3 pt-2">
+            <button className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 text-gray-700 border-none rounded-lg font-medium cursor-pointer text-sm hover:bg-gray-200 transition-colors">
               <Save size={18} />
               Save Draft
             </button>
-            <button style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 24px", backgroundColor: "#111827", color: "#ffffff", border: "none", borderRadius: "8px", fontFamily: "inherit", fontWeight: "500", cursor: "pointer", fontSize: "14px" }}>
+            <button className="flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white border-none rounded-lg font-medium cursor-pointer text-sm hover:bg-gray-800 transition-colors">
               <Send size={18} />
               Post Blog
             </button>
@@ -110,42 +109,35 @@ const EmployerBlog = () => {
 
       {/* Recent Posts */}
       <div>
-        <h2 style={{ fontSize: "20px", fontWeight: "600", margin: "0 0 24px 0" }}>Recent Posts</h2>
-        <div style={{ backgroundColor: "#ffffff", borderRadius: "16px", border: "1px solid #e5e7eb", boxShadow: "0 1px 2px rgba(0,0,0,0.05)", overflow: "hidden" }}>
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", textAlign: "left", borderCollapse: "collapse", minWidth: "600px" }}>
+        <h2 className="text-[20px] font-semibold m-0 mb-6">Recent Posts</h2>
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[600px]">
               <thead>
-                <tr style={{ backgroundColor: "#f9fafb", color: "#6b7280", fontSize: "14px" }}>
-                  <th style={{ padding: "16px 24px", fontWeight: "500", borderBottom: "1px solid #e5e7eb" }}>Title</th>
-                  <th style={{ padding: "16px 24px", fontWeight: "500", borderBottom: "1px solid #e5e7eb" }}>Category</th>
-                  <th style={{ padding: "16px 24px", fontWeight: "500", borderBottom: "1px solid #e5e7eb" }}>Date</th>
-                  <th style={{ padding: "16px 24px", fontWeight: "500", borderBottom: "1px solid #e5e7eb" }}>Status</th>
-                  <th style={{ padding: "16px 24px", fontWeight: "500", borderBottom: "1px solid #e5e7eb", textAlign: "right" }}>Actions</th>
+                <tr className="bg-gray-50 text-gray-500 text-sm">
+                  <th className="px-6 py-4 font-medium border-b border-gray-200">Title</th>
+                  <th className="px-6 py-4 font-medium border-b border-gray-200">Category</th>
+                  <th className="px-6 py-4 font-medium border-b border-gray-200">Date</th>
+                  <th className="px-6 py-4 font-medium border-b border-gray-200">Status</th>
+                  <th className="px-6 py-4 font-medium border-b border-gray-200 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {RECENT_POSTS.map((post) => (
-                  <tr key={post.id} style={{ borderBottom: "1px solid #f3f4f6" }}>
-                    <td style={{ padding: "16px 24px", fontWeight: "500", color: "#111827" }}>{post.title}</td>
-                    <td style={{ padding: "16px 24px", fontSize: "14px", color: "#4b5563" }}>
-                      <span style={{ padding: "4px 10px", backgroundColor: "#f3f4f6", borderRadius: "6px" }}>{post.category}</span>
+                  <tr key={post.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-gray-900">{post.title}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      <span className="px-2.5 py-1 bg-gray-100 rounded-md">{post.category}</span>
                     </td>
-                    <td style={{ padding: "16px 24px", fontSize: "14px", color: "#6b7280" }}>{post.date}</td>
-                    <td style={{ padding: "16px 24px" }}>
-                      <span style={{ 
-                        padding: "4px 10px", 
-                        fontSize: "12px", 
-                        fontWeight: "600", 
-                        borderRadius: "9999px",
-                        backgroundColor: post.status === "Published" ? "#d1fae5" : "#fef3c7",
-                        color: post.status === "Published" ? "#047857" : "#b45309"
-                      }}>
+                    <td className="px-6 py-4 text-sm text-gray-500">{post.date}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${post.status === "Published" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
                         {post.status}
                       </span>
                     </td>
-                    <td style={{ padding: "16px 24px", textAlign: "right" }}>
-                      <button style={{ background: "none", border: "none", fontSize: "14px", fontWeight: "500", color: "#2563eb", cursor: "pointer", marginRight: "16px" }}>Edit</button>
-                      <button style={{ background: "none", border: "none", fontSize: "14px", fontWeight: "500", color: "#dc2626", cursor: "pointer" }}>Delete</button>
+                    <td className="px-6 py-4 text-right">
+                      <button className="bg-transparent border-none text-sm font-medium text-blue-600 cursor-pointer mr-4 hover:text-blue-800 transition-colors">Edit</button>
+                      <button className="bg-transparent border-none text-sm font-medium text-red-600 cursor-pointer hover:text-red-800 transition-colors">Delete</button>
                     </td>
                   </tr>
                 ))}
