@@ -9,13 +9,13 @@ interface Application {
   phone: string; location: string; note?: string; rateRequest: string;
 }
 
-const SC: Record<Stage, { label: string; color: string; bg: string; step: number }> = {
-  applied:    { label: "Applied",    color: "#6B7280", bg: "#F3F4F6", step: 1 },
-  screening:  { label: "Screening",  color: "#D97706", bg: "#FEF3C7", step: 2 },
-  interview:  { label: "Interview",  color: "#2563EB", bg: "#DBEAFE", step: 3 },
-  offer:      { label: "Offer",      color: "#7C3AED", bg: "#EDE9FE", step: 4 },
-  hired:      { label: "Hired",      color: "#059669", bg: "#D1FAE5", step: 5 },
-  rejected:   { label: "Rejected",   color: "#FFFFFF", bg: "#DC2626", step: 0 },
+const SC: Record<Stage, { label: string; textClass: string; bgClass: string; step: number }> = {
+  applied:    { label: "Applied",    textClass: "text-gray-500", bgClass: "bg-gray-100", step: 1 },
+  screening:  { label: "Screening",  textClass: "text-amber-600", bgClass: "bg-amber-50", step: 2 },
+  interview:  { label: "Interview",  textClass: "text-blue-600", bgClass: "bg-blue-100", step: 3 },
+  offer:      { label: "Offer",      textClass: "text-purple-600", bgClass: "bg-purple-100", step: 4 },
+  hired:      { label: "Hired",      textClass: "text-emerald-600", bgClass: "bg-emerald-100", step: 5 },
+  rejected:   { label: "Rejected",   textClass: "text-white", bgClass: "bg-red-600", step: 0 },
 };
 
 const STAGES_FLOW: Stage[] = ["applied", "screening", "interview", "offer", "hired"];
@@ -29,7 +29,7 @@ const MOCK_APPS: Application[] = [
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
-const fmtDate = (d: string) => new Date(d).toLocaleDateString("en-KE", { day: "2-digit", month: "short", year: "numeric" });
+
 const daysAgo = (d: string) => { const n = Math.floor((Date.now() - new Date(d).getTime()) / 86400000); return n === 0 ? "Today" : n === 1 ? "Yesterday" : `${n}d ago`; };
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
@@ -47,22 +47,22 @@ const Ico = {
 };
 
 // ── Shared styles ──────────────────────────────────────────────────────────────
-const sel = { fontFamily: "'DM Sans',sans-serif", padding: "7px 10px", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 14, color: "#374151", background: "#F9FAFB", cursor: "pointer", outline: "none" };
-const sectionLabel = { margin: "0 0 8px", fontSize: 13, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.1em", color: "#9CA3AF" };
+const sel = "font-sans px-2.5 py-[7px] border border-gray-200 rounded-md text-sm text-gray-700 bg-gray-50 cursor-pointer outline-none";
+const sectionLabel = "m-[0_0_8px] text-[13px] font-bold uppercase tracking-[0.1em] text-gray-400";
 
 // ── Progress Bar ───────────────────────────────────────────────────────────────
 function StageBar({ stage }: { stage: Stage }) {
   const cfg = SC[stage];
   if (stage === "rejected") return (
-    <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", padding: "3px 10px", borderRadius: 3, color: cfg.color, background: cfg.bg }}>{cfg.label}</span>
+    <span className={`text-[13px] font-semibold tracking-[0.06em] uppercase px-2.5 py-[3px] rounded-[3px] ${cfg.textClass} ${cfg.bgClass}`}>{cfg.label}</span>
   );
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+    <div className="flex items-center gap-1">
       {STAGES_FLOW.map(s => {
         const active = s === stage, past = SC[s].step < cfg.step;
-        return <div key={s} title={SC[s].label} style={{ width: active ? 28 : 8, height: 8, borderRadius: 4, background: active || past ? "#111827" : "#E5E7EB", opacity: past ? 0.3 : 1, transition: "width 0.3s ease" }} />;
+        return <div key={s} title={SC[s].label} className={`h-2 rounded bg-gray-900 transition-all duration-300 ${active ? "w-7" : "w-2"} ${!active && !past ? "bg-gray-200" : ""} ${past ? "opacity-30" : "opacity-100"}`} />;
       })}
-      <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "#111827", marginLeft: 4 }}>{cfg.label}</span>
+      <span className="text-[13px] font-semibold tracking-[0.05em] uppercase text-gray-900 ml-1">{cfg.label}</span>
     </div>
   );
 }
@@ -74,67 +74,67 @@ function DetailPanel({ app, onClose, onAdvance, onReject }: { app: Application; 
   const nextStage = activeIdx >= 0 && activeIdx < STAGES_FLOW.length - 1 ? STAGES_FLOW[activeIdx + 1] : null;
 
   return (
-    <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 10, height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div className="bg-white border-[1.5px] border-gray-200 rounded-[10px] h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <div style={{ padding: "18px 20px", borderBottom: "1px solid #E5E7EB" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <img src={app.avatar} alt="PFP" style={{ width: 44, height: 44, borderRadius: 10, objectFit: "cover", border: "1.5px solid #E5E7EB" }} />
+      <div className="px-5 py-[18px] border-b border-gray-200">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2.5">
+            <img src={app.avatar} alt="PFP" className="w-11 h-11 rounded-[10px] object-cover border-[1.5px] border-gray-200" />
             <div>
-              <p style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#111827" }}>{app.applicantName}</p>
-              <p style={{ margin: 0, fontSize: 14, color: "#6B7280" }}>{app.phone} · {app.location}</p>
+              <p className="m-0 text-[17px] font-bold text-gray-900">{app.applicantName}</p>
+              <p className="m-0 text-sm text-gray-500">{app.phone} · {app.location}</p>
             </div>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "1px solid #E5E7EB", borderRadius: 6, padding: "6px 8px", cursor: "pointer", color: "#6B7280" }}>{Ico.close}</button>
+          <button onClick={onClose} className="bg-transparent border border-gray-200 rounded-md px-2 py-1.5 cursor-pointer text-gray-500">{Ico.close}</button>
         </div>
-        <div style={{ display: "flex", gap: 6 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.05em", padding: "4px 10px", borderRadius: 4, textTransform: "uppercase" as const, color: cfg.color, background: cfg.bg }}>{cfg.label}</span>
-          <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 13, padding: "4px 10px", borderRadius: 4, color: "#374151", background: "#F3F4F6", fontWeight: 500 }}>
+        <div className="flex gap-1.5">
+          <span className={`text-[13px] font-semibold tracking-[0.05em] px-2.5 py-1 rounded uppercase ${cfg.textClass} ${cfg.bgClass}`}>{cfg.label}</span>
+          <span className="flex items-center gap-1 text-[13px] px-2.5 py-1 rounded text-gray-700 bg-gray-100 font-medium">
              {app.jobCategory === "Corporate" ? Ico.briefcase : Ico.tool} {app.jobCategory}
           </span>
         </div>
       </div>
 
       {/* Body */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "18px 20px" }}>
+      <div className="flex-1 overflow-y-auto px-5 py-[18px]">
         
         {/* Pipeline Actions */}
-        <p style={sectionLabel}>Pipeline Actions</p>
-        <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+        <p className={sectionLabel}>Pipeline Actions</p>
+        <div className="flex gap-2 mb-5">
           {nextStage && app.stage !== "rejected" && (
-            <button onClick={onAdvance} style={{ flex: 1, padding: "8px", background: "#111827", color: "#fff", border: "none", borderRadius: 6, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", display: "flex", justifyContent: "center", gap: 4, alignItems: "center" }}>
+            <button onClick={onAdvance} className="flex-1 p-2 bg-gray-900 text-white border-none rounded-md text-sm font-semibold cursor-pointer font-sans flex justify-center gap-1 items-center">
               Move to {SC[nextStage].label} {Ico.chevronR}
             </button>
           )}
           {app.stage !== "hired" && app.stage !== "rejected" && (
-            <button onClick={onReject} style={{ padding: "8px 14px", background: "#FEE2E2", color: "#DC2626", border: "none", borderRadius: 6, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+            <button onClick={onReject} className="px-3.5 py-2 bg-red-100 text-red-600 border-none rounded-md text-sm font-semibold cursor-pointer font-sans">
               Reject
             </button>
           )}
         </div>
 
         {/* Applied For */}
-        <p style={sectionLabel}>Applied For</p>
-        <div style={{ padding: "12px 14px", borderRadius: 6, border: "1px solid #E5E7EB", marginBottom: 20, background: "#FAFAFA" }}>
-          <p style={{ margin: 0, fontSize: 15, color: "#111827", fontWeight: 600 }}>{app.jobTitle}</p>
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
-            <span style={{ fontSize: 13, color: "#6B7280" }}>Expectation: <span style={{ color: "#111827", fontWeight: 600 }}>{app.rateRequest}</span></span>
-            <span style={{ fontSize: 13, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>{daysAgo(app.appliedDate)}</span>
+        <p className={sectionLabel}>Applied For</p>
+        <div className="px-3.5 py-3 rounded-md border border-gray-200 mb-5 bg-gray-50">
+          <p className="m-0 text-[15px] text-gray-900 font-semibold">{app.jobTitle}</p>
+          <div className="flex justify-between mt-2">
+            <span className="text-[13px] text-gray-500">Expectation: <span className="text-gray-900 font-semibold">{app.rateRequest}</span></span>
+            <span className="text-[13px] text-gray-400 font-mono">{daysAgo(app.appliedDate)}</span>
           </div>
         </div>
 
         {/* Notes */}
         {app.note && <>
-          <p style={sectionLabel}>Manager Note</p>
-          <div style={{ padding: "12px 14px", borderRadius: 6, background: "#FFFBEB", border: "1px solid #FDE68A", marginBottom: 20 }}>
-            <p style={{ margin: 0, fontSize: 14, color: "#78350F", lineHeight: 1.6 }}>{app.note}</p>
+          <p className={sectionLabel}>Manager Note</p>
+          <div className="px-3.5 py-3 rounded-md bg-amber-50 border border-amber-200 mb-5">
+            <p className="m-0 text-sm text-yellow-900 leading-[1.6]">{app.note}</p>
           </div>
         </>}
 
         {/* Resources */}
-        <p style={sectionLabel}>Documents</p>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button style={{ flex: 1, padding: "8px", background: "#fff", color: "#374151", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", display: "flex", gap: 6, alignItems: "center", justifyContent: "center" }}>
+        <p className={sectionLabel}>Documents</p>
+        <div className="flex gap-2">
+          <button className="flex-1 p-2 bg-white text-gray-700 border border-gray-200 rounded-md text-sm font-semibold cursor-pointer font-sans flex gap-1.5 items-center justify-center">
             {Ico.download} View Resume
           </button>
         </div>
@@ -176,55 +176,55 @@ export default function Applicants() {
   };
 
   return (
-    <div style={{ fontFamily: "'DM Sans','Segoe UI',sans-serif", background: "#F9FAFB", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div className="font-sans bg-gray-50 min-h-screen flex flex-col">
        {/* Top bar */}
-       <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+       <div className="bg-white border-b border-gray-200 px-6 py-3.5 flex items-center justify-between">
         <div>
-          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#111827" }}>Manage Applications</h1>
-          <p style={{ margin: 0, fontSize: 14, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>{apps.filter(x => x.stage !== "rejected").length} active pipeline</p>
+          <h1 className="m-0 text-xl font-bold text-gray-900">Manage Applications</h1>
+          <p className="m-0 text-sm text-gray-400 font-mono">{apps.filter(x => x.stage !== "rejected").length} active pipeline</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "10px 24px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" as const }}>
-        <div style={{ position: "relative" as const, flex: 1, maxWidth: 260 }}>
-          <span style={{ position: "absolute" as const, left: 10, top: "50%", transform: "translateY(-50%)", color: "#9CA3AF" }}>{Ico.search}</span>
+      <div className="bg-white border-b border-gray-200 px-6 py-2.5 flex items-center gap-2.5 flex-wrap">
+        <div className="relative flex-1 max-w-[260px]">
+          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400">{Ico.search}</span>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search applicant or role…"
-            style={{ width: "100%", padding: "7px 10px 7px 32px", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 14, color: "#111827", background: "#F9FAFB", outline: "none" }} />
+            className="w-full py-[7px] pr-2.5 pl-8 border border-gray-200 rounded-md text-sm text-gray-900 bg-gray-50 outline-none" />
         </div>
-        <select value={filterStage} onChange={e => setFilterStage(e.target.value as Stage | "all")} style={sel}>
+        <select value={filterStage} onChange={e => setFilterStage(e.target.value as Stage | "all")} className={sel}>
           <option value="all">All Stages</option>
           {(Object.keys(SC) as Stage[]).map(s => <option key={s} value={s}>{SC[s].label}</option>)}
         </select>
-        <select value={filterType} onChange={e => setFilterType(e.target.value)} style={sel}>
+        <select value={filterType} onChange={e => setFilterType(e.target.value)} className={sel}>
           <option value="all">Corporate & Casual</option>
           <option value="Corporate">Corporate Only</option>
           <option value="Casual">Casual Only</option>
         </select>
-        <span style={{ fontSize: 14, color: "#9CA3AF", marginLeft: "auto", fontFamily: "'DM Mono',monospace" }}>{filtered.length} candidate{filtered.length !== 1 ? "s" : ""}</span>
+        <span className="text-sm text-gray-400 ml-auto font-mono">{filtered.length} candidate{filtered.length !== 1 ? "s" : ""}</span>
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, display: "grid", gridTemplateColumns: selected ? "1fr 380px" : "1fr", gap: 16, padding: 20, alignItems: "start" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className={`flex-1 grid gap-4 p-5 items-start ${selected ? "grid-cols-[1fr_380px]" : "grid-cols-1"}`}>
+        <div className="flex flex-col gap-2.5">
           {filtered.length === 0
-            ? <div style={{ padding: 48, textAlign: "center" as const, border: "1.5px dashed #E5E7EB", borderRadius: 10, background: "#fff" }}><p style={{ margin: 0, fontSize: 16, color: "#9CA3AF" }}>No applications match your filters.</p></div>
+            ? <div className="p-12 text-center border-[1.5px] border-dashed border-gray-200 rounded-[10px] bg-white"><p className="m-0 text-base text-gray-400">No applications match your filters.</p></div>
             : filtered.map(app => (
-               <div key={app.id} onClick={() => setSelectedId(p => p === app.id ? null : app.id)} style={{ background: "#fff", border: `1.5px solid ${selectedId === app.id ? "#111827" : "#E5E7EB"}`, borderRadius: 8, padding: "16px 18px", cursor: "pointer", opacity: app.stage === "rejected" ? 0.7 : 1, transition: "border-color 0.15s" }}>
-                 <div style={{ display: "flex", gap: 12 }}>
-                   <img src={app.avatar} alt="A" style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover", border: "1.5px solid #E5E7EB" }} />
-                   <div style={{ flex: 1, minWidth: 0 }}>
-                     <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: "#111827" }}>{app.applicantName}</p>
-                     <p style={{ margin: "2px 0 0", fontSize: 14, color: "#6B7280" }}>{app.jobTitle}</p>
-                     <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
-                       <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 13, color: "#9CA3AF" }}>{Ico.pin} {app.location}</span>
-                       <span style={{ fontSize: 13, color: "#6B7280", padding: "2px 7px", background: "#F3F4F6", borderRadius: 3, fontWeight: 500, display: "flex", alignItems: "center", gap: 4 }}>
+               <div key={app.id} onClick={() => setSelectedId(p => p === app.id ? null : app.id)} className={`bg-white border-[1.5px] rounded-lg px-[18px] py-4 cursor-pointer transition-colors duration-150 ${selectedId === app.id ? "border-gray-900" : "border-gray-200"} ${app.stage === "rejected" ? "opacity-70" : "opacity-100"}`}>
+                 <div className="flex gap-3">
+                   <img src={app.avatar} alt="A" className="w-10 h-10 rounded-lg object-cover border-[1.5px] border-gray-200" />
+                   <div className="flex-1 min-w-0">
+                     <p className="m-0 text-base font-semibold text-gray-900">{app.applicantName}</p>
+                     <p className="m-[2px_0_0] text-sm text-gray-500">{app.jobTitle}</p>
+                     <div className="flex gap-2.5 mt-2">
+                       <span className="flex items-center gap-[3px] text-[13px] text-gray-400">{Ico.pin} {app.location}</span>
+                       <span className="flex items-center gap-1 text-[13px] text-gray-500 px-[7px] py-[2px] bg-gray-100 rounded-[3px] font-medium">
                          {app.jobCategory === "Corporate" ? Ico.briefcase : Ico.tool} {app.jobCategory}
                        </span>
                      </div>
-                     <div style={{ marginTop: 12 }}><StageBar stage={app.stage} /></div>
-                     <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12 }}>
-                       <span style={{ fontSize: 13, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>Updated {daysAgo(app.lastUpdated)}</span>
+                     <div className="mt-3"><StageBar stage={app.stage} /></div>
+                     <div className="flex justify-between mt-3">
+                       <span className="text-[13px] text-gray-400 font-mono">Updated {daysAgo(app.lastUpdated)}</span>
                      </div>
                    </div>
                  </div>
@@ -234,7 +234,7 @@ export default function Applicants() {
         </div>
         
         {selected && (
-          <div style={{ position: "sticky" as const, top: 20, height: "calc(100vh - 175px)", overflow: "hidden" }}>
+          <div className="sticky top-5 h-[calc(100vh-175px)] overflow-hidden">
             <DetailPanel app={selected} onClose={() => setSelectedId(null)} onAdvance={handleAdvance} onReject={handleReject} />
           </div>
         )}
