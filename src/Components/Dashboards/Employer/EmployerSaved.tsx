@@ -49,40 +49,39 @@ const SAVED_CANDIDATES = [
 
 const EmployerSaved = () => {
   return (
-    <div style={{ background: "#F9FAFB", minHeight: "100vh", padding: "40px", maxWidth: "1152px", margin: "0 auto", fontFamily: "'DM Sans','Segoe UI',sans-serif", color: "#111827", display: "flex", flexDirection: "column", gap: "32px", boxSizing: "border-box" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap');*{box-sizing:border-box}`}</style>
+    <div className="bg-gray-50 min-h-screen p-10 max-w-[1152px] mx-auto font-sans text-gray-900 flex flex-col gap-8">
       
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "16px" }}>
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 style={{ fontSize: "30px", fontWeight: "700", margin: "0 0 8px 0" }}>Saved Candidates</h1>
-          <p style={{ color: "#6b7280", margin: "0", fontSize: "16px" }}>Manage and review the talent profiles you've bookmarked.</p>
+          <h1 className="text-[30px] font-bold m-0 mb-2">Saved Candidates</h1>
+          <p className="text-gray-500 m-0 text-base">Manage and review the talent profiles you've bookmarked.</p>
         </div>
         
         {/* Search */}
-        <div style={{ position: "relative", width: "288px" }}>
-          <Search size={18} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#9ca3af" }} />
+        <div className="relative w-72">
+          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input 
             type="text" 
             placeholder="Search saved candidates..."
-            style={{ width: "100%", padding: "10px 16px 10px 40px", backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "8px", fontFamily: "inherit", fontSize: "14px", boxSizing: "border-box", outline: "none", color: "#111827" }}
+            className="w-full py-2.5 pr-4 pl-10 bg-white border border-gray-200 rounded-lg font-sans text-sm outline-none text-gray-900 focus:border-gray-300 transition-colors"
           />
         </div>
       </div>
 
       {/* Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))", gap: "24px" }}>
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(380px,1fr))] gap-6">
         {SAVED_CANDIDATES.map(candidate => (
-          <div key={candidate.id} style={{ backgroundColor: "#ffffff", padding: "24px", borderRadius: "16px", border: "1px solid #e5e7eb", boxShadow: "0 1px 2px rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
+          <div key={candidate.id} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex flex-col">
             
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
-              <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-                <img src={candidate.avatar} alt={candidate.name} style={{ width: "64px", height: "64px", borderRadius: "50%", objectFit: "cover", border: "1px solid #f3f4f6" }} />
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex gap-4 items-center">
+                <img src={candidate.avatar} alt={candidate.name} className="w-16 h-16 rounded-full object-cover border border-gray-100" />
                 <div>
-                  <h3 style={{ fontSize: "18px", fontWeight: "600", margin: "0 0 4px 0", color: "#111827" }}>{candidate.name}</h3>
-                  <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
-                    <p style={{ margin: 0, color: "#4b5563", fontSize: "14px", fontWeight: "500" }}>{candidate.title}</p>
-                    <span style={{ padding: "2px 8px", backgroundColor: "#eef2ff", color: "#4f46e5", fontSize: "10px", fontWeight: "700", textTransform: "uppercase", borderRadius: "9999px", letterSpacing: "0.05em" }}>
+                  <h3 className="text-[18px] font-semibold m-[0_0_4px] text-gray-900">{candidate.name}</h3>
+                  <div className="flex items-center flex-wrap gap-2">
+                    <p className="m-0 text-gray-600 text-sm font-medium">{candidate.title}</p>
+                    <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-[10px] font-bold uppercase rounded-full tracking-[0.05em]">
                       {candidate.jobType}
                     </span>
                   </div>
@@ -90,39 +89,39 @@ const EmployerSaved = () => {
               </div>
               <button 
                 title="Remove from saved"
-                style={{ cursor: "pointer", background: "none", border: "none", color: "#9ca3af", padding: "8px", borderRadius: "8px" }}
+                className="cursor-pointer bg-transparent border-none text-gray-400 p-2 rounded-lg hover:bg-gray-50 hover:text-gray-600 transition-colors"
               >
                 <BookmarkMinus size={20} />
               </button>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "24px", fontSize: "14px", color: "#4b5563" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <MapPin size={16} style={{ color: "#9ca3af" }} />
+            <div className="flex flex-col gap-2 mb-6 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <MapPin size={16} className="text-gray-400" />
                 <span>{candidate.location}</span>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <Briefcase size={16} style={{ color: "#9ca3af" }} />
+              <div className="flex items-center gap-2">
+                <Briefcase size={16} className="text-gray-400" />
                 <span>{candidate.salary}</span>
               </div>
             </div>
 
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "24px" }}>
+            <div className="flex flex-wrap gap-2 mb-6">
               {candidate.skills.map(skill => (
-                <span key={skill} style={{ padding: "4px 12px", backgroundColor: "#f3f4f6", color: "#374151", fontSize: "12px", fontWeight: "500", borderRadius: "9999px" }}>
+                <span key={skill} className="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">
                   {skill}
                 </span>
               ))}
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "16px", borderTop: "1px solid #f3f4f6", marginTop: "auto", flexWrap: "wrap", gap: "16px" }}>
-              <span style={{ fontSize: "12px", color: "#9ca3af", fontWeight: "500" }}>{candidate.savedDate}</span>
-              <div style={{ display: "flex", gap: "8px" }}>
-                <button style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 16px", backgroundColor: "#f3f4f6", color: "#374151", border: "none", borderRadius: "8px", fontFamily: "inherit", fontWeight: "500", cursor: "pointer", fontSize: "14px" }}>
+            <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto flex-wrap gap-4">
+              <span className="text-xs text-gray-400 font-medium">{candidate.savedDate}</span>
+              <div className="flex gap-2">
+                <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 border-none rounded-lg font-medium cursor-pointer text-sm hover:bg-gray-200 transition-colors">
                   <MessageSquare size={16} />
                   Message
                 </button>
-                <button style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 16px", backgroundColor: "#111827", color: "#ffffff", border: "none", borderRadius: "8px", fontFamily: "inherit", fontWeight: "500", cursor: "pointer", fontSize: "14px" }}>
+                <button className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white border-none rounded-lg font-medium cursor-pointer text-sm hover:bg-gray-800 transition-colors">
                   <ExternalLink size={16} />
                   View Profile
                 </button>
