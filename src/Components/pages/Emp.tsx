@@ -9,20 +9,18 @@ import {
   ChevronLeft,
   ChevronRight,
   Heart,
-  Star,
 } from "lucide-react";
 
-p
 
 export default function EmployeeDashboard() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
-  const [bookmarks, setBookmarks] = useState({});
+  const [bookmarks, setBookmarks] = useState<Record<number, boolean>>({});
   const [selectedLocation, setSelectedLocation] = useState("All Location");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
-  const toggleBookmark = (id) =>
+  const toggleBookmark = (id: number) =>
     setBookmarks((prev) => ({ ...prev, [id]: !prev[id] }));
 
   const jobs = [
