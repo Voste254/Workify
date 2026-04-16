@@ -19,32 +19,33 @@ const Ico = {
 };
 
 // ── Shared styles ──────────────────────────────────────────────────────────────
-const sel = { fontFamily: "'DM Sans',sans-serif", padding: "7px 10px", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 14, color: "#374151", background: "#F9FAFB", cursor: "pointer", outline: "none" };
-const sectionLabel = { margin: "0 0 8px", fontSize: 13, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.1em", color: "#9CA3AF" };
-const iconBtn = (color = "#6B7280") => ({ background: "none", border: "1px solid #E5E7EB", borderRadius: 6, padding: "6px 8px", cursor: "pointer", color, display: "flex", alignItems: "center" as const });
+const sectionLabel = "m-[0_0_8px] text-[13px] font-bold uppercase tracking-[0.1em] text-gray-400 font-sans";
+const iconBtn = (colorClass = "text-gray-500") => `bg-transparent border border-gray-200 rounded-md px-2 py-1.5 cursor-pointer flex items-center ${colorClass} hover:bg-gray-50 transition-colors`;
 
 // ── Candidate Card ─────────────────────────────────────────────────────────────
 function CandidateCard({ cand, selected, onSelect, onBookmark }: { cand: Candidate; selected: boolean; onSelect: () => void; onBookmark: () => void }) {
   return (
-    <div onClick={onSelect} style={{ background: "#fff", border: `1.5px solid ${selected ? "#111827" : "#E5E7EB"}`, borderRadius: 8, padding: "16px 18px", cursor: "pointer", transition: "border-color 0.15s", position: "relative" as const }}>
-      <div style={{ display: "flex", gap: 12 }}>
-        <img src={cand.image} alt={cand.name} style={{ width: 44, height: 44, borderRadius: 10, border: "1.5px solid #E5E7EB", objectFit: "cover" }} />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
-            <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: "#111827" }}>{cand.name}</p>
-            <button onClick={e => { e.stopPropagation(); onBookmark(); }} style={{ background: "none", border: "none", cursor: "pointer", padding: 2, color: cand.isSaved ? "#D97706" : "#9CA3AF" }}>{Ico.bookmark(cand.isSaved)}</button>
+    <div onClick={onSelect} className={`bg-white border-[1.5px] rounded-lg px-[18px] py-4 cursor-pointer transition-colors duration-150 relative ${selected ? "border-gray-900" : "border-gray-200"}`}>
+      <div className="flex gap-3">
+        <img src={cand.image} alt={cand.name} className="w-11 h-11 rounded-[10px] border-[1.5px] border-gray-200 object-cover" />
+        <div className="flex-1 min-w-0">
+          <div className="flex justify-between mb-0.5">
+            <p className="m-0 text-base font-semibold text-gray-900">{cand.name}</p>
+            <button onClick={e => { e.stopPropagation(); onBookmark(); }} className={`bg-transparent border-none cursor-pointer p-0.5 hover:opacity-80 transition-opacity ${cand.isSaved ? "text-amber-600" : "text-gray-400"}`}>
+              {Ico.bookmark(cand.isSaved)}
+            </button>
           </div>
-          <p style={{ margin: 0, fontSize: 14, color: "#6B7280" }}>{cand.role}</p>
-          <div style={{ display: "flex", gap: 10, marginTop: 8, flexWrap: "wrap" as const }}>
-            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 13, color: "#9CA3AF" }}>{Ico.location} {cand.location}</span>
-            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 13, color: "#D97706", fontWeight: 600 }}>{Ico.star} {cand.rating} <span style={{ color: "#9CA3AF", fontWeight: 400 }}>({cand.reviews})</span></span>
+          <p className="m-0 text-sm text-gray-500">{cand.role}</p>
+          <div className="flex gap-2.5 mt-2 flex-wrap">
+            <span className="flex items-center gap-[3px] text-[13px] text-gray-400">{Ico.location} {cand.location}</span>
+            <span className="flex items-center gap-[3px] text-[13px] text-amber-600 font-semibold">{Ico.star} {cand.rating} <span className="text-gray-400 font-normal">({cand.reviews})</span></span>
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
-            {cand.skills.map(s => <span key={s} style={{ fontSize: 12, color: "#374151", background: "#F3F4F6", padding: "2px 6px", borderRadius: 4, fontWeight: 500 }}>{s}</span>)}
+          <div className="flex flex-wrap gap-1.5 mt-2.5">
+            {cand.skills.map(s => <span key={s} className="text-xs text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded font-medium">{s}</span>)}
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
-            <span style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{cand.rate}</span>
-            <span style={{ fontSize: 12, color: "#059669", background: "#D1FAE5", padding: "2px 6px", borderRadius: 4, fontWeight: 600, textTransform: "uppercase" as const }}>{cand.available}</span>
+          <div className="flex justify-between items-center mt-3">
+            <span className="text-sm font-semibold text-gray-900">{cand.rate}</span>
+            <span className="text-xs text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded font-semibold uppercase">{cand.available}</span>
           </div>
         </div>
       </div>
@@ -56,7 +57,7 @@ function CandidateCard({ cand, selected, onSelect, onBookmark }: { cand: Candida
 function InteractiveStars({ rating, onRate }: { rating: number, onRate: (r: number) => void }) {
   const [hover, setHover] = useState(0);
   return (
-    <div style={{ display: "flex", gap: 2, cursor: "pointer" }} onMouseLeave={() => setHover(0)}>
+    <div className="flex gap-0.5 cursor-pointer" onMouseLeave={() => setHover(0)}>
       {[1, 2, 3, 4, 5].map(star => {
         const isFilled = star <= (hover || Math.round(rating));
         return (
@@ -64,7 +65,7 @@ function InteractiveStars({ rating, onRate }: { rating: number, onRate: (r: numb
             key={star}
             onMouseEnter={() => setHover(star)}
             onClick={() => onRate(star)}
-            style={{ color: isFilled ? "#D97706" : "#E5E7EB", transition: "color 0.1s", display: "flex", alignItems: "center" }}
+            className={`flex items-center transition-colors duration-100 ${isFilled ? "text-amber-600" : "text-gray-200"}`}
             title={`Rate ${star} star${star > 1 ? 's' : ''}`}
           >
             {Ico.star}
@@ -78,61 +79,63 @@ function InteractiveStars({ rating, onRate }: { rating: number, onRate: (r: numb
 // ── Detail Panel ───────────────────────────────────────────────────────────────
 function DetailPanel({ cand, onClose, onBookmark, onRate }: { cand: Candidate; onClose: () => void; onBookmark: () => void; onRate: (r: number) => void }) {
   return (
-    <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 10, height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div className="bg-white border-[1.5px] border-gray-200 rounded-[10px] h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <div style={{ padding: "18px 20px", borderBottom: "1px solid #E5E7EB" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <img src={cand.image} alt={cand.name} style={{ width: 44, height: 44, borderRadius: 10, border: "1.5px solid #E5E7EB", objectFit: "cover" }} />
+      <div className="px-5 py-[18px] border-b border-gray-200">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2.5">
+            <img src={cand.image} alt={cand.name} className="w-11 h-11 rounded-[10px] border-[1.5px] border-gray-200 object-cover" />
             <div>
-              <p style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#111827" }}>{cand.name}</p>
-              <p style={{ margin: 0, fontSize: 14, color: "#6B7280" }}>{cand.role}</p>
+              <p className="m-0 text-[17px] font-bold text-gray-900">{cand.name}</p>
+              <p className="m-0 text-sm text-gray-500">{cand.role}</p>
             </div>
           </div>
-          <div style={{ display: "flex", gap: 6 }}>
-            <button onClick={onBookmark} style={iconBtn(cand.isSaved ? "#D97706" : "#9CA3AF")}>{Ico.bookmark(cand.isSaved)}</button>
-            <button onClick={onClose} style={iconBtn()}>{Ico.close}</button>
+          <div className="flex gap-1.5">
+            <button onClick={onBookmark} className={iconBtn(cand.isSaved ? "text-amber-600" : "text-gray-400")}>{Ico.bookmark(cand.isSaved)}</button>
+            <button onClick={onClose} className={iconBtn()}>{Ico.close}</button>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as const }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, padding: "4px 10px", borderRadius: 4, color: "#D97706", background: "#FEF3C7" }}>
+        <div className="flex gap-1.5 flex-wrap">
+          <div className="flex items-center gap-1.5 text-[13px] font-semibold px-2.5 py-1 rounded text-amber-600 bg-amber-50">
             <InteractiveStars rating={cand.rating} onRate={onRate} />
             <span>{cand.rating.toFixed(1)} ({cand.reviews} reviews)</span>
           </div>
-          <span style={{ fontSize: 13, padding: "4px 10px", borderRadius: 4, color: "#374151", background: "#F3F4F6", fontWeight: 500 }}>{cand.location}</span>
+          <span className="text-[13px] px-2.5 py-1 rounded text-gray-700 bg-gray-100 font-medium">{cand.location}</span>
         </div>
       </div>
 
       {/* Body */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "18px 20px" }}>
+      <div className="flex-1 overflow-y-auto px-5 py-[18px]">
 
-        <p style={sectionLabel}>Quick Actions</p>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 20 }}>
-          <button style={{ padding: "8px", background: "#111827", color: "#fff", border: "none", borderRadius: 6, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+        <p className={sectionLabel}>Quick Actions</p>
+        <div className="grid grid-cols-2 gap-2 mb-5">
+          <button className="p-2 bg-gray-900 text-white border-none rounded-md text-sm font-semibold cursor-pointer font-sans flex items-center justify-center gap-1.5 hover:bg-gray-800 transition-colors">
             {Ico.mail} Message
           </button>
-          <button style={{ padding: "8px", background: "#fff", color: "#111827", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>Invite to Apply</button>
+          <button className="p-2 bg-white text-gray-900 border border-gray-200 rounded-md text-sm font-semibold cursor-pointer font-sans hover:bg-gray-50 transition-colors">
+            Invite to Apply
+          </button>
         </div>
 
-        <p style={sectionLabel}>About</p>
-        <p style={{ margin: "0 0 20px", fontSize: 14, color: "#374151", lineHeight: 1.6 }}>
+        <p className={sectionLabel}>About</p>
+        <p className="m-[0_0_20px] text-sm text-gray-700 leading-[1.6]">
           {cand.bio
             ? cand.bio
             : `${cand.name} is a highly experienced ${cand.role.toLowerCase()} with a proven track record of delivering scalable solutions. Available ${cand.available.toLowerCase()} for new opportunities.`
           }
         </p>
 
-        <p style={sectionLabel}>Skills</p>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 20 }}>
-          {cand.skills.map(s => <span key={s} style={{ fontSize: 13, color: "#374151", border: "1px solid #E5E7EB", padding: "4px 8px", borderRadius: 4, fontWeight: 500 }}>{s}</span>)}
+        <p className={sectionLabel}>Skills</p>
+        <div className="flex flex-wrap gap-1.5 mb-5">
+          {cand.skills.map(s => <span key={s} className="text-[13px] text-gray-700 border border-gray-200 px-2 py-1 rounded bg-white font-medium">{s}</span>)}
         </div>
 
-        <p style={sectionLabel}>Details</p>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+        <p className={sectionLabel}>Details</p>
+        <div className="grid grid-cols-2 gap-2">
           {[["Hourly Rate", cand.rate], ["Availability", cand.available]].map(([label, value]) => (
-            <div key={label} style={{ padding: "10px 12px", borderRadius: 6, background: "#F9FAFB", border: "1px solid #E5E7EB" }}>
-              <p style={{ margin: "0 0 2px", fontSize: 12, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</p>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#111827", fontFamily: "'DM Mono',monospace" }}>{value}</p>
+            <div key={label} className="px-3 py-2.5 rounded-md bg-gray-50 border border-gray-200">
+              <p className="m-[0_0_2px] text-xs text-gray-400 uppercase tracking-[0.08em]">{label}</p>
+              <p className="m-0 text-sm font-semibold text-gray-900 font-mono">{value}</p>
             </div>
           ))}
         </div>
@@ -158,11 +161,9 @@ export default function FindTalent() {
       if (error) { console.error("FindTalent:", error.message); return; }
       const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='1.5'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
       setCandidates((data || []).map((s: any) => {
-        // Supabase may return profiles as an array (one-to-many) or object (one-to-one)
         const p = Array.isArray(s.profiles) ? s.profiles[0] : s.profiles;
         const days: string[] = s.availability || [];
         const available = days.length > 0 ? days.map((d: string) => d.slice(0, 3)).join(", ") : "—";
-        // Strip any non-numeric characters (commas, currency symbols, spaces) before parsing
         const numericRate = parseFloat(String(s.rate ?? "").replace(/[^0-9.]/g, ""));
         const rateLabel = !isNaN(numericRate) && s.rate
           ? `KES ${numericRate.toLocaleString()} / ${s.rate_type ?? "day"}`
@@ -201,17 +202,14 @@ export default function FindTalent() {
 
     setRatedIds(prev => [...prev, id]);
 
-    // Calculate new average
     const totalScore = (cand.rating * cand.reviews) + newRating;
     const newReviews = cand.reviews + 1;
     const finalRating = Number((totalScore / newReviews).toFixed(1));
 
-    // Optimistically update UI
     setCandidates(prev => prev.map(c => 
       c.id === id ? { ...c, rating: finalRating, reviews: newReviews } : c
     ));
 
-    // Persist to database
     const { error } = await supabase
       .from("services")
       .update({ rating: finalRating, number_of_reviews: newReviews })
@@ -229,50 +227,49 @@ export default function FindTalent() {
   };
 
   return (
-    <div style={{ fontFamily: "'DM Sans','Segoe UI',sans-serif", background: "#F9FAFB", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap');*{box-sizing:border-box}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:4px}`}</style>
+    <div className="font-sans bg-gray-50 min-h-screen flex flex-col">
 
       {/* Top bar */}
-      <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div className="bg-white border-b border-gray-200 px-6 py-3.5 flex items-center justify-between">
         <div>
-          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#111827" }}>Find Talent</h1>
-          <p style={{ margin: 0, fontSize: 14, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>Discover top professionals</p>
+          <h1 className="m-0 text-xl font-bold text-gray-900">Find Talent</h1>
+          <p className="m-0 text-sm text-gray-400 font-mono">Discover top professionals</p>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="flex gap-2">
           {([["Total", stats.total, false], ["Immediate", stats.available, false], ["Saved", stats.saved, true]] as [string, number, boolean][]).map(([label, value, dark]) => (
-            <div key={label} style={{ padding: "6px 14px", borderRadius: 6, background: dark ? "#111827" : "#F3F4F6", border: dark ? "none" : "1px solid #E5E7EB", textAlign: "center" as const }}>
-              <p style={{ margin: 0, fontSize: 18, fontWeight: 700, color: dark ? "#fff" : "#111827", fontFamily: "'DM Mono',monospace" }}>{value}</p>
-              <p style={{ margin: 0, fontSize: 12, color: dark ? "#9CA3AF" : "#6B7280", textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>{label}</p>
+            <div key={label} className={`px-3.5 py-1.5 rounded-md text-center ${dark ? "bg-gray-900 border-none" : "bg-gray-100 border border-gray-200"}`}>
+              <p className={`m-0 text-lg font-bold font-mono ${dark ? "text-white" : "text-gray-900"}`}>{value}</p>
+              <p className={`m-0 text-xs uppercase tracking-[0.06em] ${dark ? "text-gray-400" : "text-gray-500"}`}>{label}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Filters */}
-      <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "10px 24px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" as const }}>
-        <div style={{ position: "relative" as const, flex: 1, maxWidth: 300 }}>
-          <span style={{ position: "absolute" as const, left: 10, top: "50%", transform: "translateY(-50%)", color: "#9CA3AF" }}>{Ico.search}</span>
+      <div className="bg-white border-b border-gray-200 px-6 py-2.5 flex items-center gap-2.5 flex-wrap">
+        <div className="relative flex-1 max-w-[300px]">
+          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400">{Ico.search}</span>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search skills, roles or names…"
-            style={{ width: "100%", padding: "7px 10px 7px 32px", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 14, color: "#111827", background: "#F9FAFB", outline: "none" }} />
+            className="w-full py-[7px] pr-2.5 pl-8 border border-gray-200 rounded-md text-sm text-gray-900 bg-gray-50 outline-none focus:bg-white focus:border-gray-300 transition-colors" />
         </div>
-        <select value={filterRole} onChange={e => setFilterRole(e.target.value)} style={sel}>
+        <select value={filterRole} onChange={e => setFilterRole(e.target.value)} className="font-sans px-2.5 py-[7px] border border-gray-200 rounded-md text-sm text-gray-700 bg-gray-50 outline-none cursor-pointer focus:bg-white focus:border-gray-300 transition-colors">
           <option value="all">Any Role Category</option>
           <option value="Engineer">Engineering</option>
           <option value="Designer">Design & UI/UX</option>
         </select>
-        <span style={{ fontSize: 14, color: "#9CA3AF", marginLeft: "auto", fontFamily: "'DM Mono',monospace" }}>{filtered.length} candidates</span>
+        <span className="text-sm text-gray-400 ml-auto font-mono">{filtered.length} candidates</span>
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, display: "grid", gridTemplateColumns: selected ? "1fr 380px" : "1fr", gap: 16, padding: 20, alignItems: "start" }}>
-        <div style={{ display: "grid", gridTemplateColumns: selected ? "1fr" : "repeat(auto-fill, minmax(320px, 1fr))", gap: 12 }}>
+      <div className={`flex-1 grid gap-4 p-5 items-start ${selected ? "grid-cols-[1fr_380px]" : "grid-cols-1"}`}>
+        <div className={`grid gap-3 ${selected ? "grid-cols-1" : "grid-cols-[repeat(auto-fill,minmax(320px,1fr))]"}`}>
           {filtered.length === 0
-            ? <div style={{ padding: 48, textAlign: "center" as const, border: "1.5px dashed #E5E7EB", borderRadius: 10, background: "#fff", gridColumn: "1/-1" }}><p style={{ margin: 0, fontSize: 16, color: "#9CA3AF" }}>No talent matches your search.</p></div>
+            ? <div className="p-12 text-center border-[1.5px] border-dashed border-gray-200 rounded-[10px] bg-white col-span-full"><p className="m-0 text-base text-gray-400">No talent matches your search.</p></div>
             : filtered.map(cand => <CandidateCard key={cand.id} cand={cand} selected={selectedId === cand.id} onSelect={() => setSelectedId(p => p === cand.id ? null : cand.id)} onBookmark={() => toggleBookmark(cand.id)} />)
           }
         </div>
         {selected && (
-          <div style={{ position: "sticky" as const, top: 20, height: "calc(100vh - 175px)", overflow: "hidden" }}>
+          <div className="sticky top-5 h-[calc(100vh-175px)] overflow-hidden">
             <DetailPanel cand={selected} onClose={() => setSelectedId(null)} onBookmark={() => toggleBookmark(selected.id)} onRate={(rating) => handleRate(selected.id, rating)} />
           </div>
         )}
