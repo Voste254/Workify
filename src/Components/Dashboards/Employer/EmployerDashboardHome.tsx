@@ -22,10 +22,10 @@ export default function EmployerDashboardHome({ setActivePage }: EmployerDashboa
 
   // Mock Data Definition
   const STATS = [
-    { title: "Active Jobs", value: "3", icon: Ico.briefcase, bg: "#EFF6FF", text: "#2563EB" },
-    { title: "New Applications", value: "128", icon: Ico.users, bg: "#FEF3C7", text: "#D97706" },
-    { title: "Interviews Scheduled", value: "14", icon: Ico.calendar, bg: "#ECFCCB", text: "#65A30D" },
-    { title: "Profile Views", value: "2.4k", icon: Ico.trending, bg: "#EDE9FE", text: "#7C3AED" },
+    { title: "Active Jobs", value: "3", icon: Ico.briefcase, bgClass: "bg-blue-50", textClass: "text-blue-600" },
+    { title: "New Applications", value: "128", icon: Ico.users, bgClass: "bg-amber-50", textClass: "text-amber-600" },
+    { title: "Interviews Scheduled", value: "14", icon: Ico.calendar, bgClass: "bg-lime-100", textClass: "text-lime-600" },
+    { title: "Profile Views", value: "2.4k", icon: Ico.trending, bgClass: "bg-purple-100", textClass: "text-purple-600" },
   ];
 
   const lineData = useMemo(() => [
@@ -62,7 +62,7 @@ export default function EmployerDashboardHome({ setActivePage }: EmployerDashboa
   return (
     <div className="font-sans min-h-screen bg-gray-50 flex flex-col p-6 gap-8">
       {/* ── Welcome Header ── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6" style={{ border: "1.5px solid #E5E7EB", borderRadius: 10 }}>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 border-[1.5px] border-gray-200 rounded-[10px]">
         <div>
            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
              Good morning, {profile?.first_name || "Employer"}! 👋
@@ -72,15 +72,13 @@ export default function EmployerDashboardHome({ setActivePage }: EmployerDashboa
         <div className="flex gap-3 w-full md:w-auto">
           <button 
             onClick={() => setActivePage?.("Find Talent")}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white text-gray-700 px-4 py-2.5 font-medium text-sm hover:bg-gray-50 transition"
-            style={{ border: "1px solid #E5E7EB", borderRadius: 6 }}
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white text-gray-700 px-4 py-2.5 font-medium text-sm hover:bg-gray-50 transition border border-gray-200 rounded-md cursor-pointer"
           >
             {Ico.search} Browse Talent
           </button>
           <button 
             onClick={() => setActivePage?.("Post Job")}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-gray-900 text-white px-4 py-2.5 font-medium text-sm hover:bg-gray-800 transition"
-            style={{ border: "none", borderRadius: 6 }}
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-gray-900 text-white px-4 py-2.5 font-medium text-sm hover:bg-gray-800 transition border-none rounded-md cursor-pointer"
           >
             {Ico.plus} Post a Job
           </button>
@@ -90,14 +88,14 @@ export default function EmployerDashboardHome({ setActivePage }: EmployerDashboa
       {/* ── Key Metrics (KPIs) ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {STATS.map((stat, i) => (
-          <div key={i} className="bg-white p-5 cursor-pointer" style={{ border: "1.5px solid #E5E7EB", borderRadius: 10 }}>
+          <div key={i} className="bg-white p-5 cursor-pointer border-[1.5px] border-gray-200 rounded-[10px]">
             <div className="flex justify-between items-start mb-4">
-              <div style={{ backgroundColor: stat.bg, color: stat.text }} className="p-3 rounded-xl flex items-center justify-center">
+              <div className={`p-3 rounded-xl flex items-center justify-center ${stat.bgClass} ${stat.textClass}`}>
                 {stat.icon}
               </div>
             </div>
-            <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 700, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.1em" }}>{stat.title}</p>
-            <p style={{ margin: 0, fontSize: 24, fontWeight: 700, color: "#111827", fontFamily: "'DM Mono', monospace" }}>{stat.value}</p>
+            <p className="m-[0_0_4px] text-[13px] font-bold text-gray-400 uppercase tracking-[0.1em]">{stat.title}</p>
+            <p className="m-0 text-2xl font-bold text-gray-900 font-mono">{stat.value}</p>
           </div>
         ))}
       </div>
@@ -108,12 +106,12 @@ export default function EmployerDashboardHome({ setActivePage }: EmployerDashboa
       </div>
 
       {/* ── Recent Activity / Candidates Pipeline ── */}
-      <div className="bg-white overflow-hidden mb-6" style={{ border: "1.5px solid #E5E7EB", borderRadius: 10 }}>
-         <div className="px-6 py-5 flex justify-between items-center bg-white" style={{ borderBottom: "1px solid #E5E7EB" }}>
-            <h3 className="text-lg font-bold text-gray-900">Recent Applications</h3>
+      <div className="bg-white overflow-hidden mb-6 border-[1.5px] border-gray-200 rounded-[10px]">
+         <div className="px-6 py-5 flex justify-between items-center bg-white border-b border-gray-200">
+            <h3 className="text-lg font-bold text-gray-900 m-0">Recent Applications</h3>
             <button 
                onClick={() => setActivePage?.("Applicants")}
-               className="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition"
+               className="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition cursor-pointer bg-transparent border-none p-0"
             >
                View All →
             </button>
