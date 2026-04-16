@@ -130,18 +130,11 @@ export default function EmployerProfile() {
   };
 
   // ── Shared Styles ────────────────────────────────────────────────────────────
-  const inp = (editable = true) => ({
-    width: "100%", padding: "10px 14px", border: "1.5px solid #E5E7EB", borderRadius: 8,
-    fontSize: 14, color: "#111827", background: (editMode && editable) ? "#fff" : "#F9FAFB",
-    outline: "none", fontFamily: "'DM Sans',sans-serif", marginBottom: 0,
-    transition: "border-color 0.15s, background 0.15s",
-    opacity: (editMode && editable) ? 1 : 0.8,
-    cursor: (editMode && editable) ? "text" : "default",
-  });
-  const lbl: React.CSSProperties = { display: "block", fontSize: 12, fontWeight: 700, color: "#9CA3AF", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.06em", fontFamily: "'DM Sans',sans-serif" };
+  const inp = (editable = true, extraClasses = "") => `w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-gray-900 outline-none font-sans transition-colors duration-150 mb-0 ${editMode && editable ? "bg-white opacity-100 cursor-text" : "bg-gray-50 opacity-80 cursor-default"} ${extraClasses}`;
+  const lbl = "block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-[0.06em] font-sans";
   const field = (label: string, node: React.ReactNode) => (
     <div>
-      <label style={lbl}>{label}</label>
+      <label className={lbl}>{label}</label>
       {node}
     </div>
   );
@@ -149,49 +142,48 @@ export default function EmployerProfile() {
   const initials = loading ? "…" : `${contact.firstName.charAt(0)}${contact.lastName.charAt(0)}`.toUpperCase() || "EM";
 
   return (
-    <div style={{ fontFamily: "'DM Sans','Segoe UI',sans-serif", background: "#F9FAFB", minHeight: "100vh", padding: "32px" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap');*{box-sizing:border-box}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:4px}`}</style>
+    <div className="font-sans bg-gray-50 min-h-screen p-8">
 
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+      <div className="flex justify-between items-center mb-8">
         <div>
-          <h2 style={{ margin: "0 0 4px", fontSize: 24, fontWeight: 700, color: "#111827" }}>Company Profile</h2>
-          <p style={{ margin: 0, fontSize: 14, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>Manage your company and contact information</p>
+          <h2 className="m-[0_0_4px] text-2xl font-bold text-gray-900">Company Profile</h2>
+          <p className="m-0 text-sm text-gray-400 font-mono">Manage your company and contact information</p>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div className="flex items-center gap-3">
           {saveSuccess && (
-            <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, color: "#059669", fontWeight: 600 }}>
+            <span className="flex items-center gap-1.5 text-sm text-emerald-600 font-semibold">
               {Ico.check} Saved successfully
             </span>
           )}
           <button
             onClick={() => { editMode ? setEditMode(false) : setEditMode(true); }}
-            style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", background: editMode ? "#F3F4F6" : "#fff", border: "1.5px solid #111827", color: "#111827", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer" }}
+            className={`flex items-center gap-2 px-[18px] py-2.5 border-[1.5px] border-gray-900 text-gray-900 rounded-lg text-sm font-bold cursor-pointer transition-colors ${editMode ? "bg-gray-100" : "bg-white"}`}
           >
             {Ico.edit} {editMode ? "Cancel" : "Edit Profile"}
           </button>
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", gap: 28, alignItems: "start" }}>
+      <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-7 items-start">
 
         {/* ── LEFT PANEL ── */}
-        <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 12, padding: 28, display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
+        <div className="bg-white border-[1.5px] border-gray-200 rounded-xl p-7 flex flex-col items-center gap-0">
 
           {/* Initials Avatar */}
-          <div style={{ width: 100, height: 100, borderRadius: 14, background: "#111827", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30, fontWeight: 700, fontFamily: "'DM Mono',monospace", marginBottom: 16, letterSpacing: 2 }}>
+          <div className="w-[100px] h-[100px] rounded-2xl bg-gray-900 text-white flex items-center justify-center text-[30px] font-bold font-mono mb-4 tracking-[2px]">
             {initials}
           </div>
 
-          <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 700, color: "#111827", textAlign: "center" }}>
+          <h3 className="m-[0_0_4px] text-lg font-bold text-gray-900 text-center">
             {loading ? "Loading..." : company.companyName || "Your Company"}
           </h3>
-          <p style={{ margin: "0 0 20px", fontSize: 13, color: "#6B7280", textAlign: "center" }}>
+          <p className="m-[0_0_20px] text-[13px] text-gray-500 text-center">
             {contact.firstName} {contact.lastName}
           </p>
 
           {/* Quick info list */}
-          <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10 }}>
+          <div className="w-full flex flex-col gap-2.5">
             {[
               { icon: Ico.industry, label: company.industry        || "Industry not set" },
               { icon: Ico.location, label: company.companyLocation || "Location not set" },
@@ -200,65 +192,65 @@ export default function EmployerProfile() {
               { icon: Ico.phone,    label: company.companyPhone    || "Company phone not set" },
               { icon: Ico.globe,    label: company.website         || "Website not set" },
             ].map(({ icon, label }) => (
-              <div key={label} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 8 }}>
-                <span style={{ color: "#6B7280", flexShrink: 0 }}>{icon}</span>
-                <span style={{ fontSize: 13, color: "#374151", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
+              <div key={label} className="flex items-center gap-2.5 px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg">
+                <span className="text-gray-500 shrink-0">{icon}</span>
+                <span className="text-[13px] text-gray-700 font-medium overflow-hidden text-ellipsis whitespace-nowrap">{label}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* ── RIGHT PANEL ── */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+        <div className="flex flex-col gap-6">
 
           {/* Contact Details */}
-          <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 12, padding: 28 }}>
-            <h3 style={{ margin: "0 0 20px", fontSize: 16, fontWeight: 700, color: "#111827", borderBottom: "1.5px solid #F3F4F6", paddingBottom: 14 }}>Contact Person</h3>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              {field("First Name", <input disabled={!editMode} value={contact.firstName} onChange={e => setContact(p => ({ ...p, firstName: e.target.value }))} style={inp()} />)}
-              {field("Last Name",  <input disabled={!editMode} value={contact.lastName}  onChange={e => setContact(p => ({ ...p, lastName: e.target.value }))}  style={inp()} />)}
-              {field("Personal Phone", <input disabled={!editMode} value={contact.phone} onChange={e => setContact(p => ({ ...p, phone: e.target.value }))} style={{ ...inp(), fontFamily: "'DM Mono',monospace" }} />)}
-              {field("Email (Read Only)", <input disabled value={contact.email} style={inp(false)} />)}
+          <div className="bg-white border-[1.5px] border-gray-200 rounded-xl p-7">
+            <h3 className="m-[0_0_20px] text-base font-bold text-gray-900 border-b-[1.5px] border-gray-100 pb-3.5">Contact Person</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {field("First Name", <input disabled={!editMode} value={contact.firstName} onChange={e => setContact(p => ({ ...p, firstName: e.target.value }))} className={inp()} />)}
+              {field("Last Name",  <input disabled={!editMode} value={contact.lastName}  onChange={e => setContact(p => ({ ...p, lastName: e.target.value }))}  className={inp()} />)}
+              {field("Personal Phone", <input disabled={!editMode} value={contact.phone} onChange={e => setContact(p => ({ ...p, phone: e.target.value }))} className={inp(true, "font-mono")} />)}
+              {field("Email (Read Only)", <input disabled value={contact.email} className={inp(false)} />)}
             </div>
           </div>
 
           {/* Company Details */}
-          <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 12, padding: 28 }}>
-            <h3 style={{ margin: "0 0 20px", fontSize: 16, fontWeight: 700, color: "#111827", borderBottom: "1.5px solid #F3F4F6", paddingBottom: 14 }}>Company Details</h3>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+          <div className="bg-white border-[1.5px] border-gray-200 rounded-xl p-7">
+            <h3 className="m-[0_0_20px] text-base font-bold text-gray-900 border-b-[1.5px] border-gray-100 pb-3.5">Company Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
               {field("Company Name",
-                <input disabled={!editMode} value={company.companyName} onChange={e => setCompany(p => ({ ...p, companyName: e.target.value }))} placeholder="e.g. Safaricom PLC" style={inp()} />
+                <input disabled={!editMode} value={company.companyName} onChange={e => setCompany(p => ({ ...p, companyName: e.target.value }))} placeholder="e.g. Safaricom PLC" className={inp()} />
               )}
 
               {field("Industry",
-                <select disabled={!editMode} value={company.industry} onChange={e => setCompany(p => ({ ...p, industry: e.target.value }))} style={{ ...inp(), cursor: editMode ? "pointer" : "default", appearance: "none" }}>
+                <select disabled={!editMode} value={company.industry} onChange={e => setCompany(p => ({ ...p, industry: e.target.value }))} className={inp(true, editMode ? "cursor-pointer appearance-auto" : "appearance-none")}>
                   <option value="">Select industry</option>
                   {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
                 </select>
               )}
 
               {field("Company Location",
-                <input disabled={!editMode} value={company.companyLocation} onChange={e => setCompany(p => ({ ...p, companyLocation: e.target.value }))} placeholder="e.g. Nairobi, Kenya or Remote" style={inp()} />
+                <input disabled={!editMode} value={company.companyLocation} onChange={e => setCompany(p => ({ ...p, companyLocation: e.target.value }))} placeholder="e.g. Nairobi, Kenya or Remote" className={inp()} />
               )}
 
               {field("Company Size",
-                <select disabled={!editMode} value={company.companySize} onChange={e => setCompany(p => ({ ...p, companySize: e.target.value }))} style={{ ...inp(), cursor: editMode ? "pointer" : "default", appearance: "none" }}>
+                <select disabled={!editMode} value={company.companySize} onChange={e => setCompany(p => ({ ...p, companySize: e.target.value }))} className={inp(true, editMode ? "cursor-pointer appearance-auto" : "appearance-none")}>
                   <option value="">Select size</option>
                   {COMPANY_SIZES.map(s => <option key={s} value={s}>{s} employees</option>)}
                 </select>
               )}
 
               {field("Company Email",
-                <input type="email" disabled={!editMode} value={company.companyEmail} onChange={e => setCompany(p => ({ ...p, companyEmail: e.target.value }))} placeholder="e.g. info@company.com" style={inp()} />
+                <input type="email" disabled={!editMode} value={company.companyEmail} onChange={e => setCompany(p => ({ ...p, companyEmail: e.target.value }))} placeholder="e.g. info@company.com" className={inp()} />
               )}
 
               {field("Company Phone",
-                <input type="tel" disabled={!editMode} value={company.companyPhone} onChange={e => setCompany(p => ({ ...p, companyPhone: e.target.value }))} placeholder="e.g. +254 700 000 000" style={{ ...inp(), fontFamily: "'DM Mono',monospace" }} />
+                <input type="tel" disabled={!editMode} value={company.companyPhone} onChange={e => setCompany(p => ({ ...p, companyPhone: e.target.value }))} placeholder="e.g. +254 700 000 000" className={inp(true, "font-mono")} />
               )}
 
               {field("Website",
-                <input type="url" disabled={!editMode} value={company.website} onChange={e => setCompany(p => ({ ...p, website: e.target.value }))} placeholder="e.g. https://company.com" style={inp()} />
+                <input type="url" disabled={!editMode} value={company.website} onChange={e => setCompany(p => ({ ...p, website: e.target.value }))} placeholder="e.g. https://company.com" className={inp()} />
               )}
 
             </div>
@@ -266,11 +258,11 @@ export default function EmployerProfile() {
 
           {/* Save Button */}
           {editMode && (
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <div className="flex justify-end">
               <button
                 disabled={saving || loading}
                 onClick={handleSave}
-                style={{ padding: "12px 28px", background: "#111827", color: "#fff", border: "none", borderRadius: 8, fontSize: 15, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", fontFamily: "'DM Sans',sans-serif", opacity: saving ? 0.7 : 1, transition: "opacity 0.15s" }}
+                className={`px-7 py-3 bg-gray-900 text-white border-none rounded-lg text-[15px] font-bold font-sans transition-opacity ${saving ? "cursor-not-allowed opacity-70" : "cursor-pointer opacity-100"}`}
               >
                 {saving ? "Saving..." : "Save Changes"}
               </button>
