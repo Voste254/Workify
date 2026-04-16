@@ -32,7 +32,7 @@ const Ico = {
 };
 
 // ── Shared styles ──────────────────────────────────────────────────────────────
-const iconBtn = (color = "#6B7280") => ({ background: "none", border: "1px solid #E5E7EB", borderRadius: 6, padding: "8px", cursor: "pointer", color, display: "flex", alignItems: "center" as const });
+const iconBtn = (colorClass = "text-gray-500") => `bg-transparent border border-gray-200 rounded-md p-2 cursor-pointer flex items-center ${colorClass} hover:bg-gray-50 transition-colors`;
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function Messages() {
@@ -44,47 +44,46 @@ export default function Messages() {
   const filteredConvos = MOCK_CONVOS.filter(c => (!q || c.name.toLowerCase().includes(q)));
 
   return (
-    <div style={{ fontFamily: "'DM Sans','Segoe UI',sans-serif", background: "#F9FAFB", height: "100vh", display: "flex", flexDirection: "column" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap');*{box-sizing:border-box}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:4px}`}</style>
+    <div className="font-sans bg-gray-50 h-screen flex flex-col">
 
       {/* Top bar */}
-      <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+      <div className="bg-white border-b border-gray-200 px-6 py-3.5 flex items-center justify-between shrink-0">
         <div>
-          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#111827" }}>Messages</h1>
-          <p style={{ margin: 0, fontSize: 14, color: "#9CA3AF" }}>Communicate with candidates</p>
+          <h1 className="m-0 text-xl font-bold text-gray-900">Messages</h1>
+          <p className="m-0 text-sm text-gray-400">Communicate with candidates</p>
         </div>
       </div>
 
-      <div style={{ flex: 1, display: "flex", padding: 20, gap: 16, overflow: "hidden" }}>
+      <div className="flex-1 flex p-5 gap-4 overflow-hidden">
         
         {/* Left Pane */}
-        <div style={{ width: 320, flexShrink: 0, background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 10, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-          <div style={{ padding: 16, borderBottom: "1px solid #E5E7EB" }}>
-            <div style={{ position: "relative" as const }}>
-              <span style={{ position: "absolute" as const, left: 10, top: "50%", transform: "translateY(-50%)", color: "#9CA3AF" }}>{Ico.search}</span>
+        <div className="w-80 shrink-0 bg-white border-[1.5px] border-gray-200 rounded-[10px] flex flex-col overflow-hidden">
+          <div className="p-4 border-b border-gray-200">
+            <div className="relative">
+              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400">{Ico.search}</span>
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search messages…"
-                style={{ width: "100%", padding: "8px 10px 8px 32px", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 14, color: "#111827", background: "#F9FAFB", outline: "none", fontFamily: "'DM Sans',sans-serif" }} />
+                className="w-full py-2 pr-2.5 pl-8 border border-gray-200 rounded-md text-sm text-gray-900 bg-gray-50 outline-none font-sans focus:bg-white focus:border-gray-300 transition-colors" />
             </div>
           </div>
           
-          <div style={{ flex: 1, overflowY: "auto" }}>
+          <div className="flex-1 overflow-y-auto">
             {filteredConvos.map(c => {
                const active = activeChat.id === c.id;
                return (
-                 <button key={c.id} onClick={() => setActiveChat(c)} style={{ width: "100%", background: active ? "#F9FAFB" : "#fff", border: "none", borderBottom: "1px solid #E5E7EB", padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, outline: "none" }}>
-                   <div style={{ position: "relative" as const, flexShrink: 0 }}>
-                      <img src={c.avatar} alt={c.name} style={{ width: 44, height: 44, borderRadius: 22, objectFit: "cover", border: "1.5px solid #E5E7EB" }} />
-                      {c.online && <div style={{ position: "absolute", bottom: 0, right: 0, width: 12, height: 12, background: "#059669", border: "2px solid #fff", borderRadius: "50%" }} />}
+                 <button key={c.id} onClick={() => setActiveChat(c)} className={`w-full border-none border-b border-gray-200 px-4 py-3.5 cursor-pointer flex items-center gap-3 outline-none hover:bg-gray-50 transition-colors ${active ? "bg-gray-50" : "bg-white"}`}>
+                   <div className="relative shrink-0">
+                      <img src={c.avatar} alt={c.name} className="w-11 h-11 rounded-full object-cover border-[1.5px] border-gray-200" />
+                      {c.online && <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-600 border-2 border-white rounded-full" />}
                    </div>
-                   <div style={{ flex: 1, minWidth: 0, textAlign: "left" as const }}>
-                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
-                       <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#111827", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</p>
-                       <span style={{ fontSize: 12, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>{c.time}</span>
+                   <div className="flex-1 min-w-0 text-left">
+                     <div className="flex justify-between mb-0.5">
+                       <p className="m-0 text-[15px] font-bold text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis">{c.name}</p>
+                       <span className="text-xs text-gray-400 font-mono">{c.time}</span>
                      </div>
-                     <p style={{ margin: "0 0 4px", fontSize: 13, color: active ? "#111827" : "#6B7280", fontWeight: active ? 600 : 400, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.role}</p>
-                     <p style={{ margin: 0, fontSize: 14, color: "#9CA3AF", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.lastMessage}</p>
+                     <p className={`m-[0_0_4px] text-[13px] whitespace-nowrap overflow-hidden text-ellipsis ${active ? "text-gray-900 font-semibold" : "text-gray-500 font-normal"}`}>{c.role}</p>
+                     <p className="m-0 text-sm text-gray-400 whitespace-nowrap overflow-hidden text-ellipsis">{c.lastMessage}</p>
                    </div>
-                   {c.unread > 0 && <div style={{ background: "#111827", color: "#fff", fontSize: 12, fontWeight: 700, width: 20, height: 20, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>{c.unread}</div>}
+                   {c.unread > 0 && <div className="bg-gray-900 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">{c.unread}</div>}
                  </button>
                );
             })}
@@ -92,51 +91,51 @@ export default function Messages() {
         </div>
 
         {/* Right Pane */}
-        <div style={{ flex: 1, background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 10, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <div className="flex-1 bg-white border-[1.5px] border-gray-200 rounded-[10px] flex flex-col overflow-hidden">
           
           {/* Chat Header */}
-          <div style={{ padding: "16px 20px", borderBottom: "1px solid #E5E7EB", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#fff" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <img src={activeChat.avatar} alt={activeChat.name} style={{ width: 40, height: 40, borderRadius: 20, objectFit: "cover", border: "1px solid #E5E7EB" }} />
+          <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between bg-white shrink-0">
+            <div className="flex items-center gap-3">
+              <img src={activeChat.avatar} alt={activeChat.name} className="w-10 h-10 rounded-full object-cover border border-gray-200" />
               <div>
-                <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#111827" }}>{activeChat.name}</p>
-                <p style={{ margin: 0, fontSize: 13, color: "#6B7280" }}>{activeChat.role}</p>
+                <p className="m-0 text-base font-bold text-gray-900">{activeChat.name}</p>
+                <p className="m-0 text-[13px] text-gray-500">{activeChat.role}</p>
               </div>
             </div>
-            <div style={{ display: "flex", gap: 6 }}>
-              <button style={iconBtn()}>{Ico.phone}</button>
-              <button style={iconBtn()}>{Ico.video}</button>
-              <button style={iconBtn()}>{Ico.more}</button>
+            <div className="flex gap-1.5">
+              <button className={iconBtn()}>{Ico.phone}</button>
+              <button className={iconBtn()}>{Ico.video}</button>
+              <button className={iconBtn()}>{Ico.more}</button>
             </div>
           </div>
 
           {/* Chat Messages */}
-          <div style={{ flex: 1, background: "#F9FAFB", padding: "24px 20px", display: "flex", flexDirection: "column", gap: 16, overflowY: "auto" }}>
+          <div className="flex-1 bg-gray-50 px-5 py-6 flex flex-col gap-4 overflow-y-auto">
              {MOCK_MSGS.map(msg => {
                 const isMe = msg.sender === "employer";
                 return (
-                  <div key={msg.id} style={{ alignSelf: isMe ? "flex-end" : "flex-start", maxWidth: "70%", display: "flex", flexDirection: "column", alignItems: isMe ? "flex-end" : "flex-start", gap: 4 }}>
-                    <div style={{ background: isMe ? "#111827" : "#fff", color: isMe ? "#fff" : "#111827", border: isMe ? "none" : "1.5px solid #E5E7EB", padding: "10px 14px", fontSize: 15, borderRadius: 10, borderTopRightRadius: isMe ? 2 : 10, borderTopLeftRadius: isMe ? 10 : 2, lineHeight: 1.5 }}>
+                  <div key={msg.id} className={`max-w-[70%] flex flex-col gap-1 ${isMe ? "self-end items-end" : "self-start items-start"}`}>
+                    <div className={`px-3.5 py-2.5 text-[15px] leading-relaxed rounded-[10px] ${isMe ? "bg-gray-900 text-white border-none rounded-tr-[2px] rounded-tl-[10px]" : "bg-white text-gray-900 border-[1.5px] border-gray-200 rounded-tr-[10px] rounded-tl-[2px]"}`}>
                       {msg.text}
                     </div>
-                    <span style={{ fontSize: 12, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>{msg.time}</span>
+                    <span className="text-xs text-gray-400 font-mono">{msg.time}</span>
                   </div>
                 );
              })}
           </div>
 
           {/* Input Area */}
-          <div style={{ padding: "16px 20px", borderTop: "1px solid #E5E7EB", background: "#fff" }}>
-            <div style={{ display: "flex", alignItems: "flex-end", gap: 12 }}>
-               <div style={{ display: "flex", gap: 6, paddingBottom: 6 }}>
-                 <button style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", padding: 4 }}>{Ico.file}</button>
-                 <button style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", padding: 4 }}>{Ico.image}</button>
+          <div className="p-4 border-t border-gray-200 bg-white shrink-0">
+            <div className="flex items-end gap-3">
+               <div className="flex gap-1.5 pb-1.5">
+                 <button className="bg-transparent border-none text-gray-400 cursor-pointer p-1 hover:text-gray-600 transition-colors">{Ico.file}</button>
+                 <button className="bg-transparent border-none text-gray-400 cursor-pointer p-1 hover:text-gray-600 transition-colors">{Ico.image}</button>
                </div>
-               <div style={{ flex: 1, position: "relative" as const }}>
+               <div className="flex-1 relative">
                  <textarea value={inputText} onChange={e => setInputText(e.target.value)} placeholder="Type a message..." rows={1}
-                  style={{ width: "100%", padding: "12px 14px", border: "1.5px solid #E5E7EB", borderRadius: 8, fontSize: 15, color: "#111827", background: "#F9FAFB", outline: "none", fontFamily: "'DM Sans',sans-serif", resize: "none" }} />
+                  className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-lg text-[15px] text-gray-900 bg-gray-50 outline-none font-sans resize-none focus:bg-white focus:border-gray-300 transition-colors placeholder-gray-400" />
                </div>
-               <button style={{ background: "#111827", color: "#fff", border: "none", cursor: "pointer", padding: "12px 14px", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+               <button className="bg-gray-900 text-white border-none cursor-pointer px-3.5 py-3 rounded-lg flex items-center justify-center hover:bg-gray-800 transition-colors">
                  {Ico.send}
                </button>
             </div>
