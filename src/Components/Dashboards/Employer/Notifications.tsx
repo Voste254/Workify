@@ -32,9 +32,6 @@ const MOCK_NOTIFS: Notification[] = [
   { id: "5", type: "system", title: "Job Posting Expiring Soon", message: "Your 'Marketing Manager' job post will expire in 2 days. Renew now to keep it active.", time: "3 days ago", read: true }
 ];
 
-// ── Shared styles ──────────────────────────────────────────────────────────────
-const tabBtn = (active: boolean) => ({ padding: "10px 16px", borderBottom: `2px solid ${active ? "#111827" : "transparent"}`, color: active ? "#111827" : "#6B7280", fontSize: 13, fontWeight: 700, cursor: "pointer", background: "none", borderTop: "none", borderLeft: "none", borderRight: "none", outline: "none", fontFamily: "'DM Sans',sans-serif", transition: "all 0.15s" });
-
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function Notifications() {
   const [notifs, setNotifs] = useState(MOCK_NOTIFS);
@@ -49,71 +46,70 @@ export default function Notifications() {
 
   const getIcon = (type: NotifType) => {
     switch(type) {
-      case "application": return { i: Ico.briefcase, bg: "#DBEAFE", col: "#2563EB" };
-      case "message":     return { i: Ico.user,      bg: "#FEF3C7", col: "#D97706" };
-      case "rating":      return { i: Ico.star,      bg: "#D1FAE5", col: "#059669" };
-      case "system":      return { i: Ico.bell,      bg: "#F3F4F6", col: "#6B7280" };
+      case "application": return { i: Ico.briefcase, bgClass: "bg-blue-100", textClass: "text-blue-600" };
+      case "message":     return { i: Ico.user,      bgClass: "bg-amber-100", textClass: "text-amber-600" };
+      case "rating":      return { i: Ico.star,      bgClass: "bg-emerald-100", textClass: "text-emerald-600" };
+      case "system":      return { i: Ico.bell,      bgClass: "bg-gray-100", textClass: "text-gray-500" };
     }
   };
 
   return (
-    <div style={{ fontFamily: "'DM Sans','Segoe UI',sans-serif", background: "#F9FAFB", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap');*{box-sizing:border-box}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:4px}`}</style>
+    <div className="font-sans bg-gray-50 min-h-screen flex flex-col">
 
       {/* Top bar */}
-      <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div className="bg-white border-b border-gray-200 px-6 py-3.5 flex items-center justify-between">
         <div>
-          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#111827", display: "flex", alignItems: "center", gap: 8 }}>
-             Notifications {unreadCount > 0 && <span style={{ background: "#DC2626", color: "#fff", fontSize: 11, padding: "2px 8px", borderRadius: 12, fontWeight: 700 }}>{unreadCount} new</span>}
+          <h1 className="m-0 text-lg font-bold text-gray-900 flex items-center gap-2">
+             Notifications {unreadCount > 0 && <span className="bg-red-600 text-white text-[11px] px-2 py-0.5 rounded-xl font-bold">{unreadCount} new</span>}
           </h1>
-          <p style={{ margin: "2px 0 0", fontSize: 13, color: "#9CA3AF" }}>Stay updated on platform activity</p>
+          <p className="m-[2px_0_0] text-[13px] text-gray-400">Stay updated on platform activity</p>
         </div>
-        <button onClick={markAllRead} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "#fff", color: "#374151", border: "1.5px solid #E5E7EB", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+        <button onClick={markAllRead} className="flex items-center gap-1.5 px-4 py-2 bg-white text-gray-700 border-[1.5px] border-gray-200 rounded-lg text-[13px] font-semibold cursor-pointer font-sans hover:bg-gray-50 transition-colors">
           {Ico.check} Mark all as read
         </button>
       </div>
 
-      <div style={{ padding: 24, maxWidth: 900, margin: "0 auto", width: "100%" }}>
+      <div className="p-6 max-w-[900px] mx-auto w-full">
         
         {/* Tabs */}
-        <div style={{ display: "flex", gap: 16, borderBottom: "1.5px solid #E5E7EB", marginBottom: 24 }}>
-          <button style={tabBtn(filter === "all")} onClick={() => setFilter("all")}>All Notifications</button>
-          <button style={tabBtn(filter === "unread")} onClick={() => setFilter("unread")}>Unread Only</button>
+        <div className="flex gap-4 border-b-[1.5px] border-gray-200 mb-6">
+          <button className={`px-4 py-2.5 border-b-2 bg-transparent border-t-0 border-l-0 border-r-0 outline-none cursor-pointer font-sans text-[13px] font-bold transition-all duration-150 ${filter === "all" ? "border-gray-900 text-gray-900" : "border-transparent text-gray-500 hover:text-gray-700"}`} onClick={() => setFilter("all")}>All Notifications</button>
+          <button className={`px-4 py-2.5 border-b-2 bg-transparent border-t-0 border-l-0 border-r-0 outline-none cursor-pointer font-sans text-[13px] font-bold transition-all duration-150 ${filter === "unread" ? "border-gray-900 text-gray-900" : "border-transparent text-gray-500 hover:text-gray-700"}`} onClick={() => setFilter("unread")}>Unread Only</button>
         </div>
 
         {/* List */}
-        <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 10, overflow: "hidden" }}>
+        <div className="bg-white border-[1.5px] border-gray-200 rounded-[10px] overflow-hidden">
            {filteredNotifs.length === 0 ? (
-             <div style={{ padding: 60, textAlign: "center", color: "#9CA3AF", fontSize: 14 }}>No notifications found.</div>
+             <div className="p-16 text-center text-gray-400 text-sm">No notifications found.</div>
            ) : (
-             <div style={{ display: "flex", flexDirection: "column" }}>
+             <div className="flex flex-col">
                {filteredNotifs.map((n, idx) => {
                  const icn = getIcon(n.type);
                  return (
-                   <div key={n.id} onClick={() => markAsRead(n.id)} style={{ display: "flex", gap: 16, padding: "20px 24px", alignItems: "flex-start", borderBottom: idx < filteredNotifs.length - 1 ? "1px solid #E5E7EB" : "none", background: n.read ? "#fff" : "#F8FAFC", cursor: "pointer", transition: "background 0.15s" }}>
+                   <div key={n.id} onClick={() => markAsRead(n.id)} className={`flex gap-4 px-6 py-5 items-start cursor-pointer transition-colors duration-150 ${idx < filteredNotifs.length - 1 ? "border-b border-gray-200" : "border-none"} ${n.read ? "bg-white hover:bg-gray-50" : "bg-slate-50 hover:bg-slate-100"}`}>
                      
-                     <div style={{ position: "relative" as const }}>
+                     <div className="relative shrink-0">
                        {n.avatar ? (
-                         <img src={n.avatar} alt="Sender" style={{ width: 44, height: 44, borderRadius: 22, objectFit: "cover", border: "1.5px solid #E5E7EB" }} />
+                         <img src={n.avatar} alt="Sender" className="w-11 h-11 rounded-full object-cover border-[1.5px] border-gray-200" />
                        ) : (
-                         <div style={{ width: 44, height: 44, borderRadius: 22, background: icn.bg, color: icn.col, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                         <div className={`w-11 h-11 rounded-full flex items-center justify-center ${icn.bgClass} ${icn.textClass}`}>
                            {icn.i}
                          </div>
                        )}
-                       {!n.read && <div style={{ position: "absolute", top: 0, right: 0, width: 12, height: 12, background: "#3B82F6", border: "2px solid #fff", borderRadius: "50%" }} />}
+                       {!n.read && <div className="absolute top-0 right-0 w-3 h-3 bg-blue-500 border-2 border-white rounded-full" />}
                      </div>
 
-                     <div style={{ flex: 1, minWidth: 0 }}>
-                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                         <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: n.read ? 600 : 700, color: "#111827" }}>{n.title}</p>
-                         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                           <span style={{ fontSize: 12, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>{n.time}</span>
-                           <button onClick={(e) => { e.stopPropagation(); deleteNotif(n.id); }} title="Delete" style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", padding: 4 }}>
+                     <div className="flex-1 min-w-0">
+                       <div className="flex justify-between items-start">
+                         <p className={`m-[0_0_4px] text-sm text-gray-900 ${n.read ? "font-semibold" : "font-bold"}`}>{n.title}</p>
+                         <div className="flex items-center gap-3">
+                           <span className="text-xs text-gray-400 font-mono">{n.time}</span>
+                           <button onClick={(e) => { e.stopPropagation(); deleteNotif(n.id); }} title="Delete" className="bg-transparent border-none text-gray-400 cursor-pointer p-1 hover:text-gray-600 transition-colors">
                              {Ico.dots}
                            </button>
                          </div>
                        </div>
-                       <p style={{ margin: 0, fontSize: 13, color: n.read ? "#6B7280" : "#374151", lineHeight: 1.5 }}>{n.message}</p>
+                       <p className={`m-0 text-[13px] leading-relaxed ${n.read ? "text-gray-500" : "text-gray-700"}`}>{n.message}</p>
                      </div>
                      
                    </div>
