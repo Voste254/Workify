@@ -16,12 +16,12 @@ const Ico = {
 };
 
 // ── Shared styles ──────────────────────────────────────────────────────────────
-const labelStyle = { display: "block", fontSize: 13, fontWeight: 700, color: "#374151", marginBottom: 8, fontFamily: "'DM Sans',sans-serif" };
-const inputOuter = { position: "relative" as const, display: "flex", alignItems: "center" };
-const inputIcon = { position: "absolute" as const, left: 14, color: "#9CA3AF" };
-const inputStyle = { width: "100%", padding: "12px 16px 12px 40px", border: "1.5px solid #E5E7EB", borderRadius: 8, fontSize: 14, color: "#111827", background: "#fff", outline: "none", fontFamily: "'DM Sans',sans-serif", transition: "border-color 0.15s" };
+const labelStyle = "block text-[13px] font-bold text-gray-700 mb-2 font-sans";
+const inputOuter = "relative flex items-center";
+const inputIcon = "absolute left-3.5 text-gray-400";
+const inputStyle = "w-full py-3 pr-4 pl-10 border-[1.5px] border-gray-200 rounded-lg text-sm text-gray-900 bg-white outline-none font-sans transition-colors duration-150 focus:border-gray-300";
 
-const menuBtn = (active: boolean) => ({ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "14px 18px", border: "none", borderRadius: 8, background: active ? "#F3F4F6" : "transparent", color: active ? "#111827" : "#6B7280", fontSize: 14, fontWeight: active ? 700 : 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", textAlign: "left" as const, transition: "background 0.15s" });
+const menuBtn = (active: boolean) => `flex items-center gap-2.5 w-full px-[18px] py-3.5 border-none rounded-lg text-sm font-sans text-left transition-colors duration-150 cursor-pointer ${active ? "bg-gray-100 text-gray-900 font-bold" : "bg-transparent text-gray-500 font-semibold hover:bg-gray-50 hover:text-gray-700"}`;
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function Settings() {
@@ -35,69 +35,68 @@ export default function Settings() {
   };
 
   return (
-    <div style={{ fontFamily: "'DM Sans','Segoe UI',sans-serif", background: "#F9FAFB", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap');*{box-sizing:border-box}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:4px}`}</style>
+    <div className="font-sans bg-gray-50 min-h-screen flex flex-col">
 
       {/* Top bar */}
-      <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+      <div className="bg-white border-b border-gray-200 px-6 py-3.5 flex items-center justify-between shrink-0">
         <div>
-          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#111827" }}>Account Settings</h1>
-          <p style={{ margin: 0, fontSize: 13, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>Manage your employer account</p>
+          <h1 className="m-0 text-lg font-bold text-gray-900">Account Settings</h1>
+          <p className="m-0 text-[13px] text-gray-400 font-mono">Manage your employer account</p>
         </div>
-        <div>
-          {isSaved && <span style={{ marginRight: 16, fontSize: 14, color: "#059669", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 6 }}>{Ico.check} Saved Successfully</span>}
-          <button onClick={handleSubmit} style={{ padding: "10px 20px", background: "#111827", color: "#fff", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+        <div className="flex items-center">
+          {isSaved && <span className="mr-4 text-sm text-emerald-600 font-bold inline-flex items-center gap-1.5">{Ico.check} Saved Successfully</span>}
+          <button onClick={handleSubmit} className="px-5 py-2.5 bg-gray-900 text-white border-none rounded-lg text-sm font-bold cursor-pointer font-sans hover:bg-gray-800 transition-colors">
             Save Changes
           </button>
         </div>
       </div>
 
-      <div style={{ flex: 1, display: "grid", gridTemplateColumns: "300px 1fr", gap: 24, padding: 24, maxWidth: 1200, margin: "0 auto", width: "100%" }}>
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 p-6 max-w-[1200px] mx-auto w-full items-start">
         
         {/* Left Navigation Menu */}
-        <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 10, padding: 16, height: "fit-content" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <button style={menuBtn(activeTab === "Company Profile")} onClick={() => setActiveTab("Company Profile")}>{Ico.building} Company Profile</button>
-            <button style={menuBtn(activeTab === "Security & Login")} onClick={() => setActiveTab("Security & Login")}>{Ico.lock} Security & Login</button>
-            <button style={menuBtn(activeTab === "Notifications")} onClick={() => setActiveTab("Notifications")}>{Ico.bell} Notification Preferences</button>
-            <button style={menuBtn(activeTab === "Billing & Plans")} onClick={() => setActiveTab("Billing & Plans")}>{Ico.creditCard} Billing & Plans</button>
+        <div className="bg-white border-[1.5px] border-gray-200 rounded-[10px] p-4 h-fit">
+          <div className="flex flex-col gap-2">
+            <button className={menuBtn(activeTab === "Company Profile")} onClick={() => setActiveTab("Company Profile")}>{Ico.building} Company Profile</button>
+            <button className={menuBtn(activeTab === "Security & Login")} onClick={() => setActiveTab("Security & Login")}>{Ico.lock} Security & Login</button>
+            <button className={menuBtn(activeTab === "Notifications")} onClick={() => setActiveTab("Notifications")}>{Ico.bell} Notification Preferences</button>
+            <button className={menuBtn(activeTab === "Billing & Plans")} onClick={() => setActiveTab("Billing & Plans")}>{Ico.creditCard} Billing & Plans</button>
           </div>
         </div>
 
         {/* Right Content Area */}
-        <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 10, overflow: "hidden", outline: "none" }}>
+        <div className="bg-white border-[1.5px] border-gray-200 rounded-[10px] overflow-hidden outline-none">
           
           {activeTab === "Company Profile" && (
             <form onSubmit={handleSubmit}>
-              <div style={{ height: 160, background: "#111827", position: "relative" as const }}>
-                <button type="button" style={{ position: "absolute", right: 20, bottom: 20, background: "rgba(255,255,255,0.2)", color: "#fff", border: "none", borderRadius: 6, padding: "8px 12px", display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 700, cursor: "pointer", backdropFilter: "blur(4px)" }}>
+              <div className="h-40 bg-gray-900 relative">
+                <button type="button" className="absolute right-5 bottom-5 bg-white/20 text-white border-none rounded-md px-3 py-2 flex items-center gap-1.5 text-[13px] font-bold cursor-pointer backdrop-blur-sm hover:bg-white/30 transition-colors">
                   {Ico.camera} Edit Cover
                 </button>
               </div>
 
-              <div style={{ padding: "0 32px 32px" }}>
-                <div style={{ marginTop: -50, marginBottom: 30, display: "flex" }}>
-                  <div style={{ width: 100, height: 100, background: "#fff", border: "4px solid #fff", borderRadius: 12, boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", overflow: "hidden" }}>
-                    <div style={{ width: "100%", height: "100%", background: "#F9FAFB", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#9CA3AF" }}>
+              <div className="px-8 pb-8">
+                <div className="mt-[-50px] mb-[30px] flex">
+                  <div className="w-[100px] h-[100px] bg-white border-4 border-white rounded-xl shadow-md flex items-center justify-center cursor-pointer overflow-hidden group">
+                    <div className="w-full h-full bg-gray-50 flex flex-col items-center justify-center text-gray-400 group-hover:bg-gray-100 transition-colors">
                       {Ico.camera}
-                      <span style={{ fontSize: 11, fontWeight: 700, marginTop: 4, textTransform: "uppercase", letterSpacing: "0.05em" }}>Logo</span>
+                      <span className="text-[11px] font-bold mt-1 uppercase tracking-[0.05em]">Logo</span>
                     </div>
                   </div>
                 </div>
 
-                <h3 style={{ margin: "0 0 24px", fontSize: 18, fontWeight: 700, color: "#111827", borderBottom: "1px solid #E5E7EB", paddingBottom: 12 }}>Company Details</h3>
+                <h3 className="m-[0_0_24px] text-lg font-bold text-gray-900 border-b border-gray-200 pb-3">Company Details</h3>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 24 }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
-                    <label style={labelStyle}>Company Name</label>
-                    <div style={inputOuter}>
-                      <span style={inputIcon}>{Ico.building}</span>
-                      <input type="text" defaultValue="TechNova Solutions" style={inputStyle} />
+                    <label className={labelStyle}>Company Name</label>
+                    <div className={inputOuter}>
+                      <span className={inputIcon}>{Ico.building}</span>
+                      <input type="text" defaultValue="TechNova Solutions" className={inputStyle} />
                     </div>
                   </div>
                   <div>
-                    <label style={labelStyle}>Industry Sector</label>
-                    <select style={{ ...inputStyle, paddingLeft: 16, cursor: "pointer", appearance: "none" }}>
+                    <label className={labelStyle}>Industry Sector</label>
+                    <select className={`${inputStyle} pl-4 cursor-pointer appearance-auto`}>
                       <option>Information Technology</option>
                       <option>Construction & Real Estate</option>
                       <option>Finance & Banking</option>
@@ -106,41 +105,41 @@ export default function Settings() {
                   </div>
                 </div>
 
-                <div style={{ marginBottom: 32 }}>
-                  <label style={labelStyle}>Corporate Overview / "About Us"</label>
-                  <textarea rows={5} defaultValue="TechNova is a leading provider of innovative cloud solutions and enterprise software dedicated to helping businesses scale seamlessly across East Africa and beyond."
-                    style={{ ...inputStyle, paddingLeft: 16, resize: "vertical" }} />
+                <div className="mb-8">
+                  <label className={labelStyle}>Corporate Overview / "About Us"</label>
+                  <textarea rows={5} defaultValue='TechNova is a leading provider of innovative cloud solutions and enterprise software dedicated to helping businesses scale seamlessly across East Africa and beyond.'
+                    className={`${inputStyle} pl-4 resize-y leading-relaxed`} />
                 </div>
 
-                <h3 style={{ margin: "0 0 24px", fontSize: 18, fontWeight: 700, color: "#111827", borderBottom: "1px solid #E5E7EB", paddingBottom: 12 }}>Contact Information</h3>
+                <h3 className="m-[0_0_24px] text-lg font-bold text-gray-900 border-b border-gray-200 pb-3">Contact Information</h3>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 20 }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
                   <div>
-                    <label style={labelStyle}>Corporate Email Address</label>
-                    <div style={inputOuter}>
-                      <span style={inputIcon}>{Ico.mail}</span>
-                      <input type="email" defaultValue="contact@technova.com" style={inputStyle} />
+                    <label className={labelStyle}>Corporate Email Address</label>
+                    <div className={inputOuter}>
+                      <span className={inputIcon}>{Ico.mail}</span>
+                      <input type="email" defaultValue="contact@technova.com" className={inputStyle} />
                     </div>
                   </div>
                   <div>
-                    <label style={labelStyle}>Support / Office Phone</label>
-                    <div style={inputOuter}>
-                      <span style={inputIcon}>{Ico.phone}</span>
-                      <input type="text" defaultValue="+254 700 123 456" style={inputStyle} />
+                    <label className={labelStyle}>Support / Office Phone</label>
+                    <div className={inputOuter}>
+                      <span className={inputIcon}>{Ico.phone}</span>
+                      <input type="text" defaultValue="+254 700 123 456" className={`${inputStyle} font-mono`} />
                     </div>
                   </div>
                   <div>
-                    <label style={labelStyle}>Company Website</label>
-                    <div style={inputOuter}>
-                      <span style={inputIcon}>{Ico.globe}</span>
-                      <input type="url" defaultValue="https://technova.co.ke" style={inputStyle} />
+                    <label className={labelStyle}>Company Website</label>
+                    <div className={inputOuter}>
+                      <span className={inputIcon}>{Ico.globe}</span>
+                      <input type="url" defaultValue="https://technova.co.ke" className={inputStyle} />
                     </div>
                   </div>
                   <div>
-                    <label style={labelStyle}>Primary Location</label>
-                    <div style={inputOuter}>
-                      <span style={inputIcon}>{Ico.pin}</span>
-                      <input type="text" defaultValue="Westlands, Nairobi" style={inputStyle} />
+                    <label className={labelStyle}>Primary Location</label>
+                    <div className={inputOuter}>
+                      <span className={inputIcon}>{Ico.pin}</span>
+                      <input type="text" defaultValue="Westlands, Nairobi" className={inputStyle} />
                     </div>
                   </div>
                 </div>
@@ -149,41 +148,41 @@ export default function Settings() {
           )}
 
           {activeTab === "Security & Login" && (
-            <div style={{ padding: 32 }}>
-               <h3 style={{ margin: "0 0 24px", fontSize: 18, fontWeight: 700, color: "#111827", borderBottom: "1px solid #E5E7EB", paddingBottom: 12 }}>Password Settings</h3>
-               <div style={{ display: "flex", flexDirection: "column", gap: 20, maxWidth: 500 }}>
+            <div className="p-8">
+               <h3 className="m-[0_0_24px] text-lg font-bold text-gray-900 border-b border-gray-200 pb-3">Password Settings</h3>
+               <div className="flex flex-col gap-5 max-w-[500px]">
                  <div>
-                   <label style={labelStyle}>Current Password</label>
-                   <input type="password" placeholder="Enter current password" style={{ ...inputStyle, paddingLeft: 16 }} />
+                   <label className={labelStyle}>Current Password</label>
+                   <input type="password" placeholder="Enter current password" className={`${inputStyle} pl-4`} />
                  </div>
                  <div>
-                   <label style={labelStyle}>New Password</label>
-                   <input type="password" placeholder="Create a new password" style={{ ...inputStyle, paddingLeft: 16 }} />
+                   <label className={labelStyle}>New Password</label>
+                   <input type="password" placeholder="Create a new password" className={`${inputStyle} pl-4`} />
                  </div>
                  <div>
-                   <label style={labelStyle}>Confirm New Password</label>
-                   <input type="password" placeholder="Verify new password" style={{ ...inputStyle, paddingLeft: 16 }} />
+                   <label className={labelStyle}>Confirm New Password</label>
+                   <input type="password" placeholder="Verify new password" className={`${inputStyle} pl-4`} />
                  </div>
-                 <button style={{ alignSelf: "flex-start", marginTop: 10, padding: "10px 20px", background: "#111827", color: "#fff", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer" }}>Update Password</button>
+                 <button className="self-start mt-2.5 px-5 py-2.5 bg-gray-900 text-white border-none rounded-lg text-sm font-bold cursor-pointer hover:bg-gray-800 transition-colors">Update Password</button>
                </div>
             </div>
           )}
 
           {activeTab === "Notifications" && (
-            <div style={{ padding: 32 }}>
-               <h3 style={{ margin: "0 0 24px", fontSize: 18, fontWeight: 700, color: "#111827", borderBottom: "1px solid #E5E7EB", paddingBottom: 12 }}>Email & Push Notifications</h3>
-               <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <div className="p-8">
+               <h3 className="m-[0_0_24px] text-lg font-bold text-gray-900 border-b border-gray-200 pb-3">Email & Push Notifications</h3>
+               <div className="flex flex-col gap-5">
                  {[
                    { label: "New Application Alerts", desc: "Receive alerts immediately when a candidate applies." },
                    { label: "Direct Messages", desc: "Get notified when a candidate responds to your messages." },
                    { label: "Job Expiring Reminders", desc: "Alert me when a job posting is about to expire." },
                    { label: "Weekly Account Summary", desc: "A brief overview metric report sent to your email weekly." }
                  ].map((t, idx) => (
-                   <div key={idx} style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                     <input type="checkbox" defaultChecked={idx < 3} style={{ width: 18, height: 18, cursor: "pointer" }} />
+                   <div key={idx} className="flex items-center gap-4">
+                     <input type="checkbox" defaultChecked={idx < 3} className="w-[18px] h-[18px] cursor-pointer accent-gray-900" />
                      <div>
-                       <p style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 700, color: "#111827" }}>{t.label}</p>
-                       <p style={{ margin: 0, fontSize: 13, color: "#6B7280" }}>{t.desc}</p>
+                       <p className="m-[0_0_4px] text-[15px] font-bold text-gray-900">{t.label}</p>
+                       <p className="m-0 text-[13px] text-gray-500">{t.desc}</p>
                      </div>
                    </div>
                  ))}
@@ -192,27 +191,27 @@ export default function Settings() {
           )}
 
           {activeTab === "Billing & Plans" && (
-            <div style={{ padding: 32 }}>
-               <h3 style={{ margin: "0 0 24px", fontSize: 18, fontWeight: 700, color: "#111827", borderBottom: "1px solid #E5E7EB", paddingBottom: 12 }}>Subscription Plan</h3>
+            <div className="p-8">
+               <h3 className="m-[0_0_24px] text-lg font-bold text-gray-900 border-b border-gray-200 pb-3">Subscription Plan</h3>
                
-               <div style={{ padding: 24, border: "2px solid #111827", borderRadius: 10, background: "#F9FAFB", marginBottom: 30 }}>
-                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+               <div className="p-6 border-2 border-gray-900 rounded-[10px] bg-gray-50 mb-[30px]">
+                 <div className="flex justify-between items-center flex-wrap gap-4">
                   <div>
-                     <p style={{ margin: "0 0 8px", fontSize: 14, fontWeight: 700, color: "#2563EB", textTransform: "uppercase", letterSpacing: "0.05em" }}>Corporate Pro Plan</p>
-                     <p style={{ margin: 0, fontSize: 24, fontWeight: 700, color: "#111827", fontFamily: "'DM Mono',monospace" }}>KES 15,000 / month</p>
+                     <p className="m-[0_0_8px] text-sm font-bold text-blue-600 uppercase tracking-[0.05em]">Corporate Pro Plan</p>
+                     <p className="m-0 text-2xl font-bold text-gray-900 font-mono">KES 15,000 / month</p>
                   </div>
-                   <button style={{ padding: "10px 20px", background: "#fff", color: "#111827", border: "1.5px solid #111827", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer" }}>Change Plan</button>
+                   <button className="px-5 py-2.5 bg-white text-gray-900 border-[1.5px] border-gray-900 rounded-lg text-sm font-bold cursor-pointer hover:bg-gray-50 transition-colors">Change Plan</button>
                 </div>
               </div>
 
-               <h3 style={{ margin: "0 0 20px", fontSize: 16, fontWeight: 700, color: "#111827" }}>Payment Methods</h3>
-              <div style={{ padding: 20, border: "1.5px solid #E5E7EB", borderRadius: 10, display: "flex", alignItems: "center", gap: 16 }}>
-                <div style={{ width: 60, height: 40, background: "#111827", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, fontWeight: 700, fontSize: 12 }}>VISA</div>
-                <div style={{ flex: 1 }}>
-                  <p style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 700, color: "#111827" }}>Visa ending in 4242</p>
-                  <p style={{ margin: 0, fontSize: 13, color: "#6B7280" }}>Expires 12/26</p>
+               <h3 className="m-[0_0_20px] text-base font-bold text-gray-900">Payment Methods</h3>
+              <div className="p-5 border-[1.5px] border-gray-200 rounded-[10px] flex items-center gap-4">
+                <div className="w-[60px] h-10 bg-gray-900 text-white flex items-center justify-center rounded-md font-bold text-xs uppercase">VISA</div>
+                <div className="flex-1">
+                  <p className="m-[0_0_4px] text-[15px] font-bold text-gray-900">Visa ending in 4242</p>
+                  <p className="m-0 text-[13px] text-gray-500">Expires 12/26</p>
                 </div>
-                <button style={{ background: "none", border: "none", color: "#2563EB", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>Edit</button>
+                <button className="bg-transparent border-none text-blue-600 text-sm font-bold cursor-pointer hover:text-blue-700 transition-colors">Edit</button>
               </div>
             </div>
           )}
