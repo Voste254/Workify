@@ -14,6 +14,7 @@ import Notifications from "./Notifications";
 import EmployerSaved from "./EmployerSaved";
 import EmployerBlog from "./EmployerBlog";
 import EmployerProfile from "./EmployerProfile";
+import SupportPage from "../Shared/Support";
 
 /* match sidebar types */
 type ActivePage =
@@ -27,6 +28,7 @@ type ActivePage =
   | "Notifications"
   | "Saved"
   | "Blog"
+  | "Support"
   | "Profile"
   | "Settings";
 
@@ -76,6 +78,9 @@ const EmployerDashboardLayout = () => {
 
       case "Blog":
         return <EmployerBlog/>;
+
+      case "Support":
+        return <SupportPage/>;
 
       case "Profile":
         return <EmployerProfile/>;

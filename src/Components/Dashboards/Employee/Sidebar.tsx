@@ -8,7 +8,8 @@ import {
   Settings,
   Sparkles,
   PanelLeftClose,
-  PanelLeft
+  PanelLeft,
+  LifeBuoy
 } from "lucide-react";
 import { useState } from "react";
 
@@ -27,6 +28,7 @@ const Sidebar = ({ activePage, setActivePage }: Props) => {
     { name: "profile", icon: User, label: "My Profile" },
     { name: "saved", icon: Bookmark, label: "Saved" },
     { name: "blog", icon: BookOpen, label: "Blogs" },
+    { name: "support", icon: LifeBuoy, label: "Support" },
     { name: "workify-ai", icon: Sparkles, label: "Workify AI" },
   ];
 

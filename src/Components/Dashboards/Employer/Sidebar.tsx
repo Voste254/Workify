@@ -12,7 +12,8 @@ import {
   FileText,
   PanelLeftClose,
   PanelLeft,
-  User
+  User,
+  LifeBuoy
 } from "lucide-react";
 import { useState } from "react";
 
@@ -27,6 +28,7 @@ type ActivePage =
   | "Notifications"
   | "Saved"
   | "Blog"
+  | "Support"
   | "Profile"
   | "Settings";
 
@@ -60,6 +62,7 @@ const communicationMenu: MenuItem[] = [
 const otherMenu: MenuItem[] = [
   { name: "Saved", icon: Bookmark },
   { name: "Blog", icon: FileText },
+  { name: "Support", icon: LifeBuoy },
   { name: "Profile", icon: User },
   { name: "Settings", icon: Settings },
 ];
