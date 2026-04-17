@@ -12,13 +12,13 @@ const Ico = {
 };
 
 // ── Shared styles ──────────────────────────────────────────────────────────────
-const sel = { fontFamily: "'DM Sans',sans-serif", padding: "7px 10px", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 14, color: "#374151", background: "#F9FAFB", cursor: "pointer", outline: "none" };
+const selClass = "font-sans px-2.5 py-[7px] border border-gray-200 rounded-md text-sm text-gray-700 bg-gray-50 cursor-pointer outline-none focus:bg-white focus:border-gray-300 transition-colors";
 
 const STATS = [
-  { title: "Active Jobs", value: "12", change: "+2 this week", trend: "up", icon: Ico.briefcase, bg: "#F3F4F6", text: "#111827" },
-  { title: "Total Applicants", value: "845", change: "+15% vs last month", trend: "up", icon: Ico.users, bg: "#FEF3C7", text: "#D97706" },
-  { title: "Interviews", value: "48", change: "-5% vs last month", trend: "down", icon: Ico.calendar, bg: "#DBEAFE", text: "#2563EB" },
-  { title: "Profile Views", value: "2.4k", change: "+22% vs last month", trend: "up", icon: Ico.trending, bg: "#EDE9FE", text: "#7C3AED" },
+  { title: "Active Jobs", value: "12", change: "+2 this week", trend: "up", icon: Ico.briefcase, bgClass: "bg-gray-100", textClass: "text-gray-900" },
+  { title: "Total Applicants", value: "845", change: "+15% vs last month", trend: "up", icon: Ico.users, bgClass: "bg-amber-100", textClass: "text-amber-600" },
+  { title: "Interviews", value: "48", change: "-5% vs last month", trend: "down", icon: Ico.calendar, bgClass: "bg-blue-100", textClass: "text-blue-600" },
+  { title: "Profile Views", value: "2.4k", change: "+22% vs last month", trend: "up", icon: Ico.trending, bgClass: "bg-purple-100", textClass: "text-purple-600" },
 ];
 
 const TOP_JOBS = [
@@ -32,67 +32,66 @@ export default function Reports() {
   const [timeRange, setTimeRange] = useState("30d");
 
   return (
-    <div style={{ fontFamily: "'DM Sans','Segoe UI',sans-serif", background: "#F9FAFB", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap');*{box-sizing:border-box}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:4px}`}</style>
+    <div className="font-sans bg-gray-50 min-h-screen flex flex-col">
 
       {/* Top bar */}
-      <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div className="bg-white border-b border-gray-200 px-6 py-3.5 flex items-center justify-between">
         <div>
-          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#111827" }}>Reports & Analytics</h1>
-          <p style={{ margin: 0, fontSize: 14, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>Track hiring performance</p>
+          <h1 className="m-0 text-xl font-bold text-gray-900">Reports & Analytics</h1>
+          <p className="m-0 text-sm text-gray-400 font-mono">Track hiring performance</p>
         </div>
-        <div style={{ display: "flex", gap: 10 }}>
-          <select value={timeRange} onChange={e => setTimeRange(e.target.value)} style={sel}>
+        <div className="flex gap-2.5">
+          <select value={timeRange} onChange={e => setTimeRange(e.target.value)} className={selClass}>
             <option value="7d">Last 7 Days</option>
             <option value="30d">Last 30 Days</option>
             <option value="90d">Last 3 Months</option>
             <option value="1y">This Year</option>
           </select>
-          <button style={{ ...sel, background: "#fff", display: "flex", alignItems: "center", gap: 6, fontWeight: 600 }}>
+          <button className={`${selClass} bg-white flex items-center gap-1.5 font-semibold hover:bg-gray-50`}>
             {Ico.download} Export CSV
           </button>
         </div>
       </div>
 
       {/* Content */}
-      <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 24 }}>
+      <div className="p-6 flex flex-col gap-6">
         
         {/* Overview Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
           {STATS.map((stat, i) => (
-            <div key={i} style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 10, padding: 20 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
-                <div style={{ background: stat.bg, color: stat.text, padding: 8, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div key={i} className="bg-white border-[1.5px] border-gray-200 rounded-[10px] p-5">
+              <div className="flex justify-between items-start mb-4">
+                <div className={`${stat.bgClass} ${stat.textClass} p-2 rounded-lg flex items-center justify-center`}>
                   {stat.icon}
                 </div>
               </div>
-              <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 600, color: "#6B7280" }}>{stat.title}</p>
-              <p style={{ margin: "0 0 8px", fontSize: 26, fontWeight: 700, color: "#111827", fontFamily: "'DM Mono',monospace" }}>{stat.value}</p>
-              <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: stat.trend === "up" ? "#059669" : "#DC2626" }}>{stat.change}</p>
+              <p className="m-[0_0_4px] text-sm font-semibold text-gray-500">{stat.title}</p>
+              <p className="m-[0_0_8px] text-[26px] font-bold text-gray-900 font-mono">{stat.value}</p>
+              <p className={`m-0 text-[13px] font-semibold ${stat.trend === "up" ? "text-emerald-600" : "text-red-600"}`}>{stat.change}</p>
             </div>
           ))}
         </div>
 
         {/* Charts Area */}
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16 }}>
-          <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 10, minHeight: 400, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" as const }}>
-            <div style={{ color: "#D1D5DB", marginBottom: 16 }}>{Ico.chart}</div>
-            <p style={{ margin: 0, fontSize: 18, fontWeight: 600, color: "#111827" }}>Applicant Trends</p>
-            <p style={{ margin: "4px 0 0", fontSize: 15, color: "#6B7280", maxWidth: 300, textAlign: "center" }}>Interactive charts will be available once data integration is complete.</p>
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4">
+          <div className="bg-white border-[1.5px] border-gray-200 rounded-[10px] min-h-[400px] flex flex-col items-center justify-center text-center p-6">
+            <div className="text-gray-300 mb-4">{Ico.chart}</div>
+            <p className="m-0 text-lg font-semibold text-gray-900">Applicant Trends</p>
+            <p className="m-[4px_0_0] text-[15px] text-gray-500 max-w-[300px] text-center">Interactive charts will be available once data integration is complete.</p>
           </div>
 
-          <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 10, padding: 20 }}>
-            <h3 style={{ margin: "0 0 20px", fontSize: 16, fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.05em" }}>Top Job Postings</h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div className="bg-white border-[1.5px] border-gray-200 rounded-[10px] p-5">
+            <h3 className="m-[0_0_20px] text-base font-bold text-gray-900 uppercase tracking-[0.05em]">Top Job Postings</h3>
+            <div className="flex flex-col gap-4">
               {TOP_JOBS.map((job, idx) => (
-                <div key={idx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 16, borderBottom: idx < TOP_JOBS.length - 1 ? "1px solid #E5E7EB" : "none" }}>
+                <div key={idx} className={`flex justify-between items-center pb-4 ${idx < TOP_JOBS.length - 1 ? "border-b border-gray-200" : "border-none"}`}>
                   <div>
-                    <p style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 600, color: "#111827" }}>{job.role}</p>
-                    <p style={{ margin: 0, fontSize: 13, color: "#6B7280", fontFamily: "'DM Mono',monospace" }}>{job.views} views</p>
+                    <p className="m-[0_0_4px] text-[15px] font-semibold text-gray-900">{job.role}</p>
+                    <p className="m-0 text-[13px] text-gray-500 font-mono">{job.views} views</p>
                   </div>
-                  <div style={{ textAlign: "right" }}>
-                    <p style={{ margin: "0 0 2px", fontSize: 16, fontWeight: 700, color: "#111827", fontFamily: "'DM Mono',monospace" }}>{job.apps}</p>
-                    <p style={{ margin: 0, fontSize: 12, color: "#9CA3AF", textTransform: "uppercase" }}>Applicants</p>
+                  <div className="text-right">
+                    <p className="m-[0_0_2px] text-base font-bold text-gray-900 font-mono">{job.apps}</p>
+                    <p className="m-0 text-xs text-gray-400 uppercase">Applicants</p>
                   </div>
                 </div>
               ))}
