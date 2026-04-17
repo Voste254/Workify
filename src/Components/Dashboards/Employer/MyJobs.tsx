@@ -12,10 +12,10 @@ export interface Job {
   salaryRate: string; description: string;
 }
 
-const STATUS_CONFIG: Record<JobStatus, { label: string; color: string; bg: string }> = {
-  active: { label: "Active", color: "#059669", bg: "#D1FAE5" },
-  closed: { label: "Closed", color: "#FFFFFF", bg: "#DC2626" },
-  draft:  { label: "Draft",  color: "#6B7280", bg: "#F3F4F6" },
+const STATUS_CONFIG: Record<JobStatus, { label: string; textClass: string; bgClass: string }> = {
+  active: { label: "Active", textClass: "text-emerald-600", bgClass: "bg-emerald-100" },
+  closed: { label: "Closed", textClass: "text-white", bgClass: "bg-red-600" },
+  draft:  { label: "Draft",  textClass: "text-gray-500", bgClass: "bg-gray-100" },
 };
 
 // ── Mock Data removed – data fetched from Supabase ────────────────────────────
@@ -37,36 +37,36 @@ const Ico = {
 };
 
 // ── Shared styles ──────────────────────────────────────────────────────────────
-const sel = { fontFamily: "'DM Sans',sans-serif", padding: "7px 10px", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 14, color: "#374151", background: "#F9FAFB", cursor: "pointer", outline: "none" };
-const sectionLabel = { margin: "0 0 8px", fontSize: 13, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.1em", color: "#9CA3AF" };
-const iconBtn = (color = "#6B7280") => ({ background: "none", border: "1px solid #E5E7EB", borderRadius: 6, padding: "6px 8px", cursor: "pointer", color, display: "flex", alignItems: "center" as const });
+const sel = "font-sans px-2.5 py-[7px] border border-gray-200 rounded-md text-sm text-gray-700 bg-gray-50 cursor-pointer outline-none";
+const sectionLabel = "m-[0_0_8px] text-[13px] font-bold uppercase tracking-[0.1em] text-gray-400";
+const iconBtn = (colorClass = "text-gray-500", borderClass = "border-gray-200", bgClass = "bg-transparent") => `border rounded-md px-2 py-1.5 cursor-pointer flex items-center ${borderClass} ${bgClass} ${colorClass}`;
 
 // ── Job Card ───────────────────────────────────────────────────────────────────
 function JobCard({ job, selected, onSelect }: { job: Job; selected: boolean; onSelect: () => void }) {
   const cfg = STATUS_CONFIG[job.status];
   return (
-    <div onClick={onSelect} style={{ background: "#fff", border: `1.5px solid ${selected ? "#111827" : "#E5E7EB"}`, borderRadius: 8, padding: "16px 18px", cursor: "pointer", opacity: job.status === "closed" ? 0.7 : 1, transition: "border-color 0.15s" }}>
-      <div style={{ display: "flex", gap: 12 }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ margin: "0 0 2px", fontSize: 16, fontWeight: 600, color: "#111827" }}>{job.title}</p>
-          <p style={{ margin: 0, fontSize: 14, color: "#6B7280" }}>{job.department}</p>
-          <div style={{ display: "flex", gap: 10, marginTop: 8, flexWrap: "wrap" as const }}>
-            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 13, color: "#9CA3AF" }}>{Ico.location} {job.location}</span>
-            <span style={{ fontSize: 13, color: "#6B7280", padding: "2px 7px", background: "#F3F4F6", borderRadius: 3, fontWeight: 500 }}>{job.type}</span>
+    <div onClick={onSelect} className={`bg-white border-[1.5px] rounded-lg px-[18px] py-4 cursor-pointer transition-colors duration-150 ${selected ? "border-gray-900" : "border-gray-200"} ${job.status === "closed" ? "opacity-70" : "opacity-100"}`}>
+      <div className="flex gap-3">
+        <div className="flex-1 min-w-0">
+          <p className="m-[0_0_2px] text-base font-semibold text-gray-900">{job.title}</p>
+          <p className="m-0 text-sm text-gray-500">{job.department}</p>
+          <div className="flex gap-2.5 mt-2 flex-wrap">
+            <span className="flex items-center gap-[3px] text-[13px] text-gray-400">{Ico.location} {job.location}</span>
+            <span className="text-[13px] text-gray-500 px-[7px] py-[2px] bg-gray-100 rounded-[3px] font-medium">{job.type}</span>
             {job.salaryRate && (
-              <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 13, color: "#059669", fontWeight: 600, fontFamily: "'DM Mono',monospace" }}>{Ico.salary} {job.salaryRate}</span>
+              <span className="flex items-center gap-[3px] text-[13px] text-emerald-600 font-semibold font-mono">{Ico.salary} {job.salaryRate}</span>
             )}
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginTop: 14 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.05em", padding: "3px 8px", borderRadius: 4, textTransform: "uppercase" as const, color: cfg.color, background: cfg.bg }}>{cfg.label}</span>
+          <div className="flex justify-between items-end mt-3.5">
+            <div className="flex items-center gap-1.5">
+              <span className={`text-[13px] font-semibold tracking-[0.05em] px-2 py-[3px] rounded tracking-wide uppercase ${cfg.textClass} ${cfg.bgClass}`}>{cfg.label}</span>
               {job.status === "active" && (
-                <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 13, color: "#111827", fontWeight: 600, background: "#F9FAFB", padding: "3px 8px", borderRadius: 4, border: "1px solid #E5E7EB" }}>
+                <span className="flex items-center gap-1 text-[13px] text-gray-900 font-semibold bg-gray-50 px-2 py-[3px] rounded border border-gray-200">
                   {Ico.users} {job.applicantsCount} Applicants
                 </span>
               )}
             </div>
-            <span style={{ fontSize: 13, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>Updated {daysAgo(job.lastUpdated)}</span>
+            <span className="text-[13px] text-gray-400 font-mono">Updated {daysAgo(job.lastUpdated)}</span>
           </div>
         </div>
       </div>
@@ -78,39 +78,39 @@ function JobCard({ job, selected, onSelect }: { job: Job; selected: boolean; onS
 function DetailPanel({ job, onClose, onDelete, onEdit }: { job: Job; onClose: () => void; onDelete: (id: string) => void; onEdit: (job: Job) => void }) {
   const cfg = STATUS_CONFIG[job.status];
   return (
-    <div style={{ background: "#fff", border: "1.5px solid #E5E7EB", borderRadius: 10, height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div className="bg-white border-[1.5px] border-gray-200 rounded-[10px] h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <div style={{ padding: "18px 20px", borderBottom: "1px solid #E5E7EB" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+      <div className="px-5 py-[18px] border-b border-gray-200">
+        <div className="flex items-center justify-between mb-3">
           <div>
-            <p style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#111827" }}>{job.title}</p>
-            <p style={{ margin: 0, fontSize: 14, color: "#6B7280" }}>{job.department} · {job.location}</p>
+            <p className="m-0 text-[17px] font-bold text-gray-900">{job.title}</p>
+            <p className="m-0 text-sm text-gray-500">{job.department} · {job.location}</p>
           </div>
-          <div style={{ display: "flex", gap: 6 }}>
-            <button onClick={() => onDelete(job.id)} style={{ ...iconBtn("#EF4444"), borderColor: "#FCA5A5", background: "#FEF2F2" }} title="Delete Job">{Ico.trash}</button>
-            <button onClick={() => onEdit(job)} style={iconBtn()} title="Edit Job">{Ico.edit}</button>
-            <button onClick={onClose} style={iconBtn()}>{Ico.close}</button>
+          <div className="flex gap-1.5">
+            <button onClick={() => onDelete(job.id)} className={iconBtn("text-red-500", "border-red-300", "bg-red-50")} title="Delete Job">{Ico.trash}</button>
+            <button onClick={() => onEdit(job)} className={iconBtn()} title="Edit Job">{Ico.edit}</button>
+            <button onClick={onClose} className={iconBtn()}>{Ico.close}</button>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as const }}>
-          <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.05em", padding: "4px 10px", borderRadius: 4, textTransform: "uppercase" as const, color: cfg.color, background: cfg.bg }}>{cfg.label}</span>
-          <span style={{ fontSize: 13, padding: "4px 10px", borderRadius: 4, color: "#374151", background: "#F3F4F6", fontWeight: 500 }}>{job.type}</span>
-          <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 13, padding: "4px 10px", borderRadius: 4, color: "#111827", background: "#F9FAFB", border: "1px solid #E5E7EB", fontWeight: 600 }}>
+        <div className="flex gap-1.5 flex-wrap">
+          <span className={`text-[13px] font-semibold tracking-[0.05em] px-2.5 py-1 rounded uppercase ${cfg.textClass} ${cfg.bgClass}`}>{cfg.label}</span>
+          <span className="text-[13px] px-2.5 py-1 rounded text-gray-700 bg-gray-100 font-medium">{job.type}</span>
+          <span className="flex items-center gap-1 text-[13px] px-2.5 py-1 rounded text-gray-900 bg-gray-50 border border-gray-200 font-semibold">
             {Ico.users} {job.applicantsCount} Applicants
           </span>
         </div>
       </div>
 
       {/* Body */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "18px 20px" }}>
-        <p style={sectionLabel}>Quick Actions</p>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 20 }}>
-          <button style={{ padding: "8px", background: "#111827", color: "#fff", border: "none", borderRadius: 6, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>View Applicants</button>
-          <button style={{ padding: "8px", background: "#fff", color: "#111827", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>Duplicate Job</button>
+      <div className="flex-1 overflow-y-auto px-5 py-[18px]">
+        <p className={sectionLabel}>Quick Actions</p>
+        <div className="grid grid-cols-2 gap-2 mb-5">
+          <button className="p-2 bg-gray-900 text-white rounded-md text-sm font-semibold cursor-pointer font-sans">View Applicants</button>
+          <button className="p-2 bg-white text-gray-900 border border-gray-200 rounded-md text-sm font-semibold cursor-pointer font-sans">Duplicate Job</button>
         </div>
 
-        <p style={sectionLabel}>Overview</p>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 20 }}>
+        <p className={sectionLabel}>Overview</p>
+        <div className="grid grid-cols-2 gap-2 mb-5">
           {([
             ["Posted Date", fmtDate(job.createdAt)],
             ["Last Update", fmtDate(job.lastUpdated)],
@@ -118,21 +118,21 @@ function DetailPanel({ job, onClose, onDelete, onEdit }: { job: Job; onClose: ()
             ["Job Type",    job.type],
             ...(job.salaryRate ? [["Salary / Rate", job.salaryRate]] : []),
           ] as [string, string][]).map(([label, value]) => (
-            <div key={label} style={{ padding: "10px 12px", borderRadius: 6, background: "#F9FAFB", border: "1px solid #E5E7EB" }}>
-              <p style={{ margin: "0 0 2px", fontSize: 12, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</p>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: label === "Salary / Rate" ? "#059669" : "#111827", fontFamily: label.includes("Date") || label.includes("Update") || label === "Salary / Rate" ? "'DM Mono',monospace" : "inherit" }}>{value}</p>
+            <div key={label} className="px-3 py-2.5 rounded-md bg-gray-50 border border-gray-200">
+              <p className="m-[0_0_2px] text-xs text-gray-400 uppercase tracking-[0.08em]">{label}</p>
+              <p className={`m-0 text-sm font-semibold ${label === "Salary / Rate" ? "text-emerald-600" : "text-gray-900"} ${label.includes("Date") || label.includes("Update") || label === "Salary / Rate" ? "font-mono" : ""}`}>{value}</p>
             </div>
           ))}
         </div>
 
         {job.status === "active" && (
           <>
-            <p style={sectionLabel}>Applicant Pipeline</p>
-            <div style={{ padding: "12px 14px", borderRadius: 6, border: "1px solid #E5E7EB", marginBottom: 20, background: "#FAFAFA" }}>
+            <p className={sectionLabel}>Applicant Pipeline</p>
+            <div className="px-3.5 py-3 rounded-md border border-gray-200 mb-5 bg-gray-50">
               {[["Applied", 24], ["Interviewing", 15], ["Offered", 6]].map(([label, value], i, arr) => (
-                <div key={label as string} style={{ display: "flex", justifyContent: "space-between", marginBottom: i < arr.length - 1 ? 8 : 0, fontSize: 14 }}>
-                  <span style={{ color: "#6B7280" }}>{label}</span>
-                  <strong style={{ color: "#111827" }}>{value}</strong>
+                <div key={label as string} className={`flex justify-between text-sm ${i < arr.length - 1 ? "mb-2" : "mb-0"}`}>
+                  <span className="text-gray-500">{label}</span>
+                  <strong className="text-gray-900">{value}</strong>
                 </div>
               ))}
             </div>
@@ -163,7 +163,6 @@ export default function MyJobs({ setActivePage, onEditJob }: { setActivePage?: (
       setFetchError(null);
 
       try {
-        // 1. Fetch all jobs for this employer
         const { data: jobRows, error: jobErr } = await supabase
           .from("jobs")
           .select("id, title, location, job_type, created_at, updated_at, status, category, salary_rate, description")
@@ -173,7 +172,6 @@ export default function MyJobs({ setActivePage, onEditJob }: { setActivePage?: (
         if (jobErr) throw jobErr;
         if (!jobRows) { setJobs([]); return; }
 
-        // 2. Fetch applicant counts per job
         const jobIds = jobRows.map(j => j.id);
         let countMap: Record<string, number> = {};
 
@@ -190,7 +188,6 @@ export default function MyJobs({ setActivePage, onEditJob }: { setActivePage?: (
           }
         }
 
-        // 3. Map DB rows → Job interface
         const mapped: Job[] = jobRows.map(row => ({
           id: row.id,
           title: row.title,
@@ -232,72 +229,69 @@ export default function MyJobs({ setActivePage, onEditJob }: { setActivePage?: (
     totalApps: jobs.reduce((sum, j) => sum + j.applicantsCount, 0),
   };
 
-  // ── Loading / error states ─────────────────────────────────────────────────
   if (loading) {
     return (
-      <div style={{ fontFamily: "'DM Sans','Segoe UI',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh", flexDirection: "column", gap: 12 }}>
-        <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap');@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}`}</style>
-        <div style={{ width: 36, height: 36, border: "4px solid #F3F4F6", borderTop: "4px solid #111827", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
-        <p style={{ margin: 0, fontSize: 15, color: "#9CA3AF" }}>Loading your jobs…</p>
+      <div className="font-sans flex flex-col items-center justify-center min-h-[60vh] gap-3">
+        <div className="w-9 h-9 border-4 border-gray-100 border-t-gray-900 rounded-full animate-spin" />
+        <p className="m-0 text-[15px] text-gray-400">Loading your jobs…</p>
       </div>
     );
   }
 
   if (fetchError) {
     return (
-      <div style={{ fontFamily: "'DM Sans','Segoe UI',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh", flexDirection: "column", gap: 12 }}>
-        <p style={{ margin: 0, fontSize: 15, color: "#EF4444" }}>⚠ {fetchError}</p>
+      <div className="font-sans flex flex-col items-center justify-center min-h-[60vh] gap-3">
+        <p className="m-0 text-[15px] text-red-500">⚠ {fetchError}</p>
       </div>
     );
   }
 
   return (
-    <div style={{ fontFamily: "'DM Sans','Segoe UI',sans-serif", background: "#F9FAFB", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap');*{box-sizing:border-box}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:4px}`}</style>
+    <div className="font-sans bg-gray-50 min-h-screen flex flex-col">
 
       {/* Top bar */}
-      <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div className="bg-white border-b border-gray-200 px-6 py-3.5 flex items-center justify-between">
         <div>
-          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#111827" }}>My Jobs</h1>
-          <p style={{ margin: 0, fontSize: 14, color: "#9CA3AF", fontFamily: "'DM Mono',monospace" }}>{stats.active} active · {jobs.length} total</p>
+          <h1 className="m-0 text-xl font-bold text-gray-900">My Jobs</h1>
+          <p className="m-0 text-sm text-gray-400 font-mono">{stats.active} active · {jobs.length} total</p>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="flex gap-2">
           {([["Active", stats.active, false], ["Closed", stats.closed, false], ["Drafts", stats.draft, false], ["Total Apps", stats.totalApps, true]] as [string, number, boolean][]).map(([label, value, dark]) => (
-            <div key={label} style={{ padding: "6px 14px", borderRadius: 6, background: dark ? "#111827" : "#F3F4F6", border: dark ? "none" : "1px solid #E5E7EB", textAlign: "center" as const }}>
-              <p style={{ margin: 0, fontSize: 18, fontWeight: 700, color: dark ? "#fff" : "#111827", fontFamily: "'DM Mono',monospace" }}>{value}</p>
-              <p style={{ margin: 0, fontSize: 12, color: dark ? "#9CA3AF" : "#6B7280", textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>{label}</p>
+            <div key={label} className={`px-3.5 py-1.5 rounded-md text-center ${dark ? "bg-gray-900 border-none" : "bg-gray-100 border border-gray-200"}`}>
+              <p className={`m-0 text-lg font-bold font-mono ${dark ? "text-white" : "text-gray-900"}`}>{value}</p>
+              <p className={`m-0 text-xs uppercase tracking-[0.06em] ${dark ? "text-gray-400" : "text-gray-500"}`}>{label}</p>
             </div>
           ))}
-          <button onClick={() => setActivePage?.("Post Job")} style={{ marginLeft: 8, padding: "0 16px", background: "#111827", color: "#fff", border: "none", borderRadius: 6, fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+          <button onClick={() => setActivePage?.("Post Job")} className="ml-2 px-4 bg-gray-900 text-white border-none rounded-md text-[15px] font-semibold cursor-pointer font-sans">
             Post Job
           </button>
         </div>
       </div>
 
       {/* Filters */}
-      <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "10px 24px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" as const }}>
-        <div style={{ position: "relative" as const, flex: 1, maxWidth: 260 }}>
-          <span style={{ position: "absolute" as const, left: 10, top: "50%", transform: "translateY(-50%)", color: "#9CA3AF" }}>{Ico.search}</span>
+      <div className="bg-white border-b border-gray-200 px-6 py-2.5 flex items-center gap-2.5 flex-wrap">
+        <div className="relative flex-1 max-w-[260px]">
+          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400">{Ico.search}</span>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search jobs…"
-            style={{ width: "100%", padding: "7px 10px 7px 32px", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 14, color: "#111827", background: "#F9FAFB", outline: "none" }} />
+            className="w-full py-[7px] pr-2.5 pl-8 border border-gray-200 rounded-md text-sm text-gray-900 bg-gray-50 outline-none" />
         </div>
-        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as JobStatus | "all")} style={sel}>
+        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as JobStatus | "all")} className={sel}>
           <option value="all">All Statuses</option>
           {(Object.keys(STATUS_CONFIG) as JobStatus[]).map(s => <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>)}
         </select>
-        <span style={{ fontSize: 14, color: "#9CA3AF", marginLeft: "auto", fontFamily: "'DM Mono',monospace" }}>{filtered.length} result{filtered.length !== 1 ? "s" : ""}</span>
+        <span className="text-sm text-gray-400 ml-auto font-mono">{filtered.length} result{filtered.length !== 1 ? "s" : ""}</span>
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, display: "grid", gridTemplateColumns: selected ? "1fr 380px" : "1fr", gap: 16, padding: 20, alignItems: "start" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className={`flex-1 grid gap-4 p-5 items-start ${selected ? "grid-cols-[1fr_380px]" : "grid-cols-1"}`}>
+        <div className="flex flex-col gap-2.5">
           {filtered.length === 0
-            ? <div style={{ padding: 48, textAlign: "center" as const, border: "1.5px dashed #E5E7EB", borderRadius: 10, background: "#fff" }}><p style={{ margin: 0, fontSize: 16, color: "#9CA3AF" }}>No jobs match your filters.</p></div>
+            ? <div className="p-12 text-center border-[1.5px] border-dashed border-gray-200 rounded-[10px] bg-white"><p className="m-0 text-base text-gray-400">No jobs match your filters.</p></div>
             : filtered.map(job => <JobCard key={job.id} job={job} selected={selectedId === job.id} onSelect={() => setSelectedId(p => p === job.id ? null : job.id)} />)
           }
         </div>
         {selected && (
-          <div style={{ position: "sticky" as const, top: 20, height: "calc(100vh - 175px)", overflow: "hidden" }}>
+          <div className="sticky top-5 h-[calc(100vh-175px)] overflow-hidden">
             <DetailPanel job={selected} onClose={() => setSelectedId(null)} onDelete={setJobToDelete} onEdit={(job) => { onEditJob?.(job); setActivePage?.("Post Job"); }} />
           </div>
         )}
@@ -305,18 +299,18 @@ export default function MyJobs({ setActivePage, onEditJob }: { setActivePage?: (
 
       {/* Delete Modal */}
       {jobToDelete && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, padding: 20 }}>
-          <div style={{ background: "#fff", width: "100%", maxWidth: 400, borderRadius: 12, padding: 24 }}>
-            <h3 style={{ margin: "0 0 10px", fontSize: 18, fontWeight: 700, color: "#111827" }}>Delete Job Posting</h3>
-            <p style={{ margin: "0 0 24px", fontSize: 14, color: "#4B5563", lineHeight: 1.5 }}>Are you sure you want to delete this job posting? This action cannot be undone and all associated applicants will be removed.</p>
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
-              <button onClick={() => setJobToDelete(null)} style={{ padding: "8px 16px", background: "#fff", border: "1px solid #E5E7EB", borderRadius: 6, fontSize: 14, fontWeight: 600, color: "#374151", cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>Cancel</button>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-5">
+          <div className="bg-white w-full max-w-[400px] rounded-xl p-6">
+            <h3 className="m-[0_0_10px] text-lg font-bold text-gray-900">Delete Job Posting</h3>
+            <p className="m-[0_0_24px] text-sm text-gray-600 leading-relaxed">Are you sure you want to delete this job posting? This action cannot be undone and all associated applicants will be removed.</p>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setJobToDelete(null)} className="px-4 py-2 bg-white border border-gray-200 rounded-md text-sm font-semibold text-gray-700 cursor-pointer font-sans">Cancel</button>
               <button onClick={() => {
                 supabase.from("jobs").delete().eq("id", jobToDelete);
                 setJobs(j => j.filter(x => x.id !== jobToDelete));
                 if (selectedId === jobToDelete) setSelectedId(null);
                 setJobToDelete(null);
-              }} style={{ padding: "8px 16px", background: "#EF4444", border: "none", borderRadius: 6, fontSize: 14, fontWeight: 600, color: "#fff", cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>Delete Job</button>
+              }} className="px-4 py-2 bg-red-500 border-none rounded-md text-sm font-semibold text-white cursor-pointer font-sans">Delete Job</button>
             </div>
           </div>
         </div>
