@@ -1,10 +1,18 @@
 import { useState, useEffect } from "react";
-import { CATEGORIES } from "../Employee/FindJobs";
 import { supabase } from "../../../lib/supabaseClient";
 import { useAuth } from "../../../contexts/AuthContext";
 import type { Job } from "./MyJobs";
 
-
+const CATEGORIES = [
+  "Technology & IT",
+  "Healthcare & Medical",
+  "Finance & Accounting",
+  "Sales & Marketing",
+  "Manual & Casual Labor",
+  "Customer Support",
+  "Administration",
+  "Engineering & Design",
+];
 // ── Icons ──────────────────────────────────────────────────────────────────────
 const I = (d: string, s = 14, fill = "none") => <svg width={s} height={s} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: d }} />;
 const Ico = {
