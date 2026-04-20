@@ -98,7 +98,8 @@ export default function FindJobsPage() {
     setLoading(true);
     setError(null);
     try {
-      const { data, error: dbError } = await supabase
+      // Step 1 — fetch active jobs
+      const { data: jobsData, error: jobsError } = await supabase
         .from("jobs")
         .select(`
           id,
@@ -110,28 +111,36 @@ export default function FindJobsPage() {
           description,
           status,
           created_at,
-          profiles (
-            id,
-            companies ( company_name )
-          )
+          employer_id
         `)
         .eq("status", "active")
         .order("created_at", { ascending: false });
 
-      if (dbError) throw dbError;
+      if (jobsError) throw jobsError;
 
-      // Flatten: jobs → profiles → companies (owner_id = profiles.id)
-      // companies is one-to-many so Supabase returns it as an array — take the first entry
-      const mapped = (data ?? []).map((row: any) => {
-        const companiesArr = row.profiles?.companies;
-        const companyName = Array.isArray(companiesArr)
-          ? companiesArr[0]?.name
-          : companiesArr?.name;
-        return {
-          ...row,
-          company_name: companyName ?? "Unknown Company",
-        };
-      });
+      // Step 2 — fetch company names for those employers
+      // jobs.employer_id = profiles.id = companies.owner_id
+      const employerIds = [...new Set((jobsData ?? []).map(j => j.employer_id).filter(Boolean))];
+
+      let companyMap: Record<string, string> = {};
+      if (employerIds.length > 0) {
+        const { data: companiesData, error: companyError } = await supabase
+          .from("companies")
+          .select("owner_id, company_name")
+          .in("owner_id", employerIds);
+
+        if (companyError) throw companyError;
+
+        companyMap = Object.fromEntries(
+          (companiesData ?? []).map(c => [c.owner_id, c.company_name])
+        );
+      }
+
+      // Step 3 — merge
+      const mapped = (jobsData ?? []).map(row => ({
+        ...row,
+        company_name: companyMap[row.employer_id] ?? "Unknown Company",
+      }));
 
       setJobs(mapped);
     } catch (err: any) {
