@@ -3,29 +3,52 @@ import { useState, useMemo } from "react";
 // ── Types & Config ─────────────────────────────────────────────────────────────
 type Stage = "applied" | "screening" | "interview" | "offer" | "hired" | "rejected";
 
+interface StageHistoryEntry {
+  from_stage: Stage | null;
+  to_stage: Stage;
+  employer_note: string;
+  changed_at: string;
+}
+
 interface Application {
   id: string; applicantName: string; jobTitle: string; jobCategory: "Corporate" | "Casual";
   appliedDate: string; lastUpdated: string; stage: Stage; avatar: string;
   phone: string; location: string; note?: string; rateRequest: string;
+  stageHistory: StageHistoryEntry[];
 }
 
 const SC: Record<Stage, { label: string; textClass: string; bgClass: string; step: number }> = {
-  applied:    { label: "Applied",    textClass: "text-gray-500", bgClass: "bg-gray-100", step: 1 },
-  screening:  { label: "Screening",  textClass: "text-amber-600", bgClass: "bg-amber-50", step: 2 },
-  interview:  { label: "Interview",  textClass: "text-blue-600", bgClass: "bg-blue-100", step: 3 },
-  offer:      { label: "Offer",      textClass: "text-purple-600", bgClass: "bg-purple-100", step: 4 },
-  hired:      { label: "Hired",      textClass: "text-emerald-600", bgClass: "bg-emerald-100", step: 5 },
-  rejected:   { label: "Rejected",   textClass: "text-white", bgClass: "bg-red-600", step: 0 },
+  applied: { label: "Applied", textClass: "text-gray-500", bgClass: "bg-gray-100", step: 1 },
+  screening: { label: "Screening", textClass: "text-amber-600", bgClass: "bg-amber-50", step: 2 },
+  interview: { label: "Interview", textClass: "text-blue-600", bgClass: "bg-blue-100", step: 3 },
+  offer: { label: "Offer", textClass: "text-purple-600", bgClass: "bg-purple-100", step: 4 },
+  hired: { label: "Hired", textClass: "text-emerald-600", bgClass: "bg-emerald-100", step: 5 },
+  rejected: { label: "Rejected", textClass: "text-white", bgClass: "bg-red-600", step: 0 },
 };
 
 const STAGES_FLOW: Stage[] = ["applied", "screening", "interview", "offer", "hired"];
 // TODO : 
 const MOCK_APPS: Application[] = [
-  { id: "1", applicantName: "John Omondi", jobTitle: "Construction Foreman", jobCategory: "Casual", appliedDate: "2025-03-20", lastUpdated: "2025-03-22", stage: "screening", avatar: "https://i.pravatar.cc/150?img=11", phone: "0712 345 678", location: "Nairobi, Kenya", note: "Has 5 years site experience in Westlands.", rateRequest: "KES 2,500/day" },
-  { id: "2", applicantName: "Sarah Wanjiku", jobTitle: "Senior DevOps Engineer", jobCategory: "Corporate", appliedDate: "2025-03-15", lastUpdated: "2025-03-21", stage: "interview", avatar: "https://i.pravatar.cc/150?img=5", phone: "0723 456 789", location: "Remote", note: "Scheduled for technical round on Friday.", rateRequest: "KES 250,000/mo" },
-  { id: "3", applicantName: "Brian Mutisya", jobTitle: "Electrician", jobCategory: "Casual", appliedDate: "2025-03-21", lastUpdated: "2025-03-21", stage: "applied", avatar: "https://i.pravatar.cc/150?img=12", phone: "0734 567 890", location: "Mombasa, Kenya", rateRequest: "KES 1,800/day" },
-  { id: "4", applicantName: "Mercy Kiprotich", jobTitle: "Marketing Manager", jobCategory: "Corporate", appliedDate: "2025-03-10", lastUpdated: "2025-03-18", stage: "offer", avatar: "https://i.pravatar.cc/150?img=9", phone: "0745 678 901", location: "Nairobi, Kenya", note: "Negotiating final bonus structure.", rateRequest: "KES 180,000/mo" },
-  { id: "5", applicantName: "Peter Kamau", jobTitle: "Plumber", jobCategory: "Casual", appliedDate: "2025-03-16", lastUpdated: "2025-03-17", stage: "rejected", avatar: "https://i.pravatar.cc/150?img=14", phone: "0700 111 222", location: "Nakuru, Kenya", note: "Did not have the necessary pipe-threading tools.", rateRequest: "KES 1,500/day" },
+  {
+    id: "1", applicantName: "John Omondi", jobTitle: "Construction Foreman", jobCategory: "Casual", appliedDate: "2025-03-20", lastUpdated: "2025-03-22", stage: "screening", avatar: "https://i.pravatar.cc/150?img=11", phone: "0712 345 678", location: "Nairobi, Kenya", note: "Has 5 years site experience in Westlands.", rateRequest: "KES 2,500/day",
+    stageHistory: [{ from_stage: null, to_stage: "applied", employer_note: "Application received.", changed_at: "2025-03-20" }, { from_stage: "applied", to_stage: "screening", employer_note: "CV looks strong — moved to screening.", changed_at: "2025-03-22" }]
+  },
+  {
+    id: "2", applicantName: "Sarah Wanjiku", jobTitle: "Senior DevOps Engineer", jobCategory: "Corporate", appliedDate: "2025-03-15", lastUpdated: "2025-03-21", stage: "interview", avatar: "https://i.pravatar.cc/150?img=5", phone: "0723 456 789", location: "Remote", note: "Scheduled for technical round on Friday.", rateRequest: "KES 250,000/mo",
+    stageHistory: [{ from_stage: null, to_stage: "applied", employer_note: "Application received.", changed_at: "2025-03-15" }, { from_stage: "applied", to_stage: "screening", employer_note: "Passed initial CV review.", changed_at: "2025-03-18" }, { from_stage: "screening", to_stage: "interview", employer_note: "Screening call went well. Technical interview scheduled for Friday.", changed_at: "2025-03-21" }]
+  },
+  {
+    id: "3", applicantName: "Brian Mutisya", jobTitle: "Electrician", jobCategory: "Casual", appliedDate: "2025-03-21", lastUpdated: "2025-03-21", stage: "applied", avatar: "https://i.pravatar.cc/150?img=12", phone: "0734 567 890", location: "Mombasa, Kenya", rateRequest: "KES 1,800/day",
+    stageHistory: [{ from_stage: null, to_stage: "applied", employer_note: "Application received.", changed_at: "2025-03-21" }]
+  },
+  {
+    id: "4", applicantName: "Mercy Kiprotich", jobTitle: "Marketing Manager", jobCategory: "Corporate", appliedDate: "2025-03-10", lastUpdated: "2025-03-18", stage: "offer", avatar: "https://i.pravatar.cc/150?img=9", phone: "0745 678 901", location: "Nairobi, Kenya", note: "Negotiating final bonus structure.", rateRequest: "KES 180,000/mo",
+    stageHistory: [{ from_stage: null, to_stage: "applied", employer_note: "Application received.", changed_at: "2025-03-10" }, { from_stage: "applied", to_stage: "offer", employer_note: "Outstanding interviews. Extending an offer — please review the attached terms.", changed_at: "2025-03-18" }]
+  },
+  {
+    id: "5", applicantName: "Peter Kamau", jobTitle: "Plumber", jobCategory: "Casual", appliedDate: "2025-03-16", lastUpdated: "2025-03-17", stage: "rejected", avatar: "https://i.pravatar.cc/150?img=14", phone: "0700 111 222", location: "Nakuru, Kenya", note: "Did not have the necessary pipe-threading tools.", rateRequest: "KES 1,500/day",
+    stageHistory: [{ from_stage: null, to_stage: "applied", employer_note: "Application received.", changed_at: "2025-03-16" }, { from_stage: "applied", to_stage: "rejected", employer_note: "Unfortunately you did not meet the minimum tool requirements for this role. We encourage you to re-apply in 2026.", changed_at: "2025-03-17" }]
+  },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -68,10 +91,20 @@ function StageBar({ stage }: { stage: Stage }) {
 }
 
 // ── Detail Panel ───────────────────────────────────────────────────────────────
-function DetailPanel({ app, onClose, onAdvance, onReject }: { app: Application; onClose: () => void; onAdvance: () => void; onReject: () => void }) {
+function DetailPanel({ app, onClose, onAdvance, onReject }: { app: Application; onClose: () => void; onAdvance: (note: string) => void; onReject: (note: string) => void }) {
   const cfg = SC[app.stage];
   const activeIdx = STAGES_FLOW.indexOf(app.stage);
   const nextStage = activeIdx >= 0 && activeIdx < STAGES_FLOW.length - 1 ? STAGES_FLOW[activeIdx + 1] : null;
+  const [managerNote, setManagerNote] = useState("");
+  const [noteError, setNoteError] = useState(false);
+
+  const handleAction = (action: "advance" | "reject") => {
+    if (!managerNote.trim()) { setNoteError(true); return; }
+    setNoteError(false);
+    if (action === "advance") onAdvance(managerNote.trim());
+    else onReject(managerNote.trim());
+    setManagerNote("");
+  };
 
   return (
     <div className="bg-white border-[1.5px] border-gray-200 rounded-[10px] h-full flex flex-col overflow-hidden">
@@ -90,24 +123,47 @@ function DetailPanel({ app, onClose, onAdvance, onReject }: { app: Application; 
         <div className="flex gap-1.5">
           <span className={`text-[13px] font-semibold tracking-[0.05em] px-2.5 py-1 rounded uppercase ${cfg.textClass} ${cfg.bgClass}`}>{cfg.label}</span>
           <span className="flex items-center gap-1 text-[13px] px-2.5 py-1 rounded text-gray-700 bg-gray-100 font-medium">
-             {app.jobCategory === "Corporate" ? Ico.briefcase : Ico.tool} {app.jobCategory}
+            {app.jobCategory === "Corporate" ? Ico.briefcase : Ico.tool} {app.jobCategory}
           </span>
         </div>
       </div>
 
       {/* Body */}
       <div className="flex-1 overflow-y-auto px-5 py-[18px]">
-        
+
         {/* Pipeline Actions */}
         <p className={sectionLabel}>Pipeline Actions</p>
+
+        {/* Manager Note Input */}
+        {app.stage !== "hired" && app.stage !== "rejected" && (
+          <div className="mb-4">
+            <label className="block text-[12px] font-bold uppercase tracking-[0.08em] text-gray-400 mb-1.5">
+              Note to Candidate <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              value={managerNote}
+              onChange={e => { setManagerNote(e.target.value); if (e.target.value.trim()) setNoteError(false); }}
+              rows={3}
+              placeholder={`Add a message for the candidate when moving to the next stage or rejecting...`}
+              className={`w-full text-sm p-3 rounded-md border resize-none outline-none transition-colors ${noteError
+                  ? "border-red-400 bg-red-50 placeholder:text-red-300"
+                  : "border-gray-200 bg-gray-50 focus:border-gray-400 placeholder:text-gray-400"
+                }`}
+            />
+            {noteError && (
+              <p className="text-[12px] text-red-500 mt-1">A note is required before advancing or rejecting.</p>
+            )}
+          </div>
+        )}
+
         <div className="flex gap-2 mb-5">
           {nextStage && app.stage !== "rejected" && (
-            <button onClick={onAdvance} className="flex-1 p-2 bg-gray-900 text-white border-none rounded-md text-sm font-semibold cursor-pointer font-sans flex justify-center gap-1 items-center">
+            <button onClick={() => handleAction("advance")} className="flex-1 p-2 bg-gray-900 text-white border-none rounded-md text-sm font-semibold cursor-pointer font-sans flex justify-center gap-1 items-center">
               Move to {SC[nextStage].label} {Ico.chevronR}
             </button>
           )}
           {app.stage !== "hired" && app.stage !== "rejected" && (
-            <button onClick={onReject} className="px-3.5 py-2 bg-red-100 text-red-600 border-none rounded-md text-sm font-semibold cursor-pointer font-sans">
+            <button onClick={() => handleAction("reject")} className="px-3.5 py-2 bg-red-100 text-red-600 border-none rounded-md text-sm font-semibold cursor-pointer font-sans">
               Reject
             </button>
           )}
@@ -123,13 +179,31 @@ function DetailPanel({ app, onClose, onAdvance, onReject }: { app: Application; 
           </div>
         </div>
 
-        {/* Notes */}
-        {app.note && <>
-          <p className={sectionLabel}>Manager Note</p>
-          <div className="px-3.5 py-3 rounded-md bg-amber-50 border border-amber-200 mb-5">
-            <p className="m-0 text-sm text-yellow-900 leading-[1.6]">{app.note}</p>
-          </div>
-        </>}
+        {/* Stage History / Notes Timeline */}
+        {app.stageHistory.length > 0 && (
+          <>
+            <p className={sectionLabel}>Stage History & Notes</p>
+            <div className="space-y-3 mb-5">
+              {[...app.stageHistory].reverse().map((entry, i) => (
+                <div key={i} className="flex gap-3">
+                  <div className="flex flex-col items-center">
+                    <div className="w-2 h-2 rounded-full bg-gray-900 mt-1.5 flex-shrink-0" />
+                    {i < app.stageHistory.length - 1 && <div className="w-px flex-1 bg-gray-200 mt-1" />}
+                  </div>
+                  <div className="pb-3">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className={`text-[11px] font-bold uppercase tracking-wide px-2 py-0.5 rounded ${SC[entry.to_stage].bgClass} ${SC[entry.to_stage].textClass}`}>
+                        {SC[entry.to_stage].label}
+                      </span>
+                      <span className="text-[11px] text-gray-400 font-mono">{entry.changed_at}</span>
+                    </div>
+                    <p className="text-[13px] text-gray-700 leading-relaxed mt-1">{entry.employer_note}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
         {/* Resources */}
         <p className={sectionLabel}>Documents</p>
@@ -153,32 +227,50 @@ export default function Applicants() {
   const [filterType, setFilterType] = useState("all");
 
   const q = search.toLowerCase();
-  const filtered = useMemo(() => apps.filter(a => 
-    (!q || [a.applicantName, a.jobTitle].some(s => s.toLowerCase().includes(q))) && 
+  const filtered = useMemo(() => apps.filter(a =>
+    (!q || [a.applicantName, a.jobTitle].some(s => s.toLowerCase().includes(q))) &&
     (filterStage === "all" || a.stage === filterStage) &&
     (filterType === "all" || a.jobCategory === filterType)
-  ).sort((a,b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()), [apps, q, filterStage, filterType]);
+  ).sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()), [apps, q, filterStage, filterType]);
 
   const selected = apps.find(a => a.id === selectedId) || null;
 
-  const handleAdvance = () => {
+  const handleAdvance = (note: string) => {
     if (!selected) return;
     const currIdx = STAGES_FLOW.indexOf(selected.stage);
     if (currIdx >= 0 && currIdx < STAGES_FLOW.length - 1) {
-       const nextStatus = STAGES_FLOW[currIdx + 1];
-       setApps(prev => prev.map(a => a.id === selectedId ? { ...a, stage: nextStatus } : a));
+      const nextStatus = STAGES_FLOW[currIdx + 1];
+      const historyEntry: StageHistoryEntry = {
+        from_stage: selected.stage,
+        to_stage: nextStatus,
+        employer_note: note,
+        changed_at: new Date().toISOString().split("T")[0],
+      };
+      setApps(prev => prev.map(a => a.id === selectedId
+        ? { ...a, stage: nextStatus, stageHistory: [...a.stageHistory, historyEntry] }
+        : a
+      ));
     }
   };
 
-  const handleReject = () => {
+  const handleReject = (note: string) => {
     if (!selected) return;
-    setApps(prev => prev.map(a => a.id === selectedId ? { ...a, stage: "rejected" } : a));
+    const historyEntry: StageHistoryEntry = {
+      from_stage: selected.stage,
+      to_stage: "rejected",
+      employer_note: note,
+      changed_at: new Date().toISOString().split("T")[0],
+    };
+    setApps(prev => prev.map(a => a.id === selectedId
+      ? { ...a, stage: "rejected", stageHistory: [...a.stageHistory, historyEntry] }
+      : a
+    ));
   };
 
   return (
     <div className="font-sans bg-gray-50 min-h-screen flex flex-col">
-       {/* Top bar */}
-       <div className="bg-white border-b border-gray-200 px-6 py-3.5 flex items-center justify-between">
+      {/* Top bar */}
+      <div className="bg-white border-b border-gray-200 px-6 py-3.5 flex items-center justify-between">
         <div>
           <h1 className="m-0 text-xl font-bold text-gray-900">Manage Applications</h1>
           <p className="m-0 text-sm text-gray-400 font-mono">{apps.filter(x => x.stage !== "rejected").length} active pipeline</p>
@@ -210,29 +302,29 @@ export default function Applicants() {
           {filtered.length === 0
             ? <div className="p-12 text-center border-[1.5px] border-dashed border-gray-200 rounded-[10px] bg-white"><p className="m-0 text-base text-gray-400">No applications match your filters.</p></div>
             : filtered.map(app => (
-               <div key={app.id} onClick={() => setSelectedId(p => p === app.id ? null : app.id)} className={`bg-white border-[1.5px] rounded-lg px-[18px] py-4 cursor-pointer transition-colors duration-150 ${selectedId === app.id ? "border-gray-900" : "border-gray-200"} ${app.stage === "rejected" ? "opacity-70" : "opacity-100"}`}>
-                 <div className="flex gap-3">
-                   <img src={app.avatar} alt="A" className="w-10 h-10 rounded-lg object-cover border-[1.5px] border-gray-200" />
-                   <div className="flex-1 min-w-0">
-                     <p className="m-0 text-base font-semibold text-gray-900">{app.applicantName}</p>
-                     <p className="m-[2px_0_0] text-sm text-gray-500">{app.jobTitle}</p>
-                     <div className="flex gap-2.5 mt-2">
-                       <span className="flex items-center gap-[3px] text-[13px] text-gray-400">{Ico.pin} {app.location}</span>
-                       <span className="flex items-center gap-1 text-[13px] text-gray-500 px-[7px] py-[2px] bg-gray-100 rounded-[3px] font-medium">
-                         {app.jobCategory === "Corporate" ? Ico.briefcase : Ico.tool} {app.jobCategory}
-                       </span>
-                     </div>
-                     <div className="mt-3"><StageBar stage={app.stage} /></div>
-                     <div className="flex justify-between mt-3">
-                       <span className="text-[13px] text-gray-400 font-mono">Updated {daysAgo(app.lastUpdated)}</span>
-                     </div>
-                   </div>
-                 </div>
-               </div>
+              <div key={app.id} onClick={() => setSelectedId(p => p === app.id ? null : app.id)} className={`bg-white border-[1.5px] rounded-lg px-[18px] py-4 cursor-pointer transition-colors duration-150 ${selectedId === app.id ? "border-gray-900" : "border-gray-200"} ${app.stage === "rejected" ? "opacity-70" : "opacity-100"}`}>
+                <div className="flex gap-3">
+                  <img src={app.avatar} alt="A" className="w-10 h-10 rounded-lg object-cover border-[1.5px] border-gray-200" />
+                  <div className="flex-1 min-w-0">
+                    <p className="m-0 text-base font-semibold text-gray-900">{app.applicantName}</p>
+                    <p className="m-[2px_0_0] text-sm text-gray-500">{app.jobTitle}</p>
+                    <div className="flex gap-2.5 mt-2">
+                      <span className="flex items-center gap-[3px] text-[13px] text-gray-400">{Ico.pin} {app.location}</span>
+                      <span className="flex items-center gap-1 text-[13px] text-gray-500 px-[7px] py-[2px] bg-gray-100 rounded-[3px] font-medium">
+                        {app.jobCategory === "Corporate" ? Ico.briefcase : Ico.tool} {app.jobCategory}
+                      </span>
+                    </div>
+                    <div className="mt-3"><StageBar stage={app.stage} /></div>
+                    <div className="flex justify-between mt-3">
+                      <span className="text-[13px] text-gray-400 font-mono">Updated {daysAgo(app.lastUpdated)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             ))
           }
         </div>
-        
+
         {selected && (
           <div className="sticky top-5 h-[calc(100vh-175px)] overflow-hidden">
             <DetailPanel app={selected} onClose={() => setSelectedId(null)} onAdvance={handleAdvance} onReject={handleReject} />
