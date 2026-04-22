@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Search, X, RefreshCw } from "lucide-react";
+import { Search, X, RefreshCw, MapPin, Briefcase, Clock, DollarSign, Tag, ArrowLeft } from "lucide-react";
 import JobCard from "./JobCard";
 import { supabase } from "../../../lib/supabaseClient";
 
@@ -8,13 +8,13 @@ interface Job {
   id: string;
   title: string;
   category: string;
-  job_type: string;       // "Permanent" | "Contract" | "Daily / Day-Labor" | etc.
+  job_type: string;
   location: string;
   salary_rate: string;
   description: string;
   status: string;
   created_at: string;
-  // joined from profiles
+  employer_id: string;
   company_name?: string;
 }
 
@@ -44,6 +44,76 @@ const daysAgo = (dateStr: string) => {
   const n = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86_400_000);
   return Math.max(0, n);
 };
+
+const fmtDate = (dateStr: string) =>
+  new Date(dateStr).toLocaleDateString("en-KE", { day: "2-digit", month: "long", year: "numeric" });
+
+// ── Job Detail Panel ──────────────────────────────────────────────────────────
+function JobDetailPanel({ job, onClose }: { job: Job; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-end bg-black/30 backdrop-blur-sm" onClick={onClose}>
+      <div
+        className="h-full w-full max-w-xl bg-white shadow-2xl flex flex-col overflow-hidden"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/60 flex items-start justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 border-[1.5px] border-gray-200 bg-white flex items-center justify-center text-xl font-bold text-gray-900 font-mono flex-shrink-0">
+              {job.company_name?.charAt(0) ?? "?"}
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 leading-snug">{job.title}</h2>
+              <p className="text-sm text-gray-500 mt-0.5">{job.company_name}</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition mt-0.5 flex-shrink-0"
+          >
+            <ArrowLeft size={14} /> Close
+          </button>
+        </div>
+
+        {/* Badges */}
+        <div className="px-6 py-3 border-b border-gray-100 flex flex-wrap gap-2">
+          {[
+            { icon: <MapPin size={12} />, text: job.location },
+            { icon: <Briefcase size={12} />, text: job.job_type },
+            { icon: <Tag size={12} />, text: job.category },
+            { icon: <DollarSign size={12} />, text: job.salary_rate },
+            { icon: <Clock size={12} />, text: `Posted ${ daysAgo(job.created_at) === 0 ? "Today" : `${daysAgo(job.created_at)}d ago`}` },
+          ].map(({ icon, text }) => (
+            <span key={text} className="flex items-center gap-1.5 text-xs font-medium text-gray-600 bg-gray-100 border border-gray-200 px-2.5 py-1 rounded-md">
+              {icon} {text}
+            </span>
+          ))}
+        </div>
+
+        {/* Body — description */}
+        <div className="flex-1 overflow-y-auto px-6 py-6">
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Job Description & Requirements</p>
+          {job.description ? (
+            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{job.description}</p>
+          ) : (
+            <p className="text-sm text-gray-400 italic">No description provided.</p>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/60 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-base font-bold text-gray-900 font-mono">{job.salary_rate}</p>
+            <p className="text-xs text-gray-400">{fmtDate(job.created_at)}</p>
+          </div>
+          <button className="h-10 px-6 bg-gray-900 text-white text-sm font-semibold hover:bg-gray-700 transition-colors">
+            Apply Now →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ── Shared Select component ────────────────────────────────────────────────────
 const Sel = ({ value, onChange, children }: React.SelectHTMLAttributes<HTMLSelectElement> & { children: React.ReactNode }) => (
@@ -85,6 +155,7 @@ export default function FindJobsPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
 
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All Categories");
@@ -327,13 +398,18 @@ export default function FindJobsPage() {
                 location={job.location}
                 salary={job.salary_rate ?? "—"}
                 type={toCardType(job.job_type)}
-                rating={4.0}       // placeholder until a ratings table exists
                 daysAgo={daysAgo(job.created_at)}
+                onView={() => setSelectedJob(job)}
               />
             ))}
           </div>
         )}
       </div>
+
+      {/* Job detail slide-over panel */}
+      {selectedJob && (
+        <JobDetailPanel job={selectedJob} onClose={() => setSelectedJob(null)} />
+      )}
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
