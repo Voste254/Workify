@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Search, X, RefreshCw, MapPin, Briefcase, Clock, DollarSign, Tag, ArrowLeft } from "lucide-react";
 import JobCard from "./JobCard";
 import { supabase } from "../../../lib/supabaseClient";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface Job {
@@ -152,6 +153,7 @@ function JobSkeleton() {
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 export default function FindJobsPage() {
+  const { user } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -170,7 +172,7 @@ export default function FindJobsPage() {
     setError(null);
     try {
       // Step 1 — fetch active jobs
-      const { data: jobsData, error: jobsError } = await supabase
+      let query = supabase
         .from("jobs")
         .select(`
           id,
@@ -184,8 +186,14 @@ export default function FindJobsPage() {
           created_at,
           employer_id
         `)
-        .eq("status", "active")
-        .order("created_at", { ascending: false });
+        .eq("status", "active");
+
+      // Hide jobs posted by the logged-in user
+      if (user?.id) {
+        query = query.neq("employer_id", user.id);
+      }
+
+      const { data: jobsData, error: jobsError } = await query.order("created_at", { ascending: false });
 
       if (jobsError) throw jobsError;
 
@@ -222,7 +230,7 @@ export default function FindJobsPage() {
     }
   };
 
-  useEffect(() => { fetchJobs(); }, []);
+  useEffect(() => { fetchJobs(); }, [user?.id]);
 
   // ── Dynamic location list from fetched data ──
   const locationOptions = useMemo(() => {
