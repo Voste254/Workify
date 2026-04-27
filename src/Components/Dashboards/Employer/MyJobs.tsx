@@ -10,6 +10,8 @@ export interface Job {
   createdAt: string; lastUpdated: string; applicantsCount: number;
   status: JobStatus; department: string;
   salaryRate: string; description: string;
+  expectedRoles: string;
+  requiredSkills: string[];
 }
 
 const STATUS_CONFIG: Record<JobStatus, { label: string; textClass: string; bgClass: string }> = {
@@ -125,6 +127,34 @@ function DetailPanel({ job, onClose, onDelete, onEdit }: { job: Job; onClose: ()
           ))}
         </div>
 
+        {/* Description */}
+        {job.description && (
+          <>
+            <p className={sectionLabel}>Description</p>
+            <p className="m-[0_0_20px] text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{job.description}</p>
+          </>
+        )}
+
+        {/* Expected Roles */}
+        {job.expectedRoles && (
+          <>
+            <p className={sectionLabel}>Expected Roles &amp; Responsibilities</p>
+            <p className="m-[0_0_20px] text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{job.expectedRoles}</p>
+          </>
+        )}
+
+        {/* Required Skills */}
+        {job.requiredSkills && job.requiredSkills.length > 0 && (
+          <>
+            <p className={sectionLabel}>Required Skills</p>
+            <div className="flex flex-wrap gap-1.5 mb-5">
+              {job.requiredSkills.map(skill => (
+                <span key={skill} className="text-[13px] font-medium bg-gray-900 text-white px-2.5 py-1 rounded-md">{skill}</span>
+              ))}
+            </div>
+          </>
+        )}
+
         {job.status === "active" && (
           <>
             <p className={sectionLabel}>Applicant Pipeline</p>
@@ -165,7 +195,7 @@ export default function MyJobs({ setActivePage, onEditJob }: { setActivePage?: (
       try {
         const { data: jobRows, error: jobErr } = await supabase
           .from("jobs")
-          .select("id, title, location, job_type, created_at, updated_at, status, category, salary_rate, description")
+          .select("id, title, location, job_type, created_at, updated_at, status, category, salary_rate, description, expected_roles, required_skills")
           .eq("employer_id", user.id)
           .order("updated_at", { ascending: false });
 
@@ -200,6 +230,8 @@ export default function MyJobs({ setActivePage, onEditJob }: { setActivePage?: (
           applicantsCount: countMap[row.id] ?? 0,
           salaryRate: row.salary_rate ?? "",
           description: row.description ?? "",
+          expectedRoles: row.expected_roles ?? "",
+          requiredSkills: row.required_skills ?? [],
         }));
 
         setJobs(mapped);
