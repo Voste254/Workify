@@ -13,6 +13,8 @@ interface Job {
   location: string;
   salary_rate: string;
   description: string;
+  expected_roles: string;
+  required_skills: string[];
   status: string;
   created_at: string;
   employer_id: string;
@@ -91,14 +93,39 @@ function JobDetailPanel({ job, onClose }: { job: Job; onClose: () => void }) {
           ))}
         </div>
 
-        {/* Body — description */}
-        <div className="flex-1 overflow-y-auto px-6 py-6">
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Job Description & Requirements</p>
-          {job.description ? (
-            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{job.description}</p>
-          ) : (
-            <p className="text-sm text-gray-400 italic">No description provided.</p>
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-6">
+
+          {/* Description */}
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Job Description</p>
+            {job.description ? (
+              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{job.description}</p>
+            ) : (
+              <p className="text-sm text-gray-400 italic">No description provided.</p>
+            )}
+          </div>
+
+          {/* Expected Roles */}
+          {job.expected_roles && (
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Roles &amp; Responsibilities</p>
+              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{job.expected_roles}</p>
+            </div>
           )}
+
+          {/* Required Skills */}
+          {job.required_skills && job.required_skills.length > 0 && (
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Required Skills</p>
+              <div className="flex flex-wrap gap-1.5">
+                {job.required_skills.map(skill => (
+                  <span key={skill} className="text-xs font-semibold bg-gray-900 text-white px-2.5 py-1 rounded-md">{skill}</span>
+                ))}
+              </div>
+            </div>
+          )}
+
         </div>
 
         {/* Footer */}
@@ -182,6 +209,8 @@ export default function FindJobsPage() {
           location,
           salary_rate,
           description,
+          expected_roles,
+          required_skills,
           status,
           created_at,
           employer_id
