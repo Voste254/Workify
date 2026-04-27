@@ -166,10 +166,12 @@ export default function Settings() {
   const handleDeactivate = async () => {
     if (!user) return;
     setDeactivating(true);
-    // Set a deactivated flag on the profile row — you can use this to block login on your app side
+    // Store a 30-day deactivation window. The account is considered deactivated
+    // while deactivated_until > now(). It auto-expires after 30 days.
+    const deactivatedUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
     const { error } = await supabase
       .from("profiles")
-      .update({ is_deactivated: true })
+      .update({ deactivated_until: deactivatedUntil })
       .eq("id", user.id);
     setDeactivating(false);
     if (error) { showToast("Failed to deactivate: " + error.message, "error"); return; }
@@ -327,7 +329,7 @@ export default function Settings() {
               <div className="bg-white border-[1.5px] border-amber-200 rounded-[10px] p-7">
                 <h3 className="m-0 mb-2 text-lg font-bold text-amber-700">Deactivate Account</h3>
                 <p className="m-[0_0_20px] text-sm text-gray-600 leading-relaxed max-w-lg">
-                  Deactivating temporarily disables your employer account and hides all your job postings from the platform. You can reactivate by contacting support. Your data is preserved.
+                  Deactivating temporarily disables your employer account for <strong>30 days</strong> and hides all your job postings from the platform. Your account and data are fully preserved and will automatically reactivate after 30 days. You can also reactivate early by contacting support.
                 </p>
                 <button
                   onClick={() => setDeactivateModal(true)}
@@ -362,9 +364,12 @@ export default function Settings() {
             <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 mb-4">
               {Ico.warning}
             </div>
-            <h3 className="m-[0_0_10px] text-xl font-bold text-gray-900">Deactivate your account?</h3>
+            <h3 className="m-[0_0_10px] text-xl font-bold text-gray-900">Deactivate for 30 days?</h3>
+            <p className="m-[0_0_6px] text-sm text-gray-600 leading-relaxed">
+              Your account will be paused for <strong>30 days</strong>. All active job listings will be hidden from job seekers during this period.
+            </p>
             <p className="m-[0_0_24px] text-sm text-gray-600 leading-relaxed">
-              Your account will be paused. All active job listings will be hidden from job seekers. You can reactivate by contacting our support team.
+              Your account and all data are preserved and will <strong>automatically reactivate</strong> after 30 days. You can also contact support to reactivate it earlier.
             </p>
             <div className="flex gap-3 justify-end">
               <button onClick={() => setDeactivateModal(false)} className="px-5 py-2.5 bg-white border-[1.5px] border-gray-200 rounded-lg text-sm font-bold text-gray-700 cursor-pointer font-sans hover:bg-gray-50 transition-colors">
