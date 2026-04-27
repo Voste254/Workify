@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "../../../lib/supabaseClient";
 import { useAuth } from "../../../contexts/AuthContext";
 import type { Job } from "./MyJobs";
@@ -13,37 +13,92 @@ const CATEGORIES = [
   "Administration",
   "Engineering & Design",
 ];
+
 // ── Icons ──────────────────────────────────────────────────────────────────────
 const I = (d: string, s = 14, fill = "none") => <svg width={s} height={s} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: d }} />;
 const Ico = {
   briefcase: I('<rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>', 14),
-  pin: I('<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>', 14),
-  coins: I('<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/>', 14),
-  clock: I('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>', 14),
-  check: I('<path d="M20 6 9 17l-5-5"/>', 14),
-  tool: I('<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>', 14)
+  pin:       I('<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>', 14),
+  coins:     I('<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/>', 14),
+  check:     I('<path d="M20 6 9 17l-5-5"/>', 14),
+  plus:      I('<path d="M12 5v14M5 12h14"/>', 14),
+  tag:       I('<path d="M12 2H2v10l9.29 9.29a1 1 0 0 0 1.41 0l7.3-7.3a1 1 0 0 0 0-1.41L10 2"/><circle cx="7" cy="7" r="1" fill="currentColor"/>', 14),
+  list:      I('<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>', 14),
+  x:         I('<path d="M18 6 6 18M6 6l12 12"/>', 10),
 };
 
 // ── Shared styles ──────────────────────────────────────────────────────────────
 const labelStyle = "block text-[15px] font-semibold text-gray-700 mb-1.5";
+const hintStyle  = "text-xs text-gray-400 mt-1 font-mono";
 const inputOuter = "relative flex items-center w-full";
-const inputIcon = "absolute left-3 text-gray-400";
-const inputStyle = "w-full py-2.5 pr-3.5 pl-9 border-[1.5px] border-gray-200 rounded-lg text-base text-gray-900 bg-white outline-none transition-colors duration-150 focus:border-gray-300";
+const inputIcon  = "absolute left-3 text-gray-400";
+const inputStyle = "w-full py-2.5 pr-3.5 pl-9 border-[1.5px] border-gray-200 rounded-lg text-base text-gray-900 bg-white outline-none transition-colors duration-150 focus:border-gray-400";
+const textareaStyle = "w-full py-2.5 px-3.5 border-[1.5px] border-gray-200 rounded-lg text-base text-gray-900 bg-white outline-none transition-colors duration-150 focus:border-gray-400 resize-y";
+
+// ── Skills Tag Input ───────────────────────────────────────────────────────────
+function SkillsInput({ skills, onChange }: { skills: string[]; onChange: (s: string[]) => void }) {
+  const [input, setInput] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const add = () => {
+    const trimmed = input.trim();
+    if (trimmed && !skills.includes(trimmed)) {
+      onChange([...skills, trimmed]);
+    }
+    setInput("");
+  };
+
+  const remove = (skill: string) => onChange(skills.filter(s => s !== skill));
+
+  const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(); }
+    if (e.key === "Backspace" && input === "" && skills.length > 0) {
+      remove(skills[skills.length - 1]);
+    }
+  };
+
+  return (
+    <div
+      className="min-h-[44px] flex flex-wrap gap-1.5 items-center px-3 py-2 border-[1.5px] border-gray-200 rounded-lg bg-white cursor-text focus-within:border-gray-400 transition-colors"
+      onClick={() => inputRef.current?.focus()}
+    >
+      {skills.map(skill => (
+        <span key={skill} className="flex items-center gap-1 text-[13px] font-medium bg-gray-900 text-white px-2.5 py-1 rounded-md">
+          {skill}
+          <button type="button" onClick={() => remove(skill)} className="bg-transparent border-none text-gray-400 hover:text-white cursor-pointer p-0 flex items-center">
+            {Ico.x}
+          </button>
+        </span>
+      ))}
+      <input
+        ref={inputRef}
+        value={input}
+        onChange={e => setInput(e.target.value)}
+        onKeyDown={handleKey}
+        onBlur={add}
+        placeholder={skills.length === 0 ? "e.g. React, Teamwork, Excel — press Enter to add" : ""}
+        className="flex-1 min-w-[160px] border-none outline-none text-sm text-gray-900 bg-transparent placeholder:text-gray-400"
+      />
+    </div>
+  );
+}
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | null; onSaved?: () => void } = {}) {
   const { user } = useAuth();
 
-  const [isSaved, setIsSaved] = useState(false);
+  const [isSaved, setIsSaved]         = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  const [jobCategory, setJobCategory] = useState(CATEGORIES[0]);
-  const [jobType, setJobType] = useState("Permanent");
-  const [title, setTitle] = useState("");
-  const [location, setLocation] = useState("");
-  const [salary, setSalary] = useState("");
-  const [description, setDescription] = useState("");
+  const [error, setError]             = useState<string | null>(null);
+
+  const [jobCategory,    setJobCategory]    = useState(CATEGORIES[0]);
+  const [jobType,        setJobType]        = useState("Permanent");
+  const [title,          setTitle]          = useState("");
+  const [location,       setLocation]       = useState("");
+  const [salary,         setSalary]         = useState("");
+  const [description,    setDescription]    = useState("");
+  const [expectedRoles,  setExpectedRoles]  = useState("");
+  const [requiredSkills, setRequiredSkills] = useState<string[]>([]);
 
   // Pre-fill form when an editingJob is provided
   useEffect(() => {
@@ -54,14 +109,12 @@ export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | n
       setJobCategory(editingJob.department || CATEGORIES[0]);
       setSalary(editingJob.salaryRate ?? "");
       setDescription(editingJob.description ?? "");
+      setExpectedRoles(editingJob.expectedRoles ?? "");
+      setRequiredSkills(editingJob.requiredSkills ?? []);
     } else {
-      // Reset form for a fresh post
-      setTitle("");
-      setLocation("");
-      setSalary("");
-      setDescription("");
-      setJobCategory(CATEGORIES[0]);
-      setJobType("Permanent");
+      setTitle(""); setLocation(""); setSalary(""); setDescription("");
+      setExpectedRoles(""); setRequiredSkills([]);
+      setJobCategory(CATEGORIES[0]); setJobType("Permanent");
     }
   }, [editingJob]);
 
@@ -71,65 +124,44 @@ export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | n
       setError("Please fill out all required fields.");
       return;
     }
-
-    if (!user) {
-      setError("You must be logged in to post a job.");
-      return;
-    }
+    if (!user) { setError("You must be logged in to post a job."); return; }
 
     setIsSubmitting(true);
     setError(null);
 
     try {
-      if (editingJob) {
-        // UPDATE existing job
+      const payload = {
+        title,
+        category:        jobCategory,
+        job_type:        jobType,
+        location,
+        salary_rate:     salary,
+        description,
+        expected_roles:  expectedRoles,
+        required_skills: requiredSkills,
+        status,
+        updated_at:      new Date().toISOString(),
+      };
+
+      if (isEdit) {
         const { error: dbError } = await supabase
           .from("jobs")
-          .update({
-            title,
-            category: jobCategory,
-            job_type: jobType,
-            location,
-            ...(salary ? { salary_rate: salary } : {}),
-            ...(description ? { description } : {}),
-            status,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", editingJob.id);
-
+          .update(payload)
+          .eq("id", editingJob!.id);
         if (dbError) throw dbError;
       } else {
-        // INSERT new job
-        if (!user) { setError("You must be logged in to post a job."); setIsSubmitting(false); return; }
-
-        const { error: dbError } = await supabase.from("jobs").insert([
-          {
-            employer_id: user.id,
-            title,
-            category: jobCategory,
-            job_type: jobType,
-            location,
-            salary_rate: salary,
-            description,
-            status,
-          }
-        ]);
-
+        const { error: dbError } = await supabase
+          .from("jobs")
+          .insert([{ employer_id: user.id, ...payload }]);
         if (dbError) throw dbError;
       }
 
       setIsSaved(true);
-      
-      if (!editingJob) {
-        // Reset form only for new posts
-        setTitle("");
-        setLocation("");
-        setSalary("");
-        setDescription("");
-        setJobCategory(CATEGORIES[0]);
-        setJobType("Permanent");
+      if (!isEdit) {
+        setTitle(""); setLocation(""); setSalary(""); setDescription("");
+        setExpectedRoles(""); setRequiredSkills([]);
+        setJobCategory(CATEGORIES[0]); setJobType("Permanent");
       }
-      
     } catch (err: any) {
       console.error("Error posting job:", err);
       setError(err.message || "Failed to post job. Please try again.");
@@ -138,18 +170,15 @@ export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | n
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    submitJob("active");
-  };
+  const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); submitJob("active"); };
 
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col font-sans">
-      
+
       {/* Modal */}
       {(isSubmitting || isSaved) && (
-        <div className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center transition-opacity duration-200">
-          <div className="bg-white p-10 rounded-2xl flex flex-col items-center w-[300px] shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]">
+        <div className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center">
+          <div className="bg-white p-10 rounded-2xl flex flex-col items-center w-[300px] shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1)]">
             {isSubmitting ? (
               <>
                 <div className="w-11 h-11 border-4 border-gray-100 border-t-gray-900 rounded-full animate-spin" />
@@ -158,14 +187,12 @@ export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | n
               </>
             ) : isSaved ? (
               <>
-                <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 animate-[pop_0.3s_cubic-bezier(0.175,0.885,0.32,1.275)_forwards]">
+                <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
                 </div>
                 <p className="mt-5 text-lg font-bold text-gray-900 text-center">{editingJob ? "Job Updated!" : "Job Posted!"}</p>
                 <p className="mt-1.5 text-sm text-gray-600 text-center mb-5">{editingJob ? "Your changes have been saved." : "Your job is now live on the platform."}</p>
-                <button type="button" onClick={() => { setIsSaved(false); onSaved?.(); }} className="w-full p-2.5 bg-emerald-600 text-white border-none rounded-lg text-base font-semibold cursor-pointer hover:bg-emerald-700 transition">
-                  OK
-                </button>
+                <button type="button" onClick={() => { setIsSaved(false); onSaved?.(); }} className="w-full p-2.5 bg-emerald-600 text-white border-none rounded-lg text-base font-semibold cursor-pointer hover:bg-emerald-700 transition">OK</button>
               </>
             ) : null}
           </div>
@@ -185,98 +212,116 @@ export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | n
 
       <div className="p-6 max-w-[800px] mx-auto w-full">
         <div className="bg-white border-[1.5px] border-gray-200 rounded-[10px] overflow-hidden">
-          
           <form onSubmit={handleSubmit} className="p-[30px]">
             {error && (
-              <div className="mb-5 p-3 rounded-lg bg-red-50 border border-red-300 text-red-500 text-sm">
-                {error}
-              </div>
+              <div className="mb-5 p-3 rounded-lg bg-red-50 border border-red-300 text-red-500 text-sm">{error}</div>
             )}
-            
+
+            {/* ── Section 1: Category & Type ────────────────────────────── */}
             <h3 className="m-0 mb-5 text-lg font-bold text-gray-900 border-b border-gray-200 pb-2.5">Job Category &amp; Type</h3>
 
-            {/* Category Dropdown */}
             <div className="mb-6">
               <label className={labelStyle}>Job Category</label>
               <div className={inputOuter}>
                 <span className={inputIcon}>{Ico.briefcase}</span>
-                <select
-                  value={jobCategory}
-                  onChange={e => setJobCategory(e.target.value)}
-                  className={`${inputStyle} cursor-pointer appearance-none`}
-                  required
-                >
-                  {CATEGORIES.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
+                <select value={jobCategory} onChange={e => setJobCategory(e.target.value)} className={`${inputStyle} cursor-pointer appearance-none`} required>
+                  {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                 </select>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-5 mb-6">
               <div>
-                 <label className={labelStyle}>Job Title</label>
-                 <div className={inputOuter}>
-                    <span className={inputIcon}>{Ico.briefcase}</span>
-                    <input type="text" placeholder="e.g. Senior Data Analyst" className={inputStyle} value={title} onChange={e => setTitle(e.target.value)} required />
-                 </div>
-
+                <label className={labelStyle}>Job Title <span className="text-red-400">*</span></label>
+                <div className={inputOuter}>
+                  <span className={inputIcon}>{Ico.briefcase}</span>
+                  <input type="text" placeholder="e.g. Senior Data Analyst" className={inputStyle} value={title} onChange={e => setTitle(e.target.value)} required />
+                </div>
               </div>
-
               <div>
-                 <label className={labelStyle}>Job Type</label>
-                 <select
-                   value={jobType}
-                   onChange={e => setJobType(e.target.value)}
-                   className={`${inputStyle} pl-3.5 cursor-pointer appearance-none`}
-                 >
-                   <option value="Permanent">Permanent</option>
-                   <option value="Contract">Contract</option>
-                   <option value="Internship">Internship</option>
-                   <option value="Daily / Day-Labor">Daily / Day-Labor</option>
-                   <option value="Hourly / Shift">Hourly / Shift</option>
-                   <option value="Gig / Project-Based">Gig / Project-Based</option>
-                 </select>
+                <label className={labelStyle}>Job Type</label>
+                <select value={jobType} onChange={e => setJobType(e.target.value)} className={`${inputStyle} pl-3.5 cursor-pointer appearance-none`}>
+                  <option value="Permanent">Permanent</option>
+                  <option value="Contract">Contract</option>
+                  <option value="Internship">Internship</option>
+                  <option value="Daily / Day-Labor">Daily / Day-Labor</option>
+                  <option value="Hourly / Shift">Hourly / Shift</option>
+                  <option value="Gig / Project-Based">Gig / Project-Based</option>
+                </select>
               </div>
             </div>
 
-            <h3 className="m-[30px_0_20px] text-lg font-bold text-gray-900 border-b border-gray-200 pb-2.5">Location & Compensation</h3>
+            {/* ── Section 2: Location & Compensation ───────────────────── */}
+            <h3 className="m-[30px_0_20px] text-lg font-bold text-gray-900 border-b border-gray-200 pb-2.5">Location &amp; Compensation</h3>
 
             <div className="grid grid-cols-2 gap-5 mb-6">
               <div>
-                 <label className={labelStyle}>Location</label>
-                 <div className={inputOuter}>
-                    <span className={inputIcon}>{Ico.pin}</span>
-                    <input type="text" placeholder="e.g. Nairobi, Moscow, Cairo" className={inputStyle} value={location} onChange={e => setLocation(e.target.value)} required />
-                 </div>
+                <label className={labelStyle}>Location <span className="text-red-400">*</span></label>
+                <div className={inputOuter}>
+                  <span className={inputIcon}>{Ico.pin}</span>
+                  <input type="text" placeholder="e.g. Nairobi, Moscow, Cairo" className={inputStyle} value={location} onChange={e => setLocation(e.target.value)} required />
+                </div>
               </div>
-
               <div>
-                 <label className={labelStyle}>Salary / Rate (KES)</label>
-                 <div className={inputOuter}>
-                    <span className={inputIcon}>{Ico.coins}</span>
-                    <input type="text" placeholder={jobCategory === "Corporate" ? "e.g. KES 150,000/mo" : "e.g. KES 2,000/day"} className={inputStyle} value={salary} onChange={e => setSalary(e.target.value)} required />
-                 </div>
+                <label className={labelStyle}>Salary / Rate (KES) <span className="text-red-400">*</span></label>
+                <div className={inputOuter}>
+                  <span className={inputIcon}>{Ico.coins}</span>
+                  <input type="text" placeholder="e.g. KES 150,000/mo" className={inputStyle} value={salary} onChange={e => setSalary(e.target.value)} required />
+                </div>
               </div>
             </div>
 
-            <h3 className="m-[30px_0_20px] text-lg font-bold text-gray-900 border-b border-gray-200 pb-2.5">Job Specifics</h3>
+            {/* ── Section 3: Job Details ─────────────────────────────────── */}
+            <h3 className="m-[30px_0_20px] text-lg font-bold text-gray-900 border-b border-gray-200 pb-2.5">Job Details</h3>
 
-            <div className="mb-[30px]">
-              <label className={labelStyle}>Description & Requirements</label>
-              <textarea rows={6} placeholder={jobCategory === "Corporate" ? "Detail the required skills, degree, and exact corporate responsibilities..." : "Detail the required skills, qualificatons and expected roles..."}
-                className={`${inputStyle} pl-3.5 resize-y`} value={description} onChange={e => setDescription(e.target.value)} required />
+            {/* Description */}
+            <div className="mb-6">
+              <label className={labelStyle}>
+                <span className="inline-flex items-center gap-1.5">{Ico.list} Job Description <span className="text-red-400">*</span></span>
+              </label>
+              <textarea
+                rows={5}
+                placeholder="Give a clear overview of the role, the company, what the candidate will be working on, and what makes this opportunity exciting..."
+                className={textareaStyle}
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                required
+              />
+              <p className={hintStyle}>A compelling description attracts higher-quality applicants.</p>
             </div>
 
+            {/* Expected Roles / Responsibilities */}
+            <div className="mb-6">
+              <label className={labelStyle}>
+                <span className="inline-flex items-center gap-1.5">{Ico.list} Expected Roles &amp; Responsibilities</span>
+              </label>
+              <textarea
+                rows={5}
+                className={textareaStyle}
+                value={expectedRoles}
+                onChange={e => setExpectedRoles(e.target.value)}
+              />
+              <p className={hintStyle}>List each responsibility on its own line. Use dashes (-) for readability.</p>
+            </div>
+
+            {/* Required Skills */}
+            <div className="mb-8">
+              <label className={labelStyle}>
+                <span className="inline-flex items-center gap-1.5">{Ico.tag} Required Skills</span>
+              </label>
+              <SkillsInput skills={requiredSkills} onChange={setRequiredSkills} />
+              <p className={hintStyle}>Type a skill and press <kbd className="px-1 py-0.5 bg-gray-100 border border-gray-300 rounded text-[11px]">Enter</kbd> or <kbd className="px-1 py-0.5 bg-gray-100 border border-gray-300 rounded text-[11px]">,</kbd> to add. Backspace removes the last tag.</p>
+            </div>
+
+            {/* ── Action Buttons ─────────────────────────────────────────── */}
             <div className="flex justify-end gap-3 border-t border-gray-200 pt-5">
-               <button type="button" onClick={() => submitJob("draft")} disabled={isSubmitting} className={`px-5 py-2.5 bg-white text-gray-500 border-[1.5px] border-gray-200 rounded-lg text-base font-semibold transition-opacity ${isSubmitting ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}>
-                 Save as Draft
-               </button>
-               <button type="submit" disabled={isSubmitting} className={`px-5 py-2.5 bg-gray-900 text-white border-none rounded-lg text-base font-semibold transition-opacity ${isSubmitting ? "cursor-not-allowed opacity-70" : "cursor-pointer hover:bg-gray-800"}`}>
-                 {isSubmitting ? (editingJob ? "Saving..." : "Publishing...") : (editingJob ? "Save Changes" : "Publish Job")}
-               </button>
+              <button type="button" onClick={() => submitJob("draft")} disabled={isSubmitting} className={`px-5 py-2.5 bg-white text-gray-500 border-[1.5px] border-gray-200 rounded-lg text-base font-semibold transition-opacity ${isSubmitting ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}>
+                Save as Draft
+              </button>
+              <button type="submit" disabled={isSubmitting} className={`px-5 py-2.5 bg-gray-900 text-white border-none rounded-lg text-base font-semibold transition-opacity ${isSubmitting ? "cursor-not-allowed opacity-70" : "cursor-pointer hover:bg-gray-800"}`}>
+                {isSubmitting ? (editingJob ? "Saving..." : "Publishing...") : (editingJob ? "Save Changes" : "Publish Job")}
+              </button>
             </div>
-
           </form>
         </div>
       </div>
