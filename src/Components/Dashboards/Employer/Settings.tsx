@@ -1,223 +1,427 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "../../../lib/supabaseClient";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 const I = (d: string, s = 14, fill = "none") => <svg width={s} height={s} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: d }} />;
 const Ico = {
-  camera: I('<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>', 16),
-  building: I('<rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/>', 16),
-  mail: I('<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>', 16),
-  phone: I('<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>', 16),
-  globe: I('<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>', 16),
-  pin: I('<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>', 16),
-  check: I('<path d="M20 6 9 17l-5-5"/>', 16),
-  lock: I('<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>', 16),
-  bell: I('<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>', 16),
-  creditCard: I('<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>', 16)
+  building:    I('<rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/>', 16),
+  lock:        I('<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>', 16),
+  bell:        I('<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>', 16),
+  creditCard:  I('<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>', 16),
+  trash:       I('<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>', 16),
+  check:       I('<path d="M20 6 9 17l-5-5"/>', 16),
+  eye:         I('<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>', 14),
+  eyeOff:      I('<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/>', 14),
+  warning:     I('<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>', 16),
+  user:        I('<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>', 16),
 };
 
 // ── Shared styles ──────────────────────────────────────────────────────────────
 const labelStyle = "block text-[13px] font-bold text-gray-700 mb-2 font-sans";
-const inputOuter = "relative flex items-center";
-const inputIcon = "absolute left-3.5 text-gray-400";
-const inputStyle = "w-full py-3 pr-4 pl-10 border-[1.5px] border-gray-200 rounded-lg text-sm text-gray-900 bg-white outline-none font-sans transition-colors duration-150 focus:border-gray-300";
+const inputStyle = "w-full py-2.5 px-3.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-gray-900 bg-white outline-none font-sans transition-colors duration-150 focus:border-gray-400";
+const menuBtn = (active: boolean) =>
+  `flex items-center gap-2.5 w-full px-[18px] py-3.5 border-none rounded-lg text-sm font-sans text-left transition-colors duration-150 cursor-pointer ${
+    active ? "bg-gray-100 text-gray-900 font-bold" : "bg-transparent text-gray-500 font-semibold hover:bg-gray-50 hover:text-gray-700"
+  }`;
+const sectionHead = "m-0 mb-6 text-lg font-bold text-gray-900 border-b border-gray-200 pb-3";
+const dangerBtn = "px-5 py-2.5 border-none rounded-lg text-sm font-bold cursor-pointer font-sans transition-colors";
 
-const menuBtn = (active: boolean) => `flex items-center gap-2.5 w-full px-[18px] py-3.5 border-none rounded-lg text-sm font-sans text-left transition-colors duration-150 cursor-pointer ${active ? "bg-gray-100 text-gray-900 font-bold" : "bg-transparent text-gray-500 font-semibold hover:bg-gray-50 hover:text-gray-700"}`;
+// ── Password eye toggle ──────────────────────────────────────────────────────
+function PwdInput({ placeholder, value, onChange }: { placeholder: string; value: string; onChange: (v: string) => void }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative flex items-center">
+      <input
+        type={show ? "text" : "password"}
+        placeholder={placeholder}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className={`${inputStyle} pr-10`}
+      />
+      <button type="button" onClick={() => setShow(p => !p)} className="absolute right-3 text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer p-0">
+        {show ? Ico.eyeOff : Ico.eye}
+      </button>
+    </div>
+  );
+}
 
-// ── Main ───────────────────────────────────────────────────────────────────────
+// ── Toggle switch ────────────────────────────────────────────────────────────
+function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      className={`relative w-11 h-6 rounded-full transition-colors duration-200 border-none cursor-pointer flex-shrink-0 ${checked ? "bg-gray-900" : "bg-gray-200"}`}
+    >
+      <span className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] bg-white rounded-full shadow transition-transform duration-200 ${checked ? "translate-x-5" : "translate-x-0"}`} />
+    </button>
+  );
+}
+
+// ── Toast notification ───────────────────────────────────────────────────────
+function Toast({ message, type }: { message: string; type: "success" | "error" }) {
+  return (
+    <div className={`fixed bottom-6 right-6 z-[9999] flex items-center gap-2.5 px-5 py-3.5 rounded-xl shadow-2xl text-sm font-semibold font-sans transition-all ${type === "success" ? "bg-gray-900 text-white" : "bg-red-500 text-white"}`}>
+      {type === "success" ? Ico.check : Ico.warning}
+      {message}
+    </div>
+  );
+}
+
+// ── Notification preference rows ─────────────────────────────────────────────
+const NOTIF_KEYS = [
+  { key: "new_application",   label: "New Application Alerts",    desc: "Get alerted immediately when a candidate applies to one of your jobs." },
+  { key: "direct_message",    label: "Direct Messages",           desc: "Get notified when a candidate replies to your messages." },
+  { key: "job_expiring",      label: "Job Expiring Reminders",    desc: "Alert me 3 days before a job posting is about to expire." },
+  { key: "weekly_summary",    label: "Weekly Account Summary",    desc: "A brief metrics report delivered to your email every Monday." },
+  { key: "applicant_shortlisted", label: "Applicant Shortlisted", desc: "Notify me when an applicant moves to the shortlist stage." },
+] as const;
+
+type NotifKey = typeof NOTIF_KEYS[number]["key"];
+type NotifPrefs = Record<NotifKey, boolean>;
+
+const DEFAULT_NOTIF: NotifPrefs = {
+  new_application: true,
+  direct_message: true,
+  job_expiring: true,
+  weekly_summary: false,
+  applicant_shortlisted: true,
+};
+
+// ── Main Component ─────────────────────────────────────────────────────────────
 export default function Settings() {
-  const [activeTab, setActiveTab] = useState("Company Profile");
-  const [isSaved, setIsSaved] = useState(false);
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState("Notifications");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 3000);
+  // ── Toast state ────────────────────────────────────────────────────────────
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const showToast = (message: string, type: "success" | "error" = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3500);
   };
+
+  // ── Notification preferences ────────────────────────────────────────────────
+  const [notifPrefs, setNotifPrefs] = useState<NotifPrefs>(DEFAULT_NOTIF);
+  const [notifLoading, setNotifLoading] = useState(true);
+  const [notifSaving, setNotifSaving] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      setNotifLoading(true);
+      const { data, error } = await supabase
+        .from("employer_settings")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+      if (!error && data) {
+        setNotifPrefs({
+          new_application:      data.new_application      ?? DEFAULT_NOTIF.new_application,
+          direct_message:       data.direct_message       ?? DEFAULT_NOTIF.direct_message,
+          job_expiring:         data.job_expiring         ?? DEFAULT_NOTIF.job_expiring,
+          weekly_summary:       data.weekly_summary       ?? DEFAULT_NOTIF.weekly_summary,
+          applicant_shortlisted: data.applicant_shortlisted ?? DEFAULT_NOTIF.applicant_shortlisted,
+        });
+      }
+      setNotifLoading(false);
+    })();
+  }, [user]);
+
+  const saveNotifPrefs = async () => {
+    if (!user) return;
+    setNotifSaving(true);
+    const { error } = await supabase
+      .from("employer_settings")
+      .upsert({ user_id: user.id, ...notifPrefs, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+    setNotifSaving(false);
+    if (error) showToast("Failed to save preferences: " + error.message, "error");
+    else showToast("Notification preferences saved!");
+  };
+
+  // ── Security / Password ─────────────────────────────────────────────────────
+  const [currentPwd, setCurrentPwd] = useState("");
+  const [newPwd,     setNewPwd]     = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
+  const [pwdSaving,  setPwdSaving]  = useState(false);
+
+  const handlePasswordUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPwd !== confirmPwd) { showToast("New passwords do not match.", "error"); return; }
+    if (newPwd.length < 8)    { showToast("Password must be at least 8 characters.", "error"); return; }
+    setPwdSaving(true);
+    const { error } = await supabase.auth.updateUser({ password: newPwd });
+    setPwdSaving(false);
+    if (error) showToast(error.message, "error");
+    else {
+      showToast("Password updated successfully!");
+      setCurrentPwd(""); setNewPwd(""); setConfirmPwd("");
+    }
+  };
+
+  // ── Deactivate account ───────────────────────────────────────────────────────
+  const [deactivateModal, setDeactivateModal] = useState(false);
+  const [deactivating, setDeactivating] = useState(false);
+
+  const handleDeactivate = async () => {
+    if (!user) return;
+    setDeactivating(true);
+    // Set a deactivated flag on the profile row — you can use this to block login on your app side
+    const { error } = await supabase
+      .from("profiles")
+      .update({ is_deactivated: true })
+      .eq("id", user.id);
+    setDeactivating(false);
+    if (error) { showToast("Failed to deactivate: " + error.message, "error"); return; }
+    await supabase.auth.signOut();
+  };
+
+  // ── Delete account ───────────────────────────────────────────────────────────
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== "DELETE") { showToast("Type DELETE to confirm.", "error"); return; }
+    if (!user) return;
+    setDeleting(true);
+    // Delete all user jobs, then the profile, then sign out
+    // The actual auth user deletion must be done server-side via an RPC or admin API
+    const { error: jobsErr } = await supabase.from("jobs").delete().eq("employer_id", user.id);
+    if (jobsErr) { showToast("Error deleting jobs: " + jobsErr.message, "error"); setDeleting(false); return; }
+
+    const { error: profileErr } = await supabase.from("profiles").delete().eq("id", user.id);
+    if (profileErr) { showToast("Error deleting profile: " + profileErr.message, "error"); setDeleting(false); return; }
+
+    await supabase.auth.signOut();
+  };
+
+  // ── Sidebar tabs ─────────────────────────────────────────────────────────────
+  const TABS = [
+    { id: "Notifications", label: "Notification Preferences", icon: Ico.bell },
+    { id: "Security",      label: "Security & Password",      icon: Ico.lock },
+    { id: "Account",       label: "Account & Privacy",        icon: Ico.user },
+  ];
 
   return (
     <div className="font-sans bg-gray-50 min-h-screen flex flex-col">
 
+      {/* Toast */}
+      {toast && <Toast message={toast.message} type={toast.type} />}
+
       {/* Top bar */}
       <div className="bg-white border-b border-gray-200 px-6 py-3.5 flex items-center justify-between shrink-0">
         <div>
-          <h1 className="m-0 text-lg font-bold text-gray-900">Account Settings</h1>
-          <p className="m-0 text-[13px] text-gray-400 font-mono">Manage your employer account</p>
-        </div>
-        <div className="flex items-center">
-          {isSaved && <span className="mr-4 text-sm text-emerald-600 font-bold inline-flex items-center gap-1.5">{Ico.check} Saved Successfully</span>}
-          <button onClick={handleSubmit} className="px-5 py-2.5 bg-gray-900 text-white border-none rounded-lg text-sm font-bold cursor-pointer font-sans hover:bg-gray-800 transition-colors">
-            Save Changes
-          </button>
+          <h1 className="m-0 text-xl font-bold text-gray-900">Settings</h1>
+          <p className="m-0 text-[13px] text-gray-400 font-mono">Manage your account preferences</p>
         </div>
       </div>
 
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 p-6 max-w-[1200px] mx-auto w-full items-start">
-        
-        {/* Left Navigation Menu */}
-        <div className="bg-white border-[1.5px] border-gray-200 rounded-[10px] p-4 h-fit">
-          <div className="flex flex-col gap-2">
-            <button className={menuBtn(activeTab === "Company Profile")} onClick={() => setActiveTab("Company Profile")}>{Ico.building} Company Profile</button>
-            <button className={menuBtn(activeTab === "Security & Login")} onClick={() => setActiveTab("Security & Login")}>{Ico.lock} Security & Login</button>
-            <button className={menuBtn(activeTab === "Notifications")} onClick={() => setActiveTab("Notifications")}>{Ico.bell} Notification Preferences</button>
-            <button className={menuBtn(activeTab === "Billing & Plans")} onClick={() => setActiveTab("Billing & Plans")}>{Ico.creditCard} Billing & Plans</button>
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6 p-6 max-w-[1100px] mx-auto w-full items-start">
+
+        {/* ── Sidebar ───────────────────────────────────────────────────────── */}
+        <div className="bg-white border-[1.5px] border-gray-200 rounded-[10px] p-3 h-fit sticky top-6">
+          <div className="flex flex-col gap-1">
+            {TABS.map(tab => (
+              <button key={tab.id} className={menuBtn(activeTab === tab.id)} onClick={() => setActiveTab(tab.id)}>
+                {tab.icon} {tab.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Right Content Area */}
-        <div className="bg-white border-[1.5px] border-gray-200 rounded-[10px] overflow-hidden outline-none">
-          
-          {activeTab === "Company Profile" && (
-            <form onSubmit={handleSubmit}>
-              <div className="h-40 bg-gray-900 relative">
-                <button type="button" className="absolute right-5 bottom-5 bg-white/20 text-white border-none rounded-md px-3 py-2 flex items-center gap-1.5 text-[13px] font-bold cursor-pointer backdrop-blur-sm hover:bg-white/30 transition-colors">
-                  {Ico.camera} Edit Cover
+        {/* ── Content ───────────────────────────────────────────────────────── */}
+        <div className="flex flex-col gap-5">
+
+          {/* ── Notifications ──────────────────────────────────────────────── */}
+          {activeTab === "Notifications" && (
+            <div className="bg-white border-[1.5px] border-gray-200 rounded-[10px] p-7">
+              <h3 className={sectionHead}>Email &amp; Push Notifications</h3>
+              {notifLoading ? (
+                <div className="flex items-center gap-2 text-gray-400 text-sm"><div className="w-4 h-4 border-2 border-gray-200 border-t-gray-500 rounded-full animate-spin" /> Loading preferences…</div>
+              ) : (
+                <div className="flex flex-col gap-5">
+                  {NOTIF_KEYS.map(({ key, label, desc }) => (
+                    <div key={key} className="flex items-start gap-4 py-3 border-b border-gray-100 last:border-0">
+                      <Toggle checked={notifPrefs[key]} onChange={v => setNotifPrefs(p => ({ ...p, [key]: v }))} />
+                      <div>
+                        <p className="m-[0_0_3px] text-[15px] font-bold text-gray-900">{label}</p>
+                        <p className="m-0 text-[13px] text-gray-500 leading-relaxed">{desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex justify-end pt-2">
+                    <button onClick={saveNotifPrefs} disabled={notifSaving} className={`px-6 py-2.5 bg-gray-900 text-white border-none rounded-lg text-sm font-bold font-sans transition-opacity ${notifSaving ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:bg-gray-800"}`}>
+                      {notifSaving ? "Saving…" : "Save Preferences"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Security ───────────────────────────────────────────────────── */}
+          {activeTab === "Security" && (
+            <div className="bg-white border-[1.5px] border-gray-200 rounded-[10px] p-7">
+              <h3 className={sectionHead}>Change Password</h3>
+              <form onSubmit={handlePasswordUpdate} className="flex flex-col gap-5 max-w-[480px]">
+                <div>
+                  <label className={labelStyle}>Current Password</label>
+                  <PwdInput placeholder="Enter your current password" value={currentPwd} onChange={setCurrentPwd} />
+                </div>
+                <div>
+                  <label className={labelStyle}>New Password <span className="text-gray-400 font-normal">(min. 8 characters)</span></label>
+                  <PwdInput placeholder="Create a strong new password" value={newPwd} onChange={setNewPwd} />
+                </div>
+                <div>
+                  <label className={labelStyle}>Confirm New Password</label>
+                  <PwdInput placeholder="Repeat your new password" value={confirmPwd} onChange={setConfirmPwd} />
+                </div>
+
+                {/* Strength indicator */}
+                {newPwd.length > 0 && (
+                  <div>
+                    <div className="flex gap-1 mb-1">
+                      {[1,2,3,4].map(i => {
+                        const strength = newPwd.length >= 12 && /[A-Z]/.test(newPwd) && /[0-9]/.test(newPwd) && /[^a-zA-Z0-9]/.test(newPwd) ? 4
+                          : newPwd.length >= 10 && /[A-Z]/.test(newPwd) ? 3
+                          : newPwd.length >= 8 ? 2 : 1;
+                        return <div key={i} className={`h-1.5 flex-1 rounded-full transition-colors ${i <= strength ? (strength >= 3 ? "bg-emerald-500" : strength === 2 ? "bg-amber-400" : "bg-red-400") : "bg-gray-200"}`} />;
+                      })}
+                    </div>
+                    <p className="text-[12px] text-gray-400 m-0">
+                      {newPwd.length < 8 ? "Too short" : /[A-Z]/.test(newPwd) && /[0-9]/.test(newPwd) && /[^a-zA-Z0-9]/.test(newPwd) ? "Strong password" : "Add uppercase, numbers & symbols for a stronger password"}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex justify-start pt-1">
+                  <button type="submit" disabled={pwdSaving} className={`px-6 py-2.5 bg-gray-900 text-white border-none rounded-lg text-sm font-bold font-sans transition-opacity ${pwdSaving ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:bg-gray-800"}`}>
+                    {pwdSaving ? "Updating…" : "Update Password"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* ── Account & Privacy ──────────────────────────────────────────── */}
+          {activeTab === "Account" && (
+            <>
+              {/* Account Info (read-only) */}
+              <div className="bg-white border-[1.5px] border-gray-200 rounded-[10px] p-7">
+                <h3 className={sectionHead}>Account Information</h3>
+                <div className="flex flex-col gap-4 max-w-[480px]">
+                  <div>
+                    <label className={labelStyle}>Registered Email</label>
+                    <input value={user?.email ?? "—"} disabled className={`${inputStyle} bg-gray-50 text-gray-500 cursor-default`} />
+                    <p className="text-[12px] text-gray-400 mt-1 m-0 font-mono">To change your email, contact support.</p>
+                  </div>
+                  <div>
+                    <label className={labelStyle}>Account ID</label>
+                    <input value={user?.id ?? "—"} disabled className={`${inputStyle} bg-gray-50 text-gray-400 cursor-default font-mono text-xs`} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Deactivate */}
+              <div className="bg-white border-[1.5px] border-amber-200 rounded-[10px] p-7">
+                <h3 className="m-0 mb-2 text-lg font-bold text-amber-700">Deactivate Account</h3>
+                <p className="m-[0_0_20px] text-sm text-gray-600 leading-relaxed max-w-lg">
+                  Deactivating temporarily disables your employer account and hides all your job postings from the platform. You can reactivate by contacting support. Your data is preserved.
+                </p>
+                <button
+                  onClick={() => setDeactivateModal(true)}
+                  className={`${dangerBtn} bg-amber-50 text-amber-700 border-[1.5px] border-amber-300 hover:bg-amber-100`}
+                >
+                  Deactivate My Account
                 </button>
               </div>
 
-              <div className="px-8 pb-8">
-                <div className="mt-[-50px] mb-[30px] flex">
-                  <div className="w-[100px] h-[100px] bg-white border-4 border-white rounded-xl shadow-md flex items-center justify-center cursor-pointer overflow-hidden group">
-                    <div className="w-full h-full bg-gray-50 flex flex-col items-center justify-center text-gray-400 group-hover:bg-gray-100 transition-colors">
-                      {Ico.camera}
-                      <span className="text-[11px] font-bold mt-1 uppercase tracking-[0.05em]">Logo</span>
-                    </div>
-                  </div>
-                </div>
-
-                <h3 className="m-[0_0_24px] text-lg font-bold text-gray-900 border-b border-gray-200 pb-3">Company Details</h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <label className={labelStyle}>Company Name</label>
-                    <div className={inputOuter}>
-                      <span className={inputIcon}>{Ico.building}</span>
-                      <input type="text" defaultValue="TechNova Solutions" className={inputStyle} />
-                    </div>
-                  </div>
-                  <div>
-                    <label className={labelStyle}>Industry Sector</label>
-                    <select className={`${inputStyle} pl-4 cursor-pointer appearance-auto`}>
-                      <option>Information Technology</option>
-                      <option>Construction & Real Estate</option>
-                      <option>Finance & Banking</option>
-                      <option>Healthcare</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="mb-8">
-                  <label className={labelStyle}>Corporate Overview / "About Us"</label>
-                  <textarea rows={5} defaultValue='TechNova is a leading provider of innovative cloud solutions and enterprise software dedicated to helping businesses scale seamlessly across East Africa and beyond.'
-                    className={`${inputStyle} pl-4 resize-y leading-relaxed`} />
-                </div>
-
-                <h3 className="m-[0_0_24px] text-lg font-bold text-gray-900 border-b border-gray-200 pb-3">Contact Information</h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
-                  <div>
-                    <label className={labelStyle}>Corporate Email Address</label>
-                    <div className={inputOuter}>
-                      <span className={inputIcon}>{Ico.mail}</span>
-                      <input type="email" defaultValue="contact@technova.com" className={inputStyle} />
-                    </div>
-                  </div>
-                  <div>
-                    <label className={labelStyle}>Support / Office Phone</label>
-                    <div className={inputOuter}>
-                      <span className={inputIcon}>{Ico.phone}</span>
-                      <input type="text" defaultValue="+254 700 123 456" className={`${inputStyle} font-mono`} />
-                    </div>
-                  </div>
-                  <div>
-                    <label className={labelStyle}>Company Website</label>
-                    <div className={inputOuter}>
-                      <span className={inputIcon}>{Ico.globe}</span>
-                      <input type="url" defaultValue="https://technova.co.ke" className={inputStyle} />
-                    </div>
-                  </div>
-                  <div>
-                    <label className={labelStyle}>Primary Location</label>
-                    <div className={inputOuter}>
-                      <span className={inputIcon}>{Ico.pin}</span>
-                      <input type="text" defaultValue="Westlands, Nairobi" className={inputStyle} />
-                    </div>
-                  </div>
-                </div>
+              {/* Delete */}
+              <div className="bg-white border-[1.5px] border-red-200 rounded-[10px] p-7">
+                <h3 className="m-0 mb-2 text-lg font-bold text-red-600">Delete Account</h3>
+                <p className="m-[0_0_20px] text-sm text-gray-600 leading-relaxed max-w-lg">
+                  Permanently deletes your account, all job postings, applicant records, and company data. <strong>This action is irreversible.</strong> You will be immediately signed out and all data will be purged.
+                </p>
+                <button
+                  onClick={() => setDeleteModal(true)}
+                  className={`${dangerBtn} bg-red-50 text-red-600 border-[1.5px] border-red-300 hover:bg-red-100 inline-flex items-center gap-2`}
+                >
+                  {Ico.trash} Delete My Account Permanently
+                </button>
               </div>
-            </form>
+            </>
           )}
-
-          {activeTab === "Security & Login" && (
-            <div className="p-8">
-               <h3 className="m-[0_0_24px] text-lg font-bold text-gray-900 border-b border-gray-200 pb-3">Password Settings</h3>
-               <div className="flex flex-col gap-5 max-w-[500px]">
-                 <div>
-                   <label className={labelStyle}>Current Password</label>
-                   <input type="password" placeholder="Enter current password" className={`${inputStyle} pl-4`} />
-                 </div>
-                 <div>
-                   <label className={labelStyle}>New Password</label>
-                   <input type="password" placeholder="Create a new password" className={`${inputStyle} pl-4`} />
-                 </div>
-                 <div>
-                   <label className={labelStyle}>Confirm New Password</label>
-                   <input type="password" placeholder="Verify new password" className={`${inputStyle} pl-4`} />
-                 </div>
-                 <button className="self-start mt-2.5 px-5 py-2.5 bg-gray-900 text-white border-none rounded-lg text-sm font-bold cursor-pointer hover:bg-gray-800 transition-colors">Update Password</button>
-               </div>
-            </div>
-          )}
-
-          {activeTab === "Notifications" && (
-            <div className="p-8">
-               <h3 className="m-[0_0_24px] text-lg font-bold text-gray-900 border-b border-gray-200 pb-3">Email & Push Notifications</h3>
-               <div className="flex flex-col gap-5">
-                 {[
-                   { label: "New Application Alerts", desc: "Receive alerts immediately when a candidate applies." },
-                   { label: "Direct Messages", desc: "Get notified when a candidate responds to your messages." },
-                   { label: "Job Expiring Reminders", desc: "Alert me when a job posting is about to expire." },
-                   { label: "Weekly Account Summary", desc: "A brief overview metric report sent to your email weekly." }
-                 ].map((t, idx) => (
-                   <div key={idx} className="flex items-center gap-4">
-                     <input type="checkbox" defaultChecked={idx < 3} className="w-[18px] h-[18px] cursor-pointer accent-gray-900" />
-                     <div>
-                       <p className="m-[0_0_4px] text-[15px] font-bold text-gray-900">{t.label}</p>
-                       <p className="m-0 text-[13px] text-gray-500">{t.desc}</p>
-                     </div>
-                   </div>
-                 ))}
-               </div>
-            </div>
-          )}
-
-          {activeTab === "Billing & Plans" && (
-            <div className="p-8">
-               <h3 className="m-[0_0_24px] text-lg font-bold text-gray-900 border-b border-gray-200 pb-3">Subscription Plan</h3>
-               
-               <div className="p-6 border-2 border-gray-900 rounded-[10px] bg-gray-50 mb-[30px]">
-                 <div className="flex justify-between items-center flex-wrap gap-4">
-                  <div>
-                     <p className="m-[0_0_8px] text-sm font-bold text-blue-600 uppercase tracking-[0.05em]">Corporate Pro Plan</p>
-                     <p className="m-0 text-2xl font-bold text-gray-900 font-mono">KES 15,000 / month</p>
-                  </div>
-                   <button className="px-5 py-2.5 bg-white text-gray-900 border-[1.5px] border-gray-900 rounded-lg text-sm font-bold cursor-pointer hover:bg-gray-50 transition-colors">Change Plan</button>
-                </div>
-              </div>
-
-               <h3 className="m-[0_0_20px] text-base font-bold text-gray-900">Payment Methods</h3>
-              <div className="p-5 border-[1.5px] border-gray-200 rounded-[10px] flex items-center gap-4">
-                <div className="w-[60px] h-10 bg-gray-900 text-white flex items-center justify-center rounded-md font-bold text-xs uppercase">VISA</div>
-                <div className="flex-1">
-                  <p className="m-[0_0_4px] text-[15px] font-bold text-gray-900">Visa ending in 4242</p>
-                  <p className="m-0 text-[13px] text-gray-500">Expires 12/26</p>
-                </div>
-                <button className="bg-transparent border-none text-blue-600 text-sm font-bold cursor-pointer hover:text-blue-700 transition-colors">Edit</button>
-              </div>
-            </div>
-          )}
-
         </div>
       </div>
+
+      {/* ── Deactivate Confirmation Modal ───────────────────────────────────── */}
+      {deactivateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-5">
+          <div className="bg-white w-full max-w-[420px] rounded-2xl p-7 shadow-2xl">
+            <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 mb-4">
+              {Ico.warning}
+            </div>
+            <h3 className="m-[0_0_10px] text-xl font-bold text-gray-900">Deactivate your account?</h3>
+            <p className="m-[0_0_24px] text-sm text-gray-600 leading-relaxed">
+              Your account will be paused. All active job listings will be hidden from job seekers. You can reactivate by contacting our support team.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => setDeactivateModal(false)} className="px-5 py-2.5 bg-white border-[1.5px] border-gray-200 rounded-lg text-sm font-bold text-gray-700 cursor-pointer font-sans hover:bg-gray-50 transition-colors">
+                Cancel
+              </button>
+              <button
+                onClick={handleDeactivate}
+                disabled={deactivating}
+                className={`px-5 py-2.5 bg-amber-500 border-none rounded-lg text-sm font-bold text-white font-sans transition-opacity ${deactivating ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:bg-amber-600"}`}
+              >
+                {deactivating ? "Processing…" : "Yes, Deactivate"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete Confirmation Modal ───────────────────────────────────────── */}
+      {deleteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-5">
+          <div className="bg-white w-full max-w-[440px] rounded-2xl p-7 shadow-2xl">
+            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 mb-4">
+              {Ico.trash}
+            </div>
+            <h3 className="m-[0_0_10px] text-xl font-bold text-gray-900">Delete account permanently?</h3>
+            <p className="m-[0_0_20px] text-sm text-gray-600 leading-relaxed">
+              This will <strong>permanently erase</strong> all your jobs, applicant data, company profile, and settings. There is no undo.
+            </p>
+
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <label className="block text-xs font-bold text-red-600 mb-2 uppercase tracking-[0.05em]">
+                Type <span className="font-mono bg-red-100 px-1 rounded">DELETE</span> to confirm
+              </label>
+              <input
+                value={deleteConfirmText}
+                onChange={e => setDeleteConfirmText(e.target.value)}
+                placeholder="DELETE"
+                className={`${inputStyle} border-red-200 focus:border-red-400 font-mono font-bold tracking-widest`}
+                autoComplete="off"
+              />
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => { setDeleteModal(false); setDeleteConfirmText(""); }} className="px-5 py-2.5 bg-white border-[1.5px] border-gray-200 rounded-lg text-sm font-bold text-gray-700 cursor-pointer font-sans hover:bg-gray-50 transition-colors">
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleting || deleteConfirmText !== "DELETE"}
+                className={`px-5 py-2.5 bg-red-500 border-none rounded-lg text-sm font-bold text-white font-sans transition-opacity inline-flex items-center gap-2 ${(deleting || deleteConfirmText !== "DELETE") ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-red-600"}`}
+              >
+                {Ico.trash} {deleting ? "Deleting…" : "Delete Forever"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
