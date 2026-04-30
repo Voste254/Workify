@@ -51,97 +51,82 @@ const daysAgo = (dateStr: string) => {
 const fmtDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString("en-KE", { day: "2-digit", month: "long", year: "numeric" });
 
-// ── Job Detail Panel ──────────────────────────────────────────────────────────
-function JobDetailPanel({ job, onClose }: { job: Job; onClose: () => void }) {
+// ── Job Detail View ─────────────────────────────────────────────────────────────
+function JobDetailView({ job, onBack }: { job: Job; onBack: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-end bg-black/30 backdrop-blur-sm" onClick={onClose}>
-      <div
-        className="h-full w-full max-w-xl bg-white shadow-2xl flex flex-col overflow-hidden"
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/60 flex items-start justify-between gap-4">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 border-[1.5px] border-gray-200 bg-white flex items-center justify-center text-xl font-bold text-gray-900 font-mono flex-shrink-0">
-              {job.company_name?.charAt(0) ?? "?"}
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-gray-900 leading-snug">{job.title}</h2>
-              <p className="text-sm text-gray-500 mt-0.5">{job.company_name}</p>
-            </div>
+    <div className="bg-white border-[1.5px] border-gray-200 mt-6 mx-auto mb-10 max-w-4xl shadow-sm">
+      {/* Header */}
+      <div className="px-8 py-6 flex items-start justify-between gap-6">
+        <div className="flex items-start gap-4">
+          <button onClick={onBack} className="mt-1 flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors">
+            <ArrowLeft size={16} />
+          </button>
+          <div className="w-14 h-14 border-[1.5px] border-gray-200 bg-gray-50 flex items-center justify-center text-2xl font-bold text-gray-900 font-mono flex-shrink-0">
+            {job.company_name?.charAt(0) ?? "?"}
           </div>
-          <button
-            onClick={onClose}
-            className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition mt-0.5 flex-shrink-0"
-          >
-            <ArrowLeft size={14} /> Close
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 leading-snug">{job.title}</h2>
+            <p className="text-base text-gray-500 mt-1">{job.company_name}</p>
+          </div>
+        </div>
+        <div className="text-right">
+          <button className="h-11 px-8 bg-gray-900 text-white text-sm font-semibold hover:bg-gray-700 transition-colors shadow-md">
+            Apply Now
           </button>
         </div>
+      </div>
 
-        {/* Badges */}
-        <div className="px-6 py-3 border-b border-gray-100 flex flex-wrap gap-2">
-          {[
-            { icon: <MapPin size={12} />, text: job.location },
-            { icon: <Briefcase size={12} />, text: job.job_type },
-            { icon: <Tag size={12} />, text: job.category },
-            { icon: <DollarSign size={12} />, text: job.salary_rate },
-            { icon: <Clock size={12} />, text: `Posted ${ daysAgo(job.created_at) === 0 ? "Today" : `${daysAgo(job.created_at)}d ago`}` },
-          ].map(({ icon, text }) => (
-            <span key={text} className="flex items-center gap-1.5 text-xs font-medium text-gray-600 bg-gray-100 border border-gray-200 px-2.5 py-1 rounded-md">
-              {icon} {text}
-            </span>
-          ))}
-        </div>
+      {/* Badges */}
+      <div className="px-8 py-4 bg-gray-50/50 border-t border-b border-gray-100 flex flex-wrap gap-3">
+        {[
+          { icon: <MapPin size={14} className="text-gray-400" />, text: job.location },
+          { icon: <Briefcase size={14} className="text-gray-400" />, text: job.job_type },
+          { icon: <Tag size={14} className="text-gray-400" />, text: job.category },
+          { icon: <DollarSign size={14} className="text-gray-400" />, text: job.salary_rate },
+          { icon: <Clock size={14} className="text-gray-400" />, text: `Posted ${ daysAgo(job.created_at) === 0 ? "Today" : `${daysAgo(job.created_at)}d ago`}` },
+        ].map(({ icon, text }) => (
+          <span key={text} className="flex items-center gap-1.5 text-[13px] font-medium text-gray-700 bg-white border border-gray-200 px-3 py-1.5 rounded-md shadow-sm">
+            {icon} {text}
+          </span>
+        ))}
+      </div>
 
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-6">
-
-          {/* Description */}
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Job Description</p>
-            {job.description ? (
-              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{job.description}</p>
-            ) : (
-              <p className="text-sm text-gray-400 italic">No description provided.</p>
-            )}
-          </div>
-
-          {/* Expected Roles */}
-          {job.expected_roles && (
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Roles &amp; Responsibilities</p>
-              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{job.expected_roles}</p>
-            </div>
+      {/* Body */}
+      <div className="px-8 py-8 flex flex-col gap-8">
+        {/* Description */}
+        <div>
+          <p className="text-[13px] font-bold uppercase tracking-[0.05em] text-gray-400 mb-4 border-b border-gray-100 pb-2">Job Description</p>
+          {job.description ? (
+            <p className="text-[15px] text-gray-700 leading-loose whitespace-pre-wrap">{job.description}</p>
+          ) : (
+            <p className="text-[15px] text-gray-400 italic">No description provided.</p>
           )}
-
-          {/* Required Skills */}
-          {job.required_skills && job.required_skills.length > 0 && (
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Required Skills</p>
-              <div className="flex flex-wrap gap-1.5">
-                {job.required_skills.map(skill => (
-                  <span key={skill} className="text-xs font-semibold bg-gray-900 text-white px-2.5 py-1 rounded-md">{skill}</span>
-                ))}
-              </div>
-            </div>
-          )}
-
         </div>
 
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/60 flex items-center justify-between gap-3">
+        {/* Expected Roles */}
+        {job.expected_roles && (
           <div>
-            <p className="text-base font-bold text-gray-900 font-mono">{job.salary_rate}</p>
-            <p className="text-xs text-gray-400">{fmtDate(job.created_at)}</p>
+            <p className="text-[13px] font-bold uppercase tracking-[0.05em] text-gray-400 mb-4 border-b border-gray-100 pb-2">Roles &amp; Responsibilities</p>
+            <p className="text-[15px] text-gray-700 leading-loose whitespace-pre-wrap">{job.expected_roles}</p>
           </div>
-          <button className="h-10 px-6 bg-gray-900 text-white text-sm font-semibold hover:bg-gray-700 transition-colors">
-            Apply Now →
-          </button>
-        </div>
+        )}
+
+        {/* Required Skills */}
+        {job.required_skills && job.required_skills.length > 0 && (
+          <div>
+            <p className="text-[13px] font-bold uppercase tracking-[0.05em] text-gray-400 mb-4 border-b border-gray-100 pb-2">Required Skills</p>
+            <div className="flex flex-wrap gap-2">
+              {job.required_skills.map(skill => (
+                <span key={skill} className="text-sm font-semibold bg-gray-100 text-gray-800 border border-gray-200 px-3 py-1.5 rounded-md">{skill}</span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
 
 // ── Shared Select component ────────────────────────────────────────────────────
 const Sel = ({ value, onChange, children }: React.SelectHTMLAttributes<HTMLSelectElement> & { children: React.ReactNode }) => (
@@ -400,9 +385,9 @@ export default function FindJobsPage() {
         </div>
       )}
 
-      {/* Content */}
-      <div style={{ padding: "32px 40px", maxWidth: "1200px", margin: "0 auto" }}>
-
+      {/* Content Area */}
+      <div style={{ padding: selectedJob ? "24px 40px" : "32px 40px", maxWidth: "1200px", margin: "0 auto" }}>
+        
         {/* Error state */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between">
@@ -411,42 +396,40 @@ export default function FindJobsPage() {
           </div>
         )}
 
-        {/* Loading skeleton */}
-        {loading ? (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "16px" }}>
-            {Array.from({ length: 6 }).map((_, i) => <JobSkeleton key={i} />)}
-          </div>
-        ) : filtered.length === 0 ? (
-          <div style={{ border: "1.5px dashed #e5e7eb", backgroundColor: "#ffffff", padding: "80px 20px", textAlign: "center", borderRadius: "12px" }}>
-            <p style={{ fontSize: "16px", fontWeight: "600", color: "#111827", margin: "0 0 8px 0" }}>
-              {jobs.length === 0 ? "No jobs have been posted yet" : "No jobs match your filters"}
-            </p>
-            <p style={{ fontSize: "14px", color: "#9ca3af", margin: "0" }}>
-              {jobs.length === 0 ? "Check back soon — new opportunities are posted daily." : "Try adjusting your search or clearing some filters."}
-            </p>
-          </div>
+        {selectedJob ? (
+          <JobDetailView job={selectedJob} onBack={() => setSelectedJob(null)} />
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "16px" }}>
-            {filtered.map(job => (
-              <JobCard
-                key={job.id}
-                title={job.title}
-                company={job.company_name ?? "Unknown Company"}
-                location={job.location}
-                salary={job.salary_rate ?? "—"}
-                type={toCardType(job.job_type)}
-                daysAgo={daysAgo(job.created_at)}
-                onView={() => setSelectedJob(job)}
-              />
-            ))}
-          </div>
+          loading ? (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "16px" }}>
+              {Array.from({ length: 6 }).map((_, i) => <JobSkeleton key={i} />)}
+            </div>
+          ) : filtered.length === 0 ? (
+            <div style={{ border: "1.5px dashed #e5e7eb", backgroundColor: "#ffffff", padding: "80px 20px", textAlign: "center", borderRadius: "12px" }}>
+              <p style={{ fontSize: "16px", fontWeight: "600", color: "#111827", margin: "0 0 8px 0" }}>
+                {jobs.length === 0 ? "No jobs have been posted yet" : "No jobs match your filters"}
+              </p>
+              <p style={{ fontSize: "14px", color: "#9ca3af", margin: "0" }}>
+                {jobs.length === 0 ? "Check back soon — new opportunities are posted daily." : "Try adjusting your search or clearing some filters."}
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "16px" }}>
+              {filtered.map(job => (
+                <JobCard
+                  key={job.id}
+                  title={job.title}
+                  company={job.company_name ?? "Unknown Company"}
+                  location={job.location}
+                  salary={job.salary_rate ?? "—"}
+                  type={toCardType(job.job_type)}
+                  daysAgo={daysAgo(job.created_at)}
+                  onView={() => setSelectedJob(job)}
+                />
+              ))}
+            </div>
+          )
         )}
       </div>
-
-      {/* Job detail slide-over panel */}
-      {selectedJob && (
-        <JobDetailPanel job={selectedJob} onClose={() => setSelectedJob(null)} />
-      )}
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
