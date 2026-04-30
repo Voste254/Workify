@@ -9,7 +9,6 @@ import {
   BookOpen
 } from "lucide-react";
 
-
 import { supabase } from "../../../lib/supabaseClient";
 import { useAuth } from "../../../contexts/AuthContext";
 
@@ -21,7 +20,8 @@ export default function Support() {
   const [ticketType, setTicketType] = useState("support");
   const [message, setMessage] = useState("");
   const [subject, setSubject] = useState("");
-  
+  const [subjectError, setSubjectError] = useState(""); // new error state
+
   const faqData = [
     {
       q: "How do I upgrade my account?",
@@ -37,8 +37,31 @@ export default function Support() {
     }
   ];
 
+  // Helper: remove digits and validate
+  const handleSubjectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value;
+    // Remove any digit characters (0-9)
+    const filtered = rawValue.replace(/[0-9]/g, '');
+    setSubject(filtered);
+    
+    // Show error if any digits were removed (i.e., user tried to type a digit)
+    if (rawValue !== filtered) {
+      setSubjectError("Subject should not contain numbers");
+    } else {
+      setSubjectError("");
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Final validation: ensure no digits remain
+    const hasDigits = /\d/.test(subject);
+    if (hasDigits) {
+      setSubjectError("Subject must not contain numbers");
+      return;
+    }
+    
     if (!message || !subject) return;
     
     setLoading(true);
@@ -62,6 +85,7 @@ export default function Support() {
       setSubmitted(true);
       setMessage("");
       setSubject("");
+      setSubjectError("");
     } catch (err: any) {
       console.error("Support submission error:", err);
       setError(err.message || "Failed to submit request. Please try again.");
@@ -138,10 +162,17 @@ export default function Support() {
                         type="text"
                         placeholder="Brief summary of your request"
                         value={subject}
-                        onChange={(e) => setSubject(e.target.value)}
+                        onChange={handleSubjectChange}
                         required
-                        className="w-full h-11 px-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 text-sm"
+                        className={`w-full h-11 px-3 border rounded-lg focus:outline-none focus:ring-1 text-sm ${
+                          subjectError 
+                            ? "border-red-500 focus:border-red-500 focus:ring-red-500" 
+                            : "border-gray-300 focus:border-green-500 focus:ring-green-500"
+                        }`}
                       />
+                      {subjectError && (
+                        <p className="text-xs text-red-500 mt-1">{subjectError}</p>
+                      )}
                     </div>
                   </div>
 
@@ -164,7 +195,7 @@ export default function Support() {
                     </div>
                     <button 
                       type="submit"
-                      disabled={!message || !subject || loading}
+                      disabled={!message || !subject || !!subjectError || loading}
                       className="h-11 px-6 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {loading ? (
@@ -207,7 +238,7 @@ export default function Support() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-gray-900">Call Us</p>
-                  <p className="text-sm text-gray-500">+254 700 123 456</p>
+                  <p className="text-sm text-gray-500">+254 700 522 545</p>
                   <p className="text-xs text-gray-400 mt-0.5">Mon-Fri, 8am-5pm EAT</p>
                 </div>
               </div>
@@ -229,9 +260,7 @@ export default function Support() {
                 </div>
               ))}
             </div>
-    
           </div>
-
         </div>
       </div>
     </div>
