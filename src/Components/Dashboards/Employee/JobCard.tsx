@@ -21,7 +21,6 @@ export default function JobCard({ title, company, location, salary, type, rating
       className="bg-white border-[1.5px] border-gray-200 hover:border-gray-400 transition-colors p-5 flex flex-col gap-4 cursor-pointer"
       onClick={onView}
     >
-
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
@@ -69,13 +68,15 @@ export default function JobCard({ title, company, location, salary, type, rating
           <p className="text-sm text-gray-400 mt-0.5">{daysAgo}d ago</p>
         </div>
         <button 
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            onView?.();
+          }}
           className="h-9 px-4 bg-gray-900 text-white text-sm font-semibold hover:bg-gray-700 transition-colors"
         >
-          Apply →
+          View Job
         </button>
       </div>
-
     </div>
   );
 }

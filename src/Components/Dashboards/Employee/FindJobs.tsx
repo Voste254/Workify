@@ -48,8 +48,8 @@ const daysAgo = (dateStr: string) => {
   return Math.max(0, n);
 };
 
-const fmtDate = (dateStr: string) =>
-  new Date(dateStr).toLocaleDateString("en-KE", { day: "2-digit", month: "long", year: "numeric" });
+// const fmtDate = (dateStr: string) =>
+//   new Date(dateStr).toLocaleDateString("en-KE", { day: "2-digit", month: "long", year: "numeric" });
 
 // ── Job Detail View ─────────────────────────────────────────────────────────────
 function JobDetailView({ job, onBack }: { job: Job; onBack: () => void }) {
