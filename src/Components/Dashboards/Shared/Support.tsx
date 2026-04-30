@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { 
   MessageSquare, 
   Mail, 
@@ -7,7 +6,6 @@ import {
   Send, 
   CheckCircle2, 
   Info,
-  ChevronRight,
   BookOpen
 } from "lucide-react";
 
@@ -231,11 +229,7 @@ export default function Support() {
                 </div>
               ))}
             </div>
-            <Link to="/faq">
-            <button className="mt-6 w-full py-2.5 bg-white/10 hover:bg-white/20 transition rounded-lg text-sm font-medium flex items-center justify-center gap-2">
-              Visit Help Center <ChevronRight size={14} />
-            </button>
-            </Link>
+    
           </div>
 
         </div>
