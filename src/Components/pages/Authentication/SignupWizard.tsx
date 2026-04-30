@@ -90,10 +90,26 @@ export default function Signup() {
   const isSeeker = roles.includes("seeker");
   const isEmployer = roles.includes("employer");
 
+  // ----- Validation helpers -----
+  const isValidEmail = (email: string) => {
+    const re = /^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/;
+    return re.test(email);
+  };
+
+  const getDigitsCount = (str: string) => (str.match(/\d/g) || []).length;
+  const isValidPhone = (phone: string) => {
+    const digitCount = getDigitsCount(phone);
+    return digitCount >= 10 && digitCount <= 13;
+  };
+
+  const hasDigits = (str: string) => /\d/.test(str);
+
+  // ----- Step validity -----
   const pwValid = form.password.length >= 8 && /[A-Z]/.test(form.password) && /[a-z]/.test(form.password) && /[0-9]/.test(form.password) && /[^A-Za-z0-9]/.test(form.password);
-  const step1Valid = form.fname && form.lname && form.email.includes("@") && form.phone && pwValid && form.password === form.confirm;
+  const step1Valid = form.fname && form.lname && isValidEmail(form.email) && isValidPhone(form.phone) && pwValid && form.password === form.confirm;
   const step2Valid = roles.length > 0;
-  const step3Valid = (!isSeeker || (form.profession && form.location)) && (!isEmployer || (form.company && form.industry && form.elocation));
+  const step3Valid = (!isSeeker || (form.profession && form.location && !hasDigits(form.profession) && !hasDigits(form.location))) &&
+                     (!isEmployer || (form.company && form.industry && form.elocation && !hasDigits(form.elocation)));
 
   const roleCards: { role: Role; icon: string; title: string; desc: string }[] = [
     { role: "seeker", icon: "🔍", title: "Job Seeker", desc: "Find jobs, build profile, track applications" },
@@ -120,24 +136,24 @@ export default function Signup() {
       </div>
     </div>
   );
-const handleSignup = async () => {
-  if (!form.terms) return;
-  setSubmitting(true);
-  setAuthError("");
 
-  const result = await signUpUser({ form, roles });
+  const handleSignup = async () => {
+    if (!form.terms) return;
+    setSubmitting(true);
+    setAuthError("");
 
-  if (result.error) {
-    setAuthError(result.error);
+    const result = await signUpUser({ form, roles });
+
+    if (result.error) {
+      setAuthError(result.error);
+      setSubmitting(false);
+      return;
+    }
+
     setSubmitting(false);
-    return;
-  }
-
-  setSubmitting(false);
-  setNeedsConfirmation(result.needsConfirmation ?? false);
-  setDone(true);
-};
-
+    setNeedsConfirmation(result.needsConfirmation ?? false);
+    setDone(true);
+  };
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
@@ -169,15 +185,19 @@ const handleSignup = async () => {
           {step === 1 && <>
             <h2 className="text-2xl font-bold text-gray-900 mb-1">Create account</h2>
             <p className="text-sm text-gray-500 mb-6">Already have one?
-            <Link to='/login'><button  className="text-gray-900 font-semibold hover:underline">Sign in</button></Link> </p>
+            <Link to='/login'><button className="text-gray-900 font-semibold hover:underline">Sign in</button></Link> </p>
             <GoogleBtn/><Divider/>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <Field label="First name" error={attemptedSteps[1] && !form.fname && "Required"}><Input placeholder="John" value={form.fname} onChange={e => set("fname", e.target.value.replace(/[^a-zA-Z\s-]/g, ""))}/></Field>
                 <Field label="Last name" error={attemptedSteps[1] && !form.lname && "Required"}><Input placeholder="Doe" value={form.lname} onChange={e => set("lname", e.target.value.replace(/[^a-zA-Z\s-]/g, ""))}/></Field>
               </div>
-              <Field label="Email" error={attemptedSteps[1] && !form.email.includes("@") && "Valid email required"}><Input type="email" placeholder="you@example.com" required value={form.email} onChange={e => set("email", e.target.value)}/></Field>
-              <Field label="Phone" error={attemptedSteps[1] && !form.phone && "Required"}><Input type="tel" placeholder="+254 7xx xxx xxx" value={form.phone} onChange={e => set("phone", e.target.value.replace(/[^0-9+\s-]/g, ""))}/></Field>
+              <Field label="Email" error={(form.email && !isValidEmail(form.email)) ? "Invalid email format" : (attemptedSteps[1] && !form.email && "Required")}>
+                <Input type="email" placeholder="you@example.com" required value={form.email} onChange={e => set("email", e.target.value)}/>
+              </Field>
+              <Field label="Phone" error={(form.phone && !isValidPhone(form.phone)) ? "Phone must contain 10–13 digits" : (attemptedSteps[1] && !form.phone && "Required")}>
+                <Input type="tel" placeholder="+254 7xx xxx xxx" value={form.phone} onChange={e => set("phone", e.target.value.replace(/[^0-9+\s-]/g, ""))}/>
+              </Field>
               <Field label="Password" error={attemptedSteps[1] && !pwValid && "Password must meet all rules below"}>
                 <div className="relative">
                   <Input type={showPw ? "text" : "password"} placeholder="Min. 8 characters" value={form.password} onChange={e => set("password", e.target.value)}/>
@@ -248,9 +268,11 @@ const handleSignup = async () => {
             <div className="space-y-4">
               {isSeeker && <>
                 {isEmployer && <div className="text-xs font-semibold text-gray-900 uppercase tracking-widest border-b pb-2 mb-4">Job Seeker Profile</div>}
-                <Field label="Profession / Service offered" error={attemptedSteps[3] && !form.profession && "Required"}><Input placeholder="e.g. Graphic Designer, Plumber" value={form.profession} onChange={e => set("profession", e.target.value)}/></Field>
-                <Field label="Location" error={attemptedSteps[3] && !form.location && "Required"}>
-                  <Input placeholder="e.g. Nairobi, Kenya or remote" value={form.location} onChange={e => set("location", e.target.value)} />
+                <Field label="Profession / Service offered" error={(form.profession && hasDigits(form.profession)) ? "Should not contain digits" : (attemptedSteps[3] && !form.profession && "Required")}>
+                  <Input placeholder="e.g. Graphic Designer, Plumber" value={form.profession} onChange={e => set("profession", e.target.value.replace(/\d/g, ''))}/>
+                </Field>
+                <Field label="Location" error={(form.location && hasDigits(form.location)) ? "Should not contain digits" : (attemptedSteps[3] && !form.location && "Required")}>
+                  <Input placeholder="e.g. Nairobi, Kenya or remote" value={form.location} onChange={e => set("location", e.target.value.replace(/\d/g, ''))} />
                 </Field>
                 <Field label="Employment type preference">
                   <Select value={form.emptype} onChange={e => set("emptype", e.target.value)}>
@@ -265,7 +287,9 @@ const handleSignup = async () => {
               </>}
               {isEmployer && <>
                 {isSeeker && <div className="text-xs font-semibold text-gray-900 uppercase tracking-widest border-b pb-2 mb-4 mt-8">Company Profile</div>}
-                <Field label="Company name" error={attemptedSteps[3] && !form.company && "Required"}><Input placeholder="e.g. Safaricom PLC" value={form.company} onChange={e => set("company", e.target.value)}/></Field>
+                <Field label="Company name" error={attemptedSteps[3] && !form.company && "Required"}>
+                  <Input placeholder="e.g. Safaricom PLC" value={form.company} onChange={e => set("company", e.target.value)}/>
+                </Field>
                 <Field label="Industry" error={attemptedSteps[3] && !form.industry && "Required"}>
                   <Select value={form.industry} onChange={e => set("industry", e.target.value)}>
                     <option value="">Select industry</option>
@@ -279,8 +303,8 @@ const handleSignup = async () => {
                       {["1–10","11–50","51–200","201–1,000","1,000+"].map(s => <option key={s}>{s} employees</option>)}
                     </Select>
                   </Field>
-                  <Field label="Location" error={attemptedSteps[3] && !form.elocation && "Required"}>
-                    <Input placeholder="e.g. Nairobi, Kenya or remote" value={form.elocation} onChange={e => set("elocation", e.target.value)} />
+                  <Field label="Location" error={(form.elocation && hasDigits(form.elocation)) ? "Should not contain digits" : (attemptedSteps[3] && !form.elocation && "Required")}>
+                    <Input placeholder="e.g. Nairobi, Kenya or remote" value={form.elocation} onChange={e => set("elocation", e.target.value.replace(/\d/g, ''))} />
                   </Field>
                 </div>
               </>}
@@ -311,8 +335,7 @@ const handleSignup = async () => {
             <div className="space-y-3 mb-5">
               <label className="flex items-start gap-2.5 cursor-pointer">
                 <input type="checkbox" checked={form.terms} onChange={e => set("terms", e.target.checked)} className="accent-gray-900 mt-0.5 w-4 h-4 flex-shrink-0"/>
-                <span className="text-sm text-gray-600">I agree to the <a href="#" className="text-gray-900 font-semibold underline">Terms of Service</a> and <a href="#" 
-                className="text-gray-900 font-semibold underline">Privacy Policy</a></span>
+                <span className="text-sm text-gray-600">I agree to the <a href="#" className="text-gray-900 font-semibold underline">Terms of Service</a> and <a href="#" className="text-gray-900 font-semibold underline">Privacy Policy</a></span>
               </label>
               <label className="flex items-start gap-2.5 cursor-pointer">
                 <input type="checkbox" checked={form.marketing} onChange={e => set("marketing", e.target.checked)} className="accent-gray-900 mt-0.5 w-4 h-4 flex-shrink-0"/>
@@ -320,7 +343,7 @@ const handleSignup = async () => {
               </label>
             </div>
             {!form.terms && <p className="text-xs text-red-500 mb-3">You must agree to the Terms of Service.</p>}
-           {authError && <p className="text-xs text-red-500 mb-3">{authError}</p>}
+            {authError && <p className="text-xs text-red-500 mb-3">{authError}</p>}
             <PrimaryBtn
               disabled={!form.terms || submitting}
               onClick={handleSignup}
@@ -328,7 +351,6 @@ const handleSignup = async () => {
               {submitting ? "Creating account…" : "Create my account →"}
             </PrimaryBtn>
           </>}
-
         </div>
       </div>
     </div>
