@@ -91,8 +91,11 @@ const DEFAULT_NOTIF: NotifPrefs = {
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 export default function Settings() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [activeTab, setActiveTab] = useState("Notifications");
+
+  // Dual-role detection: user has both seeker + employer roles
+  const isDualRole = (profile?.role ?? []).includes("seeker") && (profile?.role ?? []).includes("employer");
 
   // ── Toast state ────────────────────────────────────────────────────────────
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
@@ -145,11 +148,30 @@ export default function Settings() {
   const [confirmPwd, setConfirmPwd] = useState("");
   const [pwdSaving,  setPwdSaving]  = useState(false);
 
+  // Real-time confirm match state
+  const confirmMatch   = confirmPwd.length > 0 && confirmPwd === newPwd;
+  const confirmNoMatch = confirmPwd.length > 0 && confirmPwd !== newPwd;
+
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPwd !== confirmPwd) { showToast("New passwords do not match.", "error"); return; }
     if (newPwd.length < 8)    { showToast("Password must be at least 8 characters.", "error"); return; }
+
     setPwdSaving(true);
+
+    // Step 1: verify current password by re-authenticating
+    const { error: signInErr } = await supabase.auth.signInWithPassword({
+      email: user?.email ?? "",
+      password: currentPwd,
+    });
+
+    if (signInErr) {
+      showToast("Current password is incorrect.", "error");
+      setPwdSaving(false);
+      return;
+    }
+
+    // Step 2: current password verified — proceed with update
     const { error } = await supabase.auth.updateUser({ password: newPwd });
     setPwdSaving(false);
     if (error) showToast(error.message, "error");
@@ -266,43 +288,81 @@ export default function Settings() {
           {activeTab === "Security" && (
             <div className="bg-white border-[1.5px] border-gray-200 rounded-[10px] p-7">
               <h3 className={sectionHead}>Change Password</h3>
-              <form onSubmit={handlePasswordUpdate} className="flex flex-col gap-5 max-w-[480px]">
-                <div>
-                  <label className={labelStyle}>Current Password</label>
-                  <PwdInput placeholder="Enter your current password" value={currentPwd} onChange={setCurrentPwd} />
-                </div>
-                <div>
-                  <label className={labelStyle}>New Password <span className="text-gray-400 font-normal">(min. 8 characters)</span></label>
-                  <PwdInput placeholder="Create a strong new password" value={newPwd} onChange={setNewPwd} />
-                </div>
-                <div>
-                  <label className={labelStyle}>Confirm New Password</label>
-                  <PwdInput placeholder="Repeat your new password" value={confirmPwd} onChange={setConfirmPwd} />
-                </div>
 
-                {/* Strength indicator */}
-                {newPwd.length > 0 && (
-                  <div>
-                    <div className="flex gap-1 mb-1">
-                      {[1,2,3,4].map(i => {
-                        const strength = newPwd.length >= 12 && /[A-Z]/.test(newPwd) && /[0-9]/.test(newPwd) && /[^a-zA-Z0-9]/.test(newPwd) ? 4
-                          : newPwd.length >= 10 && /[A-Z]/.test(newPwd) ? 3
-                          : newPwd.length >= 8 ? 2 : 1;
-                        return <div key={i} className={`h-1.5 flex-1 rounded-full transition-colors ${i <= strength ? (strength >= 3 ? "bg-emerald-500" : strength === 2 ? "bg-amber-400" : "bg-red-400") : "bg-gray-200"}`} />;
-                      })}
+              {isDualRole ? (
+                /* ── Dual-role redirect notice ────────────────────────────── */
+                <div className="flex flex-col gap-4 max-w-[520px]">
+                  <div className="flex gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl items-start">
+                    <div className="shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mt-0.5">
+                      {Ico.lock}
                     </div>
-                    <p className="text-[12px] text-gray-400 m-0">
-                      {newPwd.length < 8 ? "Too short" : /[A-Z]/.test(newPwd) && /[0-9]/.test(newPwd) && /[^a-zA-Z0-9]/.test(newPwd) ? "Strong password" : "Add uppercase, numbers & symbols for a stronger password"}
-                    </p>
+                    <div>
+                      <p className="m-[0_0_4px] text-[14px] font-bold text-blue-800">Password changes are managed in your Employee Dashboard</p>
+                      <p className="m-0 text-[13px] text-blue-700 leading-relaxed">
+                        Since your account has both <strong>Employer</strong> and <strong>Employee</strong> roles, password changes are handled centrally in the Employee Dashboard to keep your credentials consistent across both dashboards.
+                      </p>
+                    </div>
                   </div>
-                )}
-
-                <div className="flex justify-start pt-1">
-                  <button type="submit" disabled={pwdSaving} className={`px-6 py-2.5 bg-gray-900 text-white border-none rounded-lg text-sm font-bold font-sans transition-opacity ${pwdSaving ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:bg-gray-800"}`}>
-                    {pwdSaving ? "Updating…" : "Update Password"}
-                  </button>
+                  <p className="text-[13px] text-gray-500 m-0">
+                    Switch to your <strong>Employee Dashboard</strong> → <em>Settings → Security &amp; Password</em> to update your password.
+                  </p>
                 </div>
-              </form>
+              ) : (
+                /* ── Single-role password form ────────────────────────────── */
+                <form onSubmit={handlePasswordUpdate} className="flex flex-col gap-5 max-w-[480px]">
+
+                  {/* Current password */}
+                  <div>
+                    <label className={labelStyle}>Current Password</label>
+                    <PwdInput placeholder="Enter your current password" value={currentPwd} onChange={setCurrentPwd} />
+                  </div>
+
+                  {/* New password */}
+                  <div>
+                    <label className={labelStyle}>New Password <span className="text-gray-400 font-normal">(min. 8 characters)</span></label>
+                    <PwdInput placeholder="Create a strong new password" value={newPwd} onChange={v => { setNewPwd(v); }} />
+                  </div>
+
+                  {/* Strength indicator */}
+                  {newPwd.length > 0 && (
+                    <div>
+                      <div className="flex gap-1 mb-1">
+                        {[1,2,3,4].map(i => {
+                          const strength = newPwd.length >= 12 && /[A-Z]/.test(newPwd) && /[0-9]/.test(newPwd) && /[^a-zA-Z0-9]/.test(newPwd) ? 4
+                            : newPwd.length >= 10 && /[A-Z]/.test(newPwd) ? 3
+                            : newPwd.length >= 8 ? 2 : 1;
+                          return <div key={i} className={`h-1.5 flex-1 rounded-full transition-colors ${i <= strength ? (strength >= 3 ? "bg-emerald-500" : strength === 2 ? "bg-amber-400" : "bg-red-400") : "bg-gray-200"}`} />;
+                        })}
+                      </div>
+                      <p className="text-[12px] text-gray-400 m-0">
+                        {newPwd.length < 8 ? "Too short" : /[A-Z]/.test(newPwd) && /[0-9]/.test(newPwd) && /[^a-zA-Z0-9]/.test(newPwd) ? "Strong password" : "Add uppercase, numbers & symbols for a stronger password"}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Confirm new password — with real-time match feedback */}
+                  <div>
+                    <label className={labelStyle}>Confirm New Password</label>
+                    <PwdInput placeholder="Repeat your new password" value={confirmPwd} onChange={setConfirmPwd} />
+                    {confirmPwd.length > 0 && (
+                      <p className={`text-[12px] mt-1.5 m-0 flex items-center gap-1 ${confirmMatch ? "text-emerald-600" : "text-red-500"}`}>
+                        {confirmMatch ? Ico.check : Ico.warning}
+                        {confirmMatch ? "Passwords match" : "Passwords do not match"}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex justify-start pt-1">
+                    <button
+                      type="submit"
+                      disabled={pwdSaving || confirmNoMatch}
+                      className={`px-6 py-2.5 bg-gray-900 text-white border-none rounded-lg text-sm font-bold font-sans transition-opacity ${(pwdSaving || confirmNoMatch) ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-gray-800"}`}
+                    >
+                      {pwdSaving ? "Verifying & updating…" : "Update Password"}
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
           )}
 
