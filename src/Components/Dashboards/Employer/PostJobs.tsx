@@ -34,6 +34,7 @@ const inputOuter = "relative flex items-center w-full";
 const inputIcon  = "absolute left-3 text-gray-400";
 const inputStyle = "w-full py-2.5 pr-3.5 pl-9 border-[1.5px] border-gray-200 rounded-lg text-base text-gray-900 bg-white outline-none transition-colors duration-150 focus:border-gray-400";
 const textareaStyle = "w-full py-2.5 px-3.5 border-[1.5px] border-gray-200 rounded-lg text-base text-gray-900 bg-white outline-none transition-colors duration-150 focus:border-gray-400 resize-y";
+const errorInputStyle = "border-red-500 focus:border-red-500";
 
 // ── Skills Tag Input ───────────────────────────────────────────────────────────
 function SkillsInput({ skills, onChange }: { skills: string[]; onChange: (s: string[]) => void }) {
@@ -91,6 +92,11 @@ export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | n
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError]             = useState<string | null>(null);
 
+  // Validation error states
+  const [titleError, setTitleError]   = useState("");
+  const [descError, setDescError]     = useState("");
+  const [salaryError, setSalaryError] = useState("");
+
   const [jobCategory,    setJobCategory]    = useState(CATEGORIES[0]);
   const [jobType,        setJobType]        = useState("Permanent");
   const [title,          setTitle]          = useState("");
@@ -111,19 +117,84 @@ export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | n
       setDescription(editingJob.description ?? "");
       setExpectedRoles(editingJob.expectedRoles ?? "");
       setRequiredSkills(editingJob.requiredSkills ?? []);
+      // Clear errors on pre-fill
+      setTitleError("");
+      setDescError("");
+      setSalaryError("");
     } else {
       setTitle(""); setLocation(""); setSalary(""); setDescription("");
       setExpectedRoles(""); setRequiredSkills([]);
       setJobCategory(CATEGORIES[0]); setJobType("Permanent");
+      setTitleError(""); setDescError(""); setSalaryError("");
     }
   }, [editingJob]);
 
+  // ── Validation Handlers ─────────────────────────────────────────────────────
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    const filtered = raw.replace(/[0-9]/g, ""); // Remove digits
+    setTitle(filtered);
+    if (raw !== filtered) {
+      setTitleError("Job title should not contain numbers");
+    } else {
+      setTitleError("");
+    }
+  };
+
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const raw = e.target.value;
+    const filtered = raw.replace(/[0-9]/g, "");
+    setDescription(filtered);
+    if (raw !== filtered) {
+      setDescError("Description should not contain numbers");
+    } else {
+      setDescError("");
+    }
+  };
+
+  const handleSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    const filtered = raw.replace(/[^0-9]/g, ""); // Only digits allowed
+    setSalary(filtered);
+    if (raw !== filtered) {
+      setSalaryError("Salary must contain only numbers (e.g., 150000)");
+    } else {
+      setSalaryError("");
+    }
+  };
+
   const submitJob = async (status: "active" | "draft") => {
     const isEdit = !!editingJob;
+
+    // Basic required fields
     if (!title || !location || (!isEdit && (!salary || !description))) {
       setError("Please fill out all required fields.");
       return;
     }
+
+    // Check validation errors
+    if (titleError || descError || salaryError) {
+      setError("Please fix the highlighted validation errors before proceeding.");
+      return;
+    }
+
+    // Ensure no digits remain (extra safety)
+    if (/\d/.test(title)) {
+      setTitleError("Job title must not contain numbers");
+      setError("Job title contains numbers. Please remove them.");
+      return;
+    }
+    if (/\d/.test(description)) {
+      setDescError("Description must not contain numbers");
+      setError("Description contains numbers. Please remove them.");
+      return;
+    }
+    if (salary && !/^\d+$/.test(salary)) {
+      setSalaryError("Salary must be numeric only");
+      setError("Salary must be numeric only.");
+      return;
+    }
+
     if (!user) { setError("You must be logged in to post a job."); return; }
 
     setIsSubmitting(true);
@@ -161,6 +232,7 @@ export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | n
         setTitle(""); setLocation(""); setSalary(""); setDescription("");
         setExpectedRoles(""); setRequiredSkills([]);
         setJobCategory(CATEGORIES[0]); setJobType("Permanent");
+        setTitleError(""); setDescError(""); setSalaryError(""); // clear errors
       }
     } catch (err: any) {
       console.error("Error posting job:", err);
@@ -171,6 +243,9 @@ export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | n
   };
 
   const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); submitJob("active"); };
+
+  // Check if form has any validation errors (for disabling buttons)
+  const hasValidationErrors = !!titleError || !!descError || !!salaryError;
 
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col font-sans">
@@ -235,8 +310,16 @@ export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | n
                 <label className={labelStyle}>Job Title <span className="text-red-400">*</span></label>
                 <div className={inputOuter}>
                   <span className={inputIcon}>{Ico.briefcase}</span>
-                  <input type="text" placeholder="e.g. Senior Data Analyst" className={inputStyle} value={title} onChange={e => setTitle(e.target.value)} required />
+                  <input
+                    type="text"
+                    placeholder="e.g. Senior Data Analyst"
+                    className={`${inputStyle} ${titleError ? errorInputStyle : ""}`}
+                    value={title}
+                    onChange={handleTitleChange}
+                    required
+                  />
                 </div>
+                {titleError && <p className="text-xs text-red-500 mt-1">{titleError}</p>}
               </div>
               <div>
                 <label className={labelStyle}>Job Type</label>
@@ -266,8 +349,16 @@ export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | n
                 <label className={labelStyle}>Salary / Rate (KES) <span className="text-red-400">*</span></label>
                 <div className={inputOuter}>
                   <span className={inputIcon}>{Ico.coins}</span>
-                  <input type="text" placeholder="e.g. KES 150,000/mo" className={inputStyle} value={salary} onChange={e => setSalary(e.target.value)} required />
+                  <input
+                    type="text"
+                    placeholder="e.g. 150000"
+                    className={`${inputStyle} ${salaryError ? errorInputStyle : ""}`}
+                    value={salary}
+                    onChange={handleSalaryChange}
+                    required
+                  />
                 </div>
+                {salaryError && <p className="text-xs text-red-500 mt-1">{salaryError}</p>}
               </div>
             </div>
 
@@ -282,12 +373,13 @@ export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | n
               <textarea
                 rows={5}
                 placeholder="Give a clear overview of the role, the company, what the candidate will be working on, and what makes this opportunity exciting..."
-                className={textareaStyle}
+                className={`${textareaStyle} ${descError ? errorInputStyle : ""}`}
                 value={description}
-                onChange={e => setDescription(e.target.value)}
+                onChange={handleDescriptionChange}
                 required
               />
-              <p className={hintStyle}>A compelling description attracts higher-quality applicants.</p>
+              {descError && <p className="text-xs text-red-500 mt-1">{descError}</p>}
+              <p className={hintStyle}>A compelling description attracts higher-quality applicants. Numbers are not allowed.</p>
             </div>
 
             {/* Expected Roles / Responsibilities */}
@@ -315,10 +407,23 @@ export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | n
 
             {/* ── Action Buttons ─────────────────────────────────────────── */}
             <div className="flex justify-end gap-3 border-t border-gray-200 pt-5">
-              <button type="button" onClick={() => submitJob("draft")} disabled={isSubmitting} className={`px-5 py-2.5 bg-white text-gray-500 border-[1.5px] border-gray-200 rounded-lg text-base font-semibold transition-opacity ${isSubmitting ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}>
+              <button
+                type="button"
+                onClick={() => submitJob("draft")}
+                disabled={isSubmitting || hasValidationErrors}
+                className={`px-5 py-2.5 bg-white text-gray-500 border-[1.5px] border-gray-200 rounded-lg text-base font-semibold transition-opacity ${
+                  isSubmitting || hasValidationErrors ? "cursor-not-allowed opacity-70" : "cursor-pointer hover:bg-gray-50"
+                }`}
+              >
                 Save as Draft
               </button>
-              <button type="submit" disabled={isSubmitting} className={`px-5 py-2.5 bg-gray-900 text-white border-none rounded-lg text-base font-semibold transition-opacity ${isSubmitting ? "cursor-not-allowed opacity-70" : "cursor-pointer hover:bg-gray-800"}`}>
+              <button
+                type="submit"
+                disabled={isSubmitting || hasValidationErrors}
+                className={`px-5 py-2.5 bg-gray-900 text-white border-none rounded-lg text-base font-semibold transition-opacity ${
+                  isSubmitting || hasValidationErrors ? "cursor-not-allowed opacity-70" : "cursor-pointer hover:bg-gray-800"
+                }`}
+              >
                 {isSubmitting ? (editingJob ? "Saving..." : "Publishing...") : (editingJob ? "Save Changes" : "Publish Job")}
               </button>
             </div>
