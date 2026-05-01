@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Search } from "lucide-react";
+import Pagination from "./Pagination";
+
+const PAGE_SIZE = 6;
 import BlogCard from "./BlogCard";
 
 const BlogPage = () => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
 
   const categories = [
     "All",
@@ -82,6 +86,12 @@ const BlogPage = () => {
 
     return matchesCategory && matchesSearch;
   });
+
+  // Reset to page 1 when filters change
+  useMemo(() => { setPage(1); }, [activeCategory, search]);
+
+  const totalPages  = Math.max(1, Math.ceil(filteredBlogs.length / PAGE_SIZE));
+  const pagedBlogs  = filteredBlogs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="p-6 lg:p-10 space-y-10">
@@ -162,8 +172,10 @@ const BlogPage = () => {
 
       {/* BLOG GRID */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredBlogs}
+        {pagedBlogs}
       </div>
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} variant="tailwind" />
     </div>
   );
 };

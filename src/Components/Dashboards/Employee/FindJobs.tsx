@@ -1,8 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { Search, X, RefreshCw, MapPin, Briefcase, Clock, DollarSign, Tag, ArrowLeft } from "lucide-react";
 import JobCard from "./JobCard";
+import Pagination from "./Pagination";
 import { supabase } from "../../../lib/supabaseClient";
 import { useAuth } from "../../../contexts/AuthContext";
+
+const PAGE_SIZE = 10;
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface Job {
@@ -177,6 +180,7 @@ export default function FindJobsPage() {
   const [contract, setContract] = useState("All");
   const [location, setLocation] = useState("All Locations");
   const [sort, setSort] = useState<typeof SORT_OPTIONS[number]>("Newest");
+  const [page, setPage] = useState(1);
 
   // ── Fetch active jobs from Supabase ──
   const fetchJobs = async () => {
@@ -297,6 +301,12 @@ export default function FindJobsPage() {
       });
   }, [jobs, search, category, jobType, contract, location, sort]);
 
+  // Reset to page 1 whenever filters or search change
+  useMemo(() => { setPage(1); }, [search, category, jobType, contract, location, sort]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#F9FAFB", fontFamily: "'DM Sans','Segoe UI',sans-serif", boxSizing: "border-box", color: "#111827" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap');*{box-sizing:border-box}`}</style>
@@ -413,20 +423,23 @@ export default function FindJobsPage() {
               </p>
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "16px" }}>
-              {filtered.map(job => (
-                <JobCard
-                  key={job.id}
-                  title={job.title}
-                  company={job.company_name ?? "Unknown Company"}
-                  location={job.location}
-                  salary={job.salary_rate ?? "—"}
-                  type={toCardType(job.job_type)}
-                  daysAgo={daysAgo(job.created_at)}
-                  onView={() => setSelectedJob(job)}
-                />
-              ))}
-            </div>
+            <>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "16px" }}>
+                {paginated.map(job => (
+                  <JobCard
+                    key={job.id}
+                    title={job.title}
+                    company={job.company_name ?? "Unknown Company"}
+                    location={job.location}
+                    salary={job.salary_rate ?? "—"}
+                    type={toCardType(job.job_type)}
+                    daysAgo={daysAgo(job.created_at)}
+                    onView={() => setSelectedJob(job)}
+                  />
+                ))}
+              </div>
+              <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            </>
           )
         )}
       </div>

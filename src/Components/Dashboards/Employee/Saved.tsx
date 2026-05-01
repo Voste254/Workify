@@ -1,4 +1,7 @@
 import { useState, useMemo } from "react";
+import Pagination from "./Pagination";
+
+const PAGE_SIZE = 9;
 
 interface SavedJob {
   id: string; title: string; company: string; location: string;
@@ -135,11 +138,21 @@ export default function SavedPage() {
   const [employers, setEmployers] = useState(EMPLOYERS);
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<"jobs"|"employers">("jobs");
+  const [jobPage, setJobPage] = useState(1);
+  const [empPage, setEmpPage] = useState(1);
 
   const q = search.toLowerCase();
   const fJobs = useMemo(() => jobs.filter(j=>[j.title,j.company,...j.tags].some(s=>s.toLowerCase().includes(q))), [jobs,q]);
   const fEmps = useMemo(() => employers.filter(e=>[e.name,e.industry].some(s=>s.toLowerCase().includes(q))), [employers,q]);
   const count = tab==="jobs" ? fJobs.length : fEmps.length;
+
+  // Reset pages on search or tab change
+  useMemo(() => { setJobPage(1); setEmpPage(1); }, [q, tab]);
+
+  const jobTotalPages = Math.max(1, Math.ceil(fJobs.length / PAGE_SIZE));
+  const empTotalPages = Math.max(1, Math.ceil(fEmps.length / PAGE_SIZE));
+  const pJobs = fJobs.slice((jobPage - 1) * PAGE_SIZE, jobPage * PAGE_SIZE);
+  const pEmps = fEmps.slice((empPage - 1) * PAGE_SIZE, empPage * PAGE_SIZE);
 
   return (
     <div style={{ fontFamily:"'DM Sans','Segoe UI',sans-serif", background:"#F9FAFB", minHeight:"100vh" }}>
@@ -188,12 +201,19 @@ export default function SavedPage() {
             <p style={{ margin:0, fontSize: 17, color:"#9CA3AF" }}>{search?`No saved ${tab} match your search.`:`You have no saved ${tab} yet.`}</p>
           </div>
         ) : (
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))", gap:14 }}>
-            {tab==="jobs"
-              ? fJobs.map(j=><JobCard key={j.id} job={j} onUnsave={()=>setJobs(p=>p.filter(x=>x.id!==j.id))}/>)
-              : fEmps.map(e=><EmployerCard key={e.id} employer={e} onUnsave={()=>setEmployers(p=>p.filter(x=>x.id!==e.id))}/>)
-            }
-          </div>
+          <>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))", gap:14 }}>
+              {tab==="jobs"
+                ? pJobs.map(j=><JobCard key={j.id} job={j} onUnsave={()=>setJobs(p=>p.filter(x=>x.id!==j.id))}/>)
+                : pEmps.map(e=><EmployerCard key={e.id} employer={e} onUnsave={()=>setEmployers(p=>p.filter(x=>x.id!==e.id))}/>)
+              }
+            </div>
+            <Pagination
+              page={tab==="jobs" ? jobPage : empPage}
+              totalPages={tab==="jobs" ? jobTotalPages : empTotalPages}
+              onPageChange={tab==="jobs" ? setJobPage : setEmpPage}
+            />
+          </>
         )}
       </div>
     </div>

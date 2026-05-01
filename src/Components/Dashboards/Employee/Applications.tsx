@@ -1,4 +1,7 @@
 import { useState, useMemo } from "react";
+import Pagination from "./Pagination";
+
+const PAGE_SIZE = 8;
 
 // ── Types & Config ─────────────────────────────────────────────────────────────
 type Stage = "applied"|"screening"|"interview"|"assessment"|"offer"|"hired"|"rejected"|"withdrawn";
@@ -231,12 +234,19 @@ export default function ApplicationsTracker() {
   const [filterStage, setFilterStage] = useState<Stage|"all">("all");
   const [filterType, setFilterType] = useState("all");
   const [sortBy, setSortBy] = useState<SortKey>("lastUpdated");
+  const [page, setPage] = useState(1);
 
   const q = search.toLowerCase();
   const filtered = useMemo(() => apps
     .filter(a => (!q||[a.jobTitle,a.company].some(s=>s.toLowerCase().includes(q))) && (filterStage==="all"||a.stage===filterStage) && (filterType==="all"||a.jobType===filterType))
     .sort((a,b) => sortBy==="company" ? a.company.localeCompare(b.company) : new Date(b[sortBy]).getTime()-new Date(a[sortBy]).getTime()),
   [apps,q,filterStage,filterType,sortBy]);
+
+  // Reset page when filters change
+  useMemo(() => { setPage(1); }, [q, filterStage, filterType, sortBy]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const selected = apps.find(a=>a.id===selectedId)||null;
   const toggleBookmark = (id:string) => setApps(p=>p.map(a=>a.id===id?{...a,isBookmarked:!a.isBookmarked}:a));
@@ -297,8 +307,9 @@ export default function ApplicationsTracker() {
         <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
           {filtered.length===0
             ? <div style={{ padding:48, textAlign:"center" as const, border:"1.5px dashed #E5E7EB", borderRadius:10, background:"#fff" }}><p style={{ margin:0, fontSize: 16, color:"#9CA3AF" }}>No applications match your filters.</p></div>
-            : filtered.map(app=><AppCard key={app.id} app={app} selected={selectedId===app.id} onSelect={()=>setSelectedId(p=>p===app.id?null:app.id)} onBookmark={()=>toggleBookmark(app.id)} onWithdraw={()=>withdraw(app.id)}/>)
+            : paginated.map(app=><AppCard key={app.id} app={app} selected={selectedId===app.id} onSelect={()=>setSelectedId(p=>p===app.id?null:app.id)} onBookmark={()=>toggleBookmark(app.id)} onWithdraw={()=>withdraw(app.id)}/>)
           }
+          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
         {selected && (
           <div style={{ position:"sticky" as const, top:20, height:"calc(100vh - 175px)", overflow:"hidden" }}>
