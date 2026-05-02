@@ -202,8 +202,18 @@ export default function JobSeekerSettings() {
   const [extendForm, setExtendForm] = useState({ company: "", industry: "", size: "", elocation: "" });
   const [extending, setExtending] = useState(false);
 
+  // Validation
+  const hasDigit = (str: string) => /\d/.test(str);
+  const companyError = hasDigit(extendForm.company) ? "Numbers are not allowed in this field" : "";
+  const elocationError = hasDigit(extendForm.elocation) ? "Numbers are not allowed in this field" : "";
+  const hasErrors = !!companyError || !!elocationError;
+
   const handleExtend = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (hasErrors) {
+      showToast("Fix the errors above before continuing.", "error");
+      return;
+    }
     if (!user || !profile) return;
     if (!extendForm.company || !extendForm.industry || !extendForm.elocation) {
       showToast("Please fill in all required fields.", "error");
@@ -415,7 +425,8 @@ export default function JobSeekerSettings() {
               <form onSubmit={handleExtend} className="flex flex-col gap-4 max-w-[480px]">
                 <div>
                   <label className={labelStyle}>Company Name <span className="text-red-500">*</span></label>
-                  <input required value={extendForm.company} onChange={e => setExtendForm(p => ({...p, company: e.target.value}))} placeholder="e.g. Safaricom PLC" className={inputStyle} />
+                  <input required value={extendForm.company} onChange={e => setExtendForm(p => ({...p, company: e.target.value}))} placeholder="e.g. Safaricom PLC" className={`${inputStyle} ${companyError ? "border-red-500 focus:border-red-500" : ""}`} />
+                  {companyError && <p className="text-red-500 text-xs mt-1.5 m-0 font-medium">{companyError}</p>}
                 </div>
                 
                 <div>
@@ -436,15 +447,17 @@ export default function JobSeekerSettings() {
                   </div>
                   <div>
                     <label className={labelStyle}>Location <span className="text-red-500">*</span></label>
-                    <input required value={extendForm.elocation} onChange={e => setExtendForm(p => ({...p, elocation: e.target.value.replace(/\d/g, '')}))} placeholder="Nairobi, Kenya" className={inputStyle} />
+                    <input required value={extendForm.elocation} onChange={e => setExtendForm(p => ({...p, elocation: e.target.value}))} placeholder="e.g. Nairobi, Kenya" className={`${inputStyle} ${elocationError ? "border-red-500 focus:border-red-500" : ""}`} />
+                    {elocationError && <p className="text-red-500 text-xs mt-1.5 m-0 font-medium">{elocationError}</p>}
                   </div>
                 </div>
 
                 <div className="pt-2">
-                  <button type="submit" disabled={extending} className={`w-full px-6 py-3 bg-gray-900 text-white border-none rounded-lg text-sm font-bold font-sans transition-opacity ${extending ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:bg-gray-800"}`}>
+                  <button type="submit" disabled={extending || hasErrors} className={`w-full px-6 py-3 bg-gray-900 text-white border-none rounded-lg text-sm font-bold font-sans transition-opacity ${extending || hasErrors ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:bg-gray-800"}`}>
                     {extending ? "Extending Account…" : "Extend to Employer Dashboard →"}
                   </button>
-                  <p className="text-center text-xs text-gray-400 mt-3 m-0">Your page will reload automatically upon success.</p>
+                  {hasErrors && <p className="text-center text-xs text-red-500 mt-3 m-0 font-medium">Fix the errors above before continuing</p>}
+                  {!hasErrors && <p className="text-center text-xs text-gray-400 mt-3 m-0">Your page will reload automatically upon success.</p>}
                 </div>
               </form>
             </div>

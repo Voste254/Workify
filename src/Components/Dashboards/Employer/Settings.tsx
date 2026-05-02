@@ -235,8 +235,18 @@ export default function Settings() {
   const [extendForm, setExtendForm] = useState({ profession: "", location: "", emptype: "", bio: "" });
   const [extending, setExtending] = useState(false);
 
+  // Validation
+  const hasDigit = (str: string) => /\d/.test(str);
+  const professionError = hasDigit(extendForm.profession) ? "Numbers are not allowed in this field" : "";
+  const locationError = hasDigit(extendForm.location) ? "Numbers are not allowed in this field" : "";
+  const hasErrors = !!professionError || !!locationError;
+
   const handleExtend = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (hasErrors) {
+      showToast("Fix the errors above before continuing.", "error");
+      return;
+    }
     if (!user || !profile) return;
     if (!extendForm.profession || !extendForm.location) {
       showToast("Please fill in all required fields.", "error");
@@ -468,12 +478,14 @@ export default function Settings() {
               <form onSubmit={handleExtend} className="flex flex-col gap-4 max-w-[480px]">
                 <div>
                   <label className={labelStyle}>Profession / Service offered <span className="text-red-500">*</span></label>
-                  <input required value={extendForm.profession} onChange={e => setExtendForm(p => ({...p, profession: e.target.value.replace(/\d/g, '')}))} placeholder="e.g. Graphic Designer, Plumber" className={inputStyle} />
+                  <input required value={extendForm.profession} onChange={e => setExtendForm(p => ({...p, profession: e.target.value}))} placeholder="e.g. Graphic Designer, Plumber" className={`${inputStyle} ${professionError ? "border-red-500 focus:border-red-500" : ""}`} />
+                  {professionError && <p className="text-red-500 text-xs mt-1.5 m-0 font-medium">{professionError}</p>}
                 </div>
                 
                 <div>
                   <label className={labelStyle}>Location <span className="text-red-500">*</span></label>
-                  <input required value={extendForm.location} onChange={e => setExtendForm(p => ({...p, location: e.target.value.replace(/\d/g, '')}))} placeholder="e.g. Nairobi, Kenya or remote" className={inputStyle} />
+                  <input required value={extendForm.location} onChange={e => setExtendForm(p => ({...p, location: e.target.value}))} placeholder="e.g. Nairobi, Kenya or remote" className={`${inputStyle} ${locationError ? "border-red-500 focus:border-red-500" : ""}`} />
+                  {locationError && <p className="text-red-500 text-xs mt-1.5 m-0 font-medium">{locationError}</p>}
                 </div>
                 
                 <div>
@@ -491,10 +503,11 @@ export default function Settings() {
                 </div>
 
                 <div className="pt-2">
-                  <button type="submit" disabled={extending} className={`w-full px-6 py-3 bg-gray-900 text-white border-none rounded-lg text-sm font-bold font-sans transition-opacity ${extending ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:bg-gray-800"}`}>
+                  <button type="submit" disabled={extending || hasErrors} className={`w-full px-6 py-3 bg-gray-900 text-white border-none rounded-lg text-sm font-bold font-sans transition-opacity ${extending || hasErrors ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:bg-gray-800"}`}>
                     {extending ? "Extending Account…" : "Extend to Employee Dashboard →"}
                   </button>
-                  <p className="text-center text-xs text-gray-400 mt-3 m-0">Your page will reload automatically upon success.</p>
+                  {hasErrors && <p className="text-center text-xs text-red-500 mt-3 m-0 font-medium">Fix the errors above before continuing</p>}
+                  {!hasErrors && <p className="text-center text-xs text-gray-400 mt-3 m-0">Your page will reload automatically upon success.</p>}
                 </div>
               </form>
             </div>
