@@ -193,7 +193,6 @@ function CompanyProfileView({
     setSaving(true);
     const { error } = await supabase.from("saved_items").insert({
       user_id: user.id,
-      item_type: "employer",
       employer_id: employerId
     });
     setSaving(false);
