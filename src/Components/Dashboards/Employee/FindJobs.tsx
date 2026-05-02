@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Search, X, RefreshCw, MapPin, Briefcase, Clock, DollarSign, Tag, ArrowLeft } from "lucide-react";
+import { Search, X, RefreshCw, MapPin, Briefcase, Clock, DollarSign, Tag, ArrowLeft, Building, Globe, Users, Mail, Phone, Bookmark } from "lucide-react";
 import JobCard from "./JobCard";
 import Pagination from "./Pagination";
 import { supabase } from "../../../lib/supabaseClient";
@@ -56,10 +56,11 @@ const daysAgo = (dateStr: string) => {
 
 // ── Job Detail View ─────────────────────────────────────────────────────────────
 function JobDetailView({
-  job, onBack, onApply, applying, alreadyApplied,
+  job, onBack, onApply, applying, alreadyApplied, onViewCompany
 }: {
   job: Job; onBack: () => void;
   onApply: () => void; applying: boolean; alreadyApplied: boolean;
+  onViewCompany: () => void;
 }) {
   return (
     <div className="bg-white border-[1.5px] border-gray-200 mt-6 mx-auto mb-10 max-w-4xl shadow-sm">
@@ -74,7 +75,16 @@ function JobDetailView({
           </div>
           <div>
             <h2 className="text-2xl font-bold text-gray-900 leading-snug">{job.title}</h2>
-            <p className="text-base text-gray-500 mt-1">{job.company_name}</p>
+            <div className="flex items-center gap-3 mt-1">
+              <p className="text-base text-gray-500 m-0">{job.company_name}</p>
+              <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+              <button 
+                onClick={onViewCompany}
+                className="text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors bg-transparent border-none cursor-pointer p-0 m-0"
+              >
+                View Company Profile
+              </button>
+            </div>
           </div>
         </div>
         <div className="text-right flex flex-col items-end gap-2">
@@ -146,6 +156,143 @@ function JobDetailView({
   );
 }
 
+// ── Company Profile View ────────────────────────────────────────────────────────
+function CompanyProfileView({
+  employerId, companyName, onBack
+}: {
+  employerId: string; companyName: string; onBack: () => void;
+}) {
+  const { user } = useAuth();
+  const [company, setCompany] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      // Fetch company details
+      const { data: comp } = await supabase.from("companies").select("*").eq("owner_id", employerId).single();
+      if (comp) setCompany(comp);
+
+      // Check if already saved
+      if (user) {
+        const { data: saveCheck } = await supabase.from("saved_items")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("employer_id", employerId)
+          .maybeSingle();
+        if (saveCheck) setSaved(true);
+      }
+      setLoading(false);
+    })();
+  }, [employerId, user]);
+
+  const handleSave = async () => {
+    if (!user || saved) return;
+    setSaving(true);
+    const { error } = await supabase.from("saved_items").insert({
+      user_id: user.id,
+      item_type: "employer",
+      employer_id: employerId
+    });
+    setSaving(false);
+    if (!error) setSaved(true);
+    else alert("Error saving profile: " + error.message);
+  };
+
+  return (
+    <div className="bg-white border-[1.5px] border-gray-200 mt-6 mx-auto mb-10 max-w-4xl shadow-sm">
+      <div className="px-8 py-6 border-b border-gray-100 flex items-start justify-between gap-6">
+        <div className="flex items-start gap-4">
+          <button onClick={onBack} className="mt-1 flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors cursor-pointer border-none">
+            <ArrowLeft size={16} />
+          </button>
+          <div className="w-16 h-16 border-[1.5px] border-gray-200 bg-gray-50 flex items-center justify-center text-3xl font-bold text-gray-900 font-mono flex-shrink-0">
+            {companyName?.charAt(0) ?? "?"}
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 leading-snug m-0 mb-1">{company?.company_name || companyName}</h2>
+            <p className="text-base text-gray-500 m-0">{company?.industry || "Industry not specified"}</p>
+          </div>
+        </div>
+        <button
+          onClick={handleSave}
+          disabled={saving || saved}
+          className={`flex items-center gap-2 h-10 px-5 text-sm font-bold transition-colors rounded-lg shadow-sm border ${
+            saved ? "bg-emerald-50 text-emerald-700 border-emerald-200 cursor-default" : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50 cursor-pointer"
+          }`}
+        >
+          <Bookmark size={16} className={saved ? "fill-emerald-600" : ""} />
+          {saved ? "Profile Saved" : saving ? "Saving…" : "Save Profile"}
+        </button>
+      </div>
+
+      <div className="px-8 py-8">
+        {loading ? (
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <div>
+                <p className="text-[12px] font-bold uppercase tracking-wider text-gray-400 m-0 mb-2">Company Size</p>
+                <div className="flex items-center gap-2 text-gray-700 font-medium">
+                  <Users size={16} className="text-gray-400 shrink-0" />
+                  {company?.company_size || "Not specified"}
+                </div>
+              </div>
+              <div>
+                <p className="text-[12px] font-bold uppercase tracking-wider text-gray-400 m-0 mb-2">Headquarters</p>
+                <div className="flex items-center gap-2 text-gray-700 font-medium">
+                  <MapPin size={16} className="text-gray-400 shrink-0" />
+                  {company?.company_location || "Not specified"}
+                </div>
+              </div>
+              <div>
+                <p className="text-[12px] font-bold uppercase tracking-wider text-gray-400 m-0 mb-2">Industry</p>
+                <div className="flex items-center gap-2 text-gray-700 font-medium">
+                  <Building size={16} className="text-gray-400 shrink-0" />
+                  {company?.industry || "Not specified"}
+                </div>
+              </div>
+            </div>
+            <div className="space-y-6">
+              <div>
+                <p className="text-[12px] font-bold uppercase tracking-wider text-gray-400 m-0 mb-2">Website</p>
+                <div className="flex items-center gap-2 text-gray-700 font-medium">
+                  <Globe size={16} className="text-gray-400 shrink-0" />
+                  {company?.website ? (
+                    <a href={company.website.startsWith('http') ? company.website : `https://${company.website}`} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+                      {company.website}
+                    </a>
+                  ) : "Not specified"}
+                </div>
+              </div>
+              <div>
+                <p className="text-[12px] font-bold uppercase tracking-wider text-gray-400 m-0 mb-2">Contact Email</p>
+                <div className="flex items-center gap-2 text-gray-700 font-medium">
+                  <Mail size={16} className="text-gray-400 shrink-0" />
+                  {company?.company_email || "Not specified"}
+                </div>
+              </div>
+              <div>
+                <p className="text-[12px] font-bold uppercase tracking-wider text-gray-400 m-0 mb-2">Contact Phone</p>
+                <div className="flex items-center gap-2 text-gray-700 font-medium">
+                  <Phone size={16} className="text-gray-400 shrink-0" />
+                  {company?.company_phone || "Not specified"}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 // ── Shared Select component ────────────────────────────────────────────────────
 const Sel = ({ value, onChange, children }: React.SelectHTMLAttributes<HTMLSelectElement> & { children: React.ReactNode }) => (
@@ -189,6 +336,8 @@ export default function FindJobsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [viewingCompanyId, setViewingCompanyId] = useState<string | null>(null);
+  const [viewingCompanyName, setViewingCompanyName] = useState<string | null>(null);
 
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All Categories");
@@ -487,13 +636,23 @@ export default function FindJobsPage() {
           </div>
         )}
 
-        {selectedJob ? (
+        {viewingCompanyId && selectedJob ? (
+          <CompanyProfileView
+            employerId={viewingCompanyId}
+            companyName={viewingCompanyName || selectedJob.company_name || ""}
+            onBack={() => setViewingCompanyId(null)}
+          />
+        ) : selectedJob ? (
           <JobDetailView
             job={selectedJob}
             onBack={() => setSelectedJob(null)}
             onApply={() => handleApply(selectedJob)}
             applying={applying}
             alreadyApplied={appliedJobIds.has(selectedJob.id)}
+            onViewCompany={() => {
+              setViewingCompanyId(selectedJob.employer_id);
+              setViewingCompanyName(selectedJob.company_name || null);
+            }}
           />
         ) : (
           loading ? (
