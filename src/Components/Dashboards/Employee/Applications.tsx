@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Pagination from "./Pagination";
+import { supabase } from "../../../lib/supabaseClient";
 
 const PAGE_SIZE = 8;
 
@@ -25,19 +26,8 @@ const SC: Record<Stage,{label:string;color:string;bg:string;step:number}> = {
   rejected:   {label:"Rejected",   color:"#FFFFFF", bg:"#DC2626", step:0},
   withdrawn:  {label:"Withdrawn",  color:"#FFFFFF", bg:"#9CA3AF", step:0},
 };
-const ACTIVE_STAGES: Stage[] = ["applied","screening","interview","assessment","offer","hired"];
 
-// ── Mock Data ──────────────────────────────────────────────────────────────────
-const MOCK: Application[] = [
-  {id:"1",jobTitle:"Senior Data Analyst",company:"Safaricom PLC",location:"Nairobi, Kenya",jobType:"Corporate – Permanent",salary:"KES 180,000–220,000",appliedDate:"2025-02-10",lastUpdated:"2025-03-08",stage:"interview",nextAction:"Technical interview scheduled",nextActionDate:"2025-03-14",notes:"Prepare SQL case study and Python portfolio",logo:"S",isBookmarked:true,recruiterName:"Amina Odhiambo",recruiterEmail:"a.odhiambo@safaricom.co.ke"},
-  {id:"2",jobTitle:"Graphic Designer",company:"Nation Media Group",location:"Nairobi, Kenya",jobType:"Corporate – Contract",salary:"KES 85,000–110,000",appliedDate:"2025-02-18",lastUpdated:"2025-03-05",stage:"assessment",nextAction:"Submit design portfolio task",nextActionDate:"2025-03-12",logo:"N",isBookmarked:false,recruiterName:"Brian Mutua",recruiterEmail:"b.mutua@nation.co.ke"},
-  {id:"3",jobTitle:"Construction Foreman",company:"Bamburi Cement",location:"Mombasa, Kenya",jobType:"Casual – Daily",salary:"KES 2,500/day",appliedDate:"2025-03-01",lastUpdated:"2025-03-01",stage:"applied",logo:"B",isBookmarked:false},
-  {id:"4",jobTitle:"Backend Engineer",company:"Andela",location:"Remote",jobType:"Corporate – Contract",salary:"$3,500–$5,000/mo",appliedDate:"2025-01-22",lastUpdated:"2025-02-28",stage:"offer",nextAction:"Review and sign offer letter",nextActionDate:"2025-03-15",notes:"Negotiate remote work policy and equipment allowance",logo:"A",isBookmarked:true,recruiterName:"Jade Thompson",recruiterEmail:"jade.t@andela.com"},
-  {id:"5",jobTitle:"Electrician",company:"Kenya Power",location:"Kisumu, Kenya",jobType:"Corporate – Permanent",salary:"KES 65,000–80,000",appliedDate:"2025-01-15",lastUpdated:"2025-02-10",stage:"rejected",notes:"Lacked 5 years minimum experience. Re-apply in 2026.",logo:"K",isBookmarked:false},
-  {id:"6",jobTitle:"Photography – Event Coverage",company:"Fairmont Hotels",location:"Nairobi, Kenya",jobType:"Casual – Hourly",salary:"KES 3,000/hr",appliedDate:"2025-03-05",lastUpdated:"2025-03-09",stage:"screening",nextAction:"Phone screening call",nextActionDate:"2025-03-13",logo:"F",isBookmarked:true,recruiterName:"Grace Wambui",recruiterEmail:"g.wambui@fairmont.com"},
-  {id:"7",jobTitle:"Plumber – Residential",company:"HomeServe Kenya",location:"Nakuru, Kenya",jobType:"Casual – Daily",salary:"KES 2,000/day",appliedDate:"2025-02-25",lastUpdated:"2025-03-06",stage:"hired",notes:"Starts 17th March. Bring own basic tools.",logo:"H",isBookmarked:false,recruiterName:"Samuel Kiptoo",recruiterEmail:"s.kiptoo@homeserve.co.ke"},
-  {id:"8",jobTitle:"Marketing Manager",company:"Equity Bank",location:"Nairobi, Kenya",jobType:"Corporate – Permanent",salary:"KES 200,000–260,000",appliedDate:"2025-01-30",lastUpdated:"2025-02-20",stage:"withdrawn",notes:"Accepted a different offer before hearing back.",logo:"E",isBookmarked:false},
-];
+const ACTIVE_STAGES: Stage[] = ["applied","screening","interview","assessment","offer","hired"];
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 const fmtDate = (d:string) => new Date(d).toLocaleDateString("en-KE",{day:"2-digit",month:"short",year:"numeric"});
@@ -228,13 +218,57 @@ function DetailPanel({ app, onClose, onBookmark }: { app:Application; onClose:()
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function ApplicationsTracker() {
-  const [apps, setApps] = useState(MOCK);
-  const [selectedId, setSelectedId] = useState<string|null>("1");
+  const [apps, setApps] = useState<Application[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState<string|null>(null);
   const [search, setSearch] = useState("");
   const [filterStage, setFilterStage] = useState<Stage|"all">("all");
   const [filterType, setFilterType] = useState("all");
   const [sortBy, setSortBy] = useState<SortKey>("lastUpdated");
   const [page, setPage] = useState(1);
+
+  // ── Fetch from Supabase ──
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) { setLoading(false); return; }
+
+      const { data, error } = await supabase
+        .from("applications")
+        .select(`
+          id, job_title, company, location, job_type, salary,
+          applied_date, last_updated, stage, company_logo_letter,
+          is_bookmarked, next_action, next_action_date,
+          seeker_notes, recruiter_name, recruiter_email
+        `)
+        .eq("seeker_id", session.user.id)
+        .order("last_updated", { ascending: false });
+
+      if (!error && data) {
+        setApps(data.map((r: any): Application => ({
+          id:             r.id,
+          jobTitle:       r.job_title,
+          company:        r.company,
+          location:       r.location ?? "",
+          jobType:        r.job_type ?? "",
+          salary:         r.salary ?? "",
+          appliedDate:    r.applied_date,
+          lastUpdated:    r.last_updated,
+          stage:          r.stage as Stage,
+          logo:           r.company_logo_letter ?? (r.company?.[0] ?? "?"),
+          isBookmarked:   r.is_bookmarked ?? false,
+          nextAction:     r.next_action     ?? undefined,
+          nextActionDate: r.next_action_date ?? undefined,
+          notes:          r.seeker_notes     ?? undefined,
+          recruiterName:  r.recruiter_name   ?? undefined,
+          recruiterEmail: r.recruiter_email  ?? undefined,
+        })));
+        if (data.length > 0) setSelectedId(data[0].id);
+      }
+      setLoading(false);
+    })();
+  }, []);
 
   const q = search.toLowerCase();
   const filtered = useMemo(() => apps
@@ -249,8 +283,21 @@ export default function ApplicationsTracker() {
   const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const selected = apps.find(a=>a.id===selectedId)||null;
-  const toggleBookmark = (id:string) => setApps(p=>p.map(a=>a.id===id?{...a,isBookmarked:!a.isBookmarked}:a));
-  const withdraw = (id:string) => setApps(p=>p.map(a=>a.id===id?{...a,stage:"withdrawn" as Stage}:a));
+
+  // ── Persist bookmark toggle ──
+  const toggleBookmark = async (id: string) => {
+    const app = apps.find(a => a.id === id);
+    if (!app) return;
+    const next = !app.isBookmarked;
+    setApps(p => p.map(a => a.id === id ? { ...a, isBookmarked: next } : a));
+    await supabase.from("applications").update({ is_bookmarked: next }).eq("id", id);
+  };
+
+  // ── Persist withdraw ──
+  const withdraw = async (id: string) => {
+    setApps(p => p.map(a => a.id === id ? { ...a, stage: "withdrawn" as Stage } : a));
+    await supabase.from("applications").update({ stage: "withdrawn" }).eq("id", id);
+  };
 
   const stats = {
     active: apps.filter(a=>!["rejected","withdrawn","hired"].includes(a.stage)).length,
@@ -305,13 +352,23 @@ export default function ApplicationsTracker() {
       {/* Content */}
       <div style={{ flex:1, display:"grid", gridTemplateColumns:selected?"1fr 380px":"1fr", gap:16, padding:20, alignItems:"start" }}>
         <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-          {filtered.length===0
-            ? <div style={{ padding:48, textAlign:"center" as const, border:"1.5px dashed #E5E7EB", borderRadius:10, background:"#fff" }}><p style={{ margin:0, fontSize: 16, color:"#9CA3AF" }}>No applications match your filters.</p></div>
-            : paginated.map(app=><AppCard key={app.id} app={app} selected={selectedId===app.id} onSelect={()=>setSelectedId(p=>p===app.id?null:app.id)} onBookmark={()=>toggleBookmark(app.id)} onWithdraw={()=>withdraw(app.id)}/>)
-          }
-          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          {loading ? (
+            <div style={{ padding:48, textAlign:"center" as const, color:"#6B7280" }}>Loading applications…</div>
+          ) : apps.length === 0 ? (
+            <div style={{ padding:48, textAlign:"center" as const, border:"1.5px dashed #E5E7EB", borderRadius:10, background:"#fff" }}>
+              <p style={{ margin:0, fontSize: 16, color:"#111827", fontWeight: 600, marginBottom: 8 }}>No applications found.</p>
+              <p style={{ margin:0, fontSize: 14, color:"#6B7280" }}>Head over to Find Jobs to start applying.</p>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div style={{ padding:48, textAlign:"center" as const, border:"1.5px dashed #E5E7EB", borderRadius:10, background:"#fff" }}><p style={{ margin:0, fontSize: 16, color:"#9CA3AF" }}>No applications match your filters.</p></div>
+          ) : (
+            <>
+              {paginated.map(app=><AppCard key={app.id} app={app} selected={selectedId===app.id} onSelect={()=>setSelectedId(p=>p===app.id?null:app.id)} onBookmark={()=>toggleBookmark(app.id)} onWithdraw={()=>withdraw(app.id)}/>)}
+              <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            </>
+          )}
         </div>
-        {selected && (
+        {!loading && selected && (
           <div style={{ position:"sticky" as const, top:20, height:"calc(100vh - 175px)", overflow:"hidden" }}>
             <DetailPanel app={selected} onClose={()=>setSelectedId(null)} onBookmark={()=>toggleBookmark(selected.id)}/>
           </div>
