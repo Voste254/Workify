@@ -12,6 +12,21 @@ const Ico = {
   user: I('<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>', 64, "none")
 };
 
+// ── Validation helpers ───────────────────────────────────────────────────────
+const NAME_RE  = /^[a-zA-Z\s\-']+$/;   // letters, spaces, hyphens, apostrophes
+const PHONE_RE = /^[\d+\-\s().]*$/;    // digits, +, -, spaces, parentheses, dot
+
+function validateField(field: "firstName" | "lastName" | "phone", value: string): string {
+  if (!value) return "";
+  if ((field === "firstName" || field === "lastName") && !NAME_RE.test(value))
+    return "Name cannot contain numbers or special characters.";
+  if (field === "phone" && !PHONE_RE.test(value))
+    return "Phone number can only contain digits, +, -, spaces and parentheses.";
+  return "";
+}
+
+type ProfileErrors = { firstName: string; lastName: string; phone: string };
+
 export default function MyProfile() {
   const [editMode, setEditMode] = useState(false);
   const [profile, setProfile] = useState({
@@ -22,9 +37,12 @@ export default function MyProfile() {
     bio: "",
     profession: ""
   });
+  const [errors, setErrors] = useState<ProfileErrors>({ firstName: "", lastName: "", phone: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+
+  const hasErrors = Object.values(errors).some(Boolean);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -53,8 +71,23 @@ export default function MyProfile() {
     fetchProfile();
   }, []);
 
+  // Clears errors when leaving edit mode
+  const handleToggleEdit = () => {
+    setEditMode(prev => {
+      if (prev) setErrors({ firstName: "", lastName: "", phone: "" });
+      return !prev;
+    });
+  };
+
+  const handleFieldChange = (field: keyof typeof profile, value: string) => {
+    setProfile(prev => ({ ...prev, [field]: value }));
+    if (field === "firstName" || field === "lastName" || field === "phone") {
+      setErrors(prev => ({ ...prev, [field]: validateField(field as any, value) }));
+    }
+  };
+
   const handleSave = async () => {
-    if (!userId) return;
+    if (!userId || hasErrors) return;
     setSaving(true);
     const { error } = await supabase
       .from("profiles")
@@ -85,7 +118,7 @@ export default function MyProfile() {
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
         <h2 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: "#111827" }}>My Profile</h2>
-        <button onClick={() => setEditMode(!editMode)} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 16px", background: editMode ? "#F3F4F6" : "#fff", border: "1.5px solid #111827", color: "#111827", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer", transition: "all 0.1s" }}>
+        <button onClick={handleToggleEdit} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 16px", background: editMode ? "#F3F4F6" : "#fff", border: "1.5px solid #111827", color: "#111827", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer", transition: "all 0.1s" }}>
           {Ico.edit} {editMode ? "Cancel Editing" : "Edit Profile"}
         </button>
       </div>
@@ -136,33 +169,102 @@ export default function MyProfile() {
           <h3 style={{ margin: "0 0 24px", fontSize: 18, fontWeight: 700, color: "#111827", borderBottom: "1.5px solid #F3F4F6", paddingBottom: 16 }}>Personal Details</h3>
           
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+
+            {/* First Name */}
             <div>
               <label style={labelStyle}>First Name</label>
-              <input disabled={!editMode || loading} value={profile.firstName} onChange={e => setProfile({ ...profile, firstName: e.target.value })} style={inputStyle} />
+              <input
+                disabled={!editMode || loading}
+                value={profile.firstName}
+                onChange={e => handleFieldChange("firstName", e.target.value)}
+                style={{ ...inputStyle, borderColor: errors.firstName ? "#EF4444" : undefined }}
+                placeholder="e.g. Jane"
+              />
+              {errors.firstName && (
+                <p style={{ margin: "-12px 0 8px", fontSize: 12, color: "#EF4444", fontFamily: "'DM Sans',sans-serif" }}>
+                  ⚠ {errors.firstName}
+                </p>
+              )}
             </div>
+
+            {/* Last Name */}
             <div>
               <label style={labelStyle}>Last Name</label>
-              <input disabled={!editMode || loading} value={profile.lastName} onChange={e => setProfile({ ...profile, lastName: e.target.value })} style={inputStyle} />
+              <input
+                disabled={!editMode || loading}
+                value={profile.lastName}
+                onChange={e => handleFieldChange("lastName", e.target.value)}
+                style={{ ...inputStyle, borderColor: errors.lastName ? "#EF4444" : undefined }}
+                placeholder="e.g. Doe"
+              />
+              {errors.lastName && (
+                <p style={{ margin: "-12px 0 8px", fontSize: 12, color: "#EF4444", fontFamily: "'DM Sans',sans-serif" }}>
+                  ⚠ {errors.lastName}
+                </p>
+              )}
             </div>
+
+            {/* Phone */}
             <div>
-               <label style={labelStyle}>Phone Number</label>
-               <input disabled={!editMode || loading} value={profile.phone} onChange={e => setProfile({ ...profile, phone: e.target.value })} style={{ ...inputStyle, fontFamily: "'DM Mono',monospace" }} />
+              <label style={labelStyle}>Phone Number</label>
+              <input
+                disabled={!editMode || loading}
+                value={profile.phone}
+                onChange={e => handleFieldChange("phone", e.target.value)}
+                style={{ ...inputStyle, fontFamily: "'DM Mono',monospace", borderColor: errors.phone ? "#EF4444" : undefined }}
+                placeholder="e.g. +254 712 345 678"
+              />
+              {errors.phone && (
+                <p style={{ margin: "-12px 0 8px", fontSize: 12, color: "#EF4444", fontFamily: "'DM Sans',sans-serif" }}>
+                  ⚠ {errors.phone}
+                </p>
+              )}
             </div>
+
+            {/* Email (read-only) */}
             <div>
-               <label style={labelStyle}>Email Address (Read Only)</label>
-               <input disabled={true} value={profile.email} style={inputStyle} />
+              <label style={labelStyle}>Email Address (Read Only)</label>
+              <input disabled={true} value={profile.email} style={inputStyle} />
             </div>
+
+            {/* Bio */}
             <div style={{ gridColumn: "1 / -1" }}>
-               <label style={labelStyle}>Bio summary</label>
-               <textarea disabled={!editMode || loading} value={profile.bio} onChange={e => setProfile({ ...profile, bio: e.target.value })} style={{ ...inputStyle, minHeight: 80, resize: "vertical" }} />
+              <label style={labelStyle}>Bio summary</label>
+              <textarea
+                disabled={!editMode || loading}
+                value={profile.bio}
+                onChange={e => handleFieldChange("bio", e.target.value)}
+                style={{ ...inputStyle, minHeight: 80, resize: "vertical" }}
+              />
             </div>
           </div>
 
           {editMode && (
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
-              <button disabled={saving} onClick={handleSave} style={{ padding: "12px 24px", background: "#111827", color: "#fff", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", fontFamily: "'DM Sans',sans-serif" }}>
-                {saving ? "Saving..." : "Save Changes"}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, marginTop: 8 }}>
+              <button
+                disabled={saving || hasErrors}
+                onClick={handleSave}
+                style={{
+                  padding: "12px 24px",
+                  background: hasErrors ? "#9CA3AF" : "#111827",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: 700,
+                  cursor: saving || hasErrors ? "not-allowed" : "pointer",
+                  fontFamily: "'DM Sans',sans-serif",
+                  opacity: saving ? 0.7 : 1,
+                  transition: "background 0.2s",
+                }}
+              >
+                {saving ? "Saving…" : "Save Changes"}
               </button>
+              {hasErrors && (
+                <p style={{ margin: 0, fontSize: 12, color: "#EF4444", fontFamily: "'DM Sans',sans-serif" }}>
+                  ⚠ Fix the errors above before saving.
+                </p>
+              )}
             </div>
           )}
 
