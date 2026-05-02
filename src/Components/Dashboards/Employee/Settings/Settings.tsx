@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../../../lib/supabaseClient";
 import { useAuth } from "../../../../contexts/AuthContext";
+import { extendAccountRole } from "../../../../services/authService";
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 const I = (d: string, s = 14, fill = "none") => <svg width={s} height={s} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: d }} />;
@@ -13,6 +14,7 @@ const Ico = {
   eyeOff:  I('<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/>', 14),
   warning: I('<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>', 16),
   user:    I('<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>', 16),
+  rocket:  I('<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>', 16),
 };
 
 const labelStyle  = "block text-[13px] font-bold text-gray-700 mb-2 font-sans";
@@ -73,8 +75,10 @@ type NotifPrefs = Record<NotifKey, boolean>;
 const DEFAULT_NOTIF: NotifPrefs = { job_matches: true, application_updates: true, direct_messages: true };
 
 export default function JobSeekerSettings() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [activeTab, setActiveTab] = useState("Notifications");
+  
+  const isEmployer = (profile?.role ?? []).includes("employer");
 
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const showToast = (message: string, type: "success" | "error" = "success") => {
@@ -191,7 +195,39 @@ export default function JobSeekerSettings() {
     { id: "Notifications", label: "Notification Preferences", icon: Ico.bell },
     { id: "Security",      label: "Security & Password",      icon: Ico.lock },
     { id: "Account",       label: "Account & Privacy",        icon: Ico.user },
+    ...(!isEmployer ? [{ id: "Extend", label: "Extend Account", icon: Ico.rocket }] : []),
   ];
+
+  // ── Extend Account State ───────────────────────────────────────────────────
+  const [extendForm, setExtendForm] = useState({ company: "", industry: "", size: "", elocation: "" });
+  const [extending, setExtending] = useState(false);
+
+  const handleExtend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !profile) return;
+    if (!extendForm.company || !extendForm.industry || !extendForm.elocation) {
+      showToast("Please fill in all required fields.", "error");
+      return;
+    }
+    
+    setExtending(true);
+    const result = await extendAccountRole({
+      userId: user.id,
+      currentRoles: profile.role,
+      newRole: "employer",
+      form: extendForm
+    });
+
+    if (result.error) {
+      showToast(result.error, "error");
+      setExtending(false);
+    } else {
+      showToast("Account successfully extended!");
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    }
+  };
 
   return (
     <div className="font-sans bg-gray-50 min-h-screen flex flex-col">
@@ -359,6 +395,59 @@ export default function JobSeekerSettings() {
                 </button>
               </div>
             </>
+          )}
+
+          {/* Extend Account */}
+          {activeTab === "Extend" && (
+            <div className="bg-white border-[1.5px] border-gray-200 rounded-[10px] p-7">
+              <div className="flex items-start gap-4 mb-6 pb-6 border-b border-gray-200">
+                <div className="shrink-0 w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                  {Ico.rocket}
+                </div>
+                <div>
+                  <h3 className="m-0 mb-1 text-lg font-bold text-gray-900">Become an Employer</h3>
+                  <p className="m-0 text-[14px] text-gray-500 leading-relaxed max-w-[500px]">
+                    Ready to start hiring? Extend your account to post jobs, review applications, and manage candidates—all without creating a separate login.
+                  </p>
+                </div>
+              </div>
+              
+              <form onSubmit={handleExtend} className="flex flex-col gap-4 max-w-[480px]">
+                <div>
+                  <label className={labelStyle}>Company Name <span className="text-red-500">*</span></label>
+                  <input required value={extendForm.company} onChange={e => setExtendForm(p => ({...p, company: e.target.value}))} placeholder="e.g. Safaricom PLC" className={inputStyle} />
+                </div>
+                
+                <div>
+                  <label className={labelStyle}>Industry <span className="text-red-500">*</span></label>
+                  <select required value={extendForm.industry} onChange={e => setExtendForm(p => ({...p, industry: e.target.value}))} className={`${inputStyle} appearance-none`}>
+                    <option value="">Select industry</option>
+                    {["Technology","Finance & Banking","Telecommunications","Construction","Hospitality","Healthcare","Media & Creative","Logistics","Agriculture","Education","Other"].map(i => <option key={i}>{i}</option>)}
+                  </select>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelStyle}>Company Size</label>
+                    <select value={extendForm.size} onChange={e => setExtendForm(p => ({...p, size: e.target.value}))} className={`${inputStyle} appearance-none`}>
+                      <option value="">Select</option>
+                      {["1–10","11–50","51–200","201–1,000","1,000+"].map(s => <option key={s}>{s} employees</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={labelStyle}>Location <span className="text-red-500">*</span></label>
+                    <input required value={extendForm.elocation} onChange={e => setExtendForm(p => ({...p, elocation: e.target.value.replace(/\d/g, '')}))} placeholder="Nairobi, Kenya" className={inputStyle} />
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button type="submit" disabled={extending} className={`w-full px-6 py-3 bg-gray-900 text-white border-none rounded-lg text-sm font-bold font-sans transition-opacity ${extending ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:bg-gray-800"}`}>
+                    {extending ? "Extending Account…" : "Extend to Employer Dashboard →"}
+                  </button>
+                  <p className="text-center text-xs text-gray-400 mt-3 m-0">Your page will reload automatically upon success.</p>
+                </div>
+              </form>
+            </div>
           )}
         </div>
       </div>

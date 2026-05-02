@@ -118,3 +118,56 @@ export const logInUser = async (email: string, password: string) => {
 
   return { data, roles };
 };
+
+export const extendAccountRole = async ({
+  userId,
+  currentRoles,
+  newRole,
+  form,
+}: {
+  userId: string;
+  currentRoles: Role[];
+  newRole: Role;
+  form: Partial<SignupFormData>;
+}) => {
+  const updatedRoles = Array.from(new Set([...currentRoles, newRole]));
+
+  // Update profiles table with new role
+  const profileUpdate: any = {
+    id: userId,
+    role: updatedRoles,
+    updated_at: new Date().toISOString(),
+  };
+
+  // If extending to seeker, add seeker-specific details to profile
+  if (newRole === "seeker") {
+    if (form.profession) profileUpdate.profession = form.profession;
+    if (form.location) profileUpdate.seeker_location = form.location;
+    if (form.emptype) profileUpdate.employment_type_preference = form.emptype;
+    if (form.bio) profileUpdate.bio = form.bio;
+  }
+
+  const { error: profileError } = await supabase.from("profiles").upsert(profileUpdate, { onConflict: "id" });
+
+  if (profileError) {
+    return { error: `Failed to update profile roles: ${profileError.message}` };
+  }
+
+  // If extending to employer, we must create a company record
+  if (newRole === "employer" && form.company) {
+    const { error: companyError } = await supabase.from("companies").upsert({
+      owner_id: userId,
+      company_name: form.company || null,
+      industry: form.industry || null,
+      company_size: form.size || null,
+      company_location: form.elocation || null,
+    }, { onConflict: "owner_id" });
+
+    if (companyError) {
+      console.warn("Company row seed failed during extension:", companyError.message);
+      // Non-fatal, return success anyway but log it
+    }
+  }
+
+  return { success: true };
+};
