@@ -40,6 +40,27 @@ const lbl = {
   color: "#374151", marginBottom: 6, fontFamily: "'DM Sans',sans-serif",
 } as React.CSSProperties;
 
+const errStyle: React.CSSProperties = {
+  margin: "-12px 0 10px", fontSize: 12, color: "#EF4444",
+  fontFamily: "'DM Sans',sans-serif",
+};
+
+// ── Validation ─────────────────────────────────────────────────────────────────
+// Title & location: letters, spaces and common punctuation — no bare digits
+const TEXT_RE  = /^[^\d]*$/;          // no digits at all
+const RATE_RE  = /^\d*\.?\d*$/;       // digits and optional single decimal
+
+function validateServiceField(field: "title" | "location" | "skill" | "rate", value: string): string {
+  if (!value) return "";
+  if ((field === "title" || field === "location" || field === "skill") && !TEXT_RE.test(value))
+    return field === "skill"
+      ? "Skill name cannot contain numbers."
+      : `${field.charAt(0).toUpperCase() + field.slice(1)} cannot contain numbers.`;
+  if (field === "rate" && !RATE_RE.test(value))
+    return "Rate must be a number (e.g. 2500).";
+  return "";
+}
+
 // ── ServiceCard ────────────────────────────────────────────────────────────────
 function ServiceCard({
   service,
@@ -58,17 +79,43 @@ function ServiceCard({
 }) {
   const [expanded, setExpanded] = useState(defaultExpanded);
   const [newSkill, setNewSkill] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({ title: "", location: "", rate: "", skill: "" });
+
+  const hasErrors = Object.values(fieldErrors).some(Boolean);
+
+  const setErr = (f: keyof typeof fieldErrors, msg: string) =>
+    setFieldErrors(prev => ({ ...prev, [f]: msg }));
+
+  const handleTextChange = (field: "title" | "location") => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setErr(field, validateServiceField(field, val));
+    onUpdate(service.id, field, val);
+  };
+
+  const handleRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setErr("rate", validateServiceField("rate", val));
+    onUpdate(service.id, "rate", val);
+  };
+
+  const handleSkillChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setErr("skill", validateServiceField("skill", val));
+    setNewSkill(val);
+  };
 
   const currentSkills = service.skills || [];
   const currentAvail  = service.availability || [];
   const isNew         = service.id.startsWith("temp_");
 
   const addSkill = () => {
+    if (fieldErrors.skill) return;          // block if skill has error
     if (!newSkill.trim()) return;
     if (!currentSkills.includes(newSkill.trim())) {
       onUpdate(service.id, "skills", [...currentSkills, newSkill.trim()]);
     }
     setNewSkill("");
+    setErr("skill", "");
   };
 
   const removeSkill = (sk: string) =>
@@ -213,9 +260,10 @@ function ServiceCard({
         <input
           placeholder="e.g. Masonry, Data Entry, Delivery"
           value={service.title}
-          onChange={e => onUpdate(service.id, "title", e.target.value)}
-          style={inp}
+          onChange={handleTextChange("title")}
+          style={{ ...inp, borderColor: fieldErrors.title ? "#EF4444" : undefined }}
         />
+        {fieldErrors.title && <p style={errStyle}>⚠ {fieldErrors.title}</p>}
       </div>
 
       {/* Description */}
@@ -235,8 +283,8 @@ function ServiceCard({
             <input
               placeholder="e.g. 2500"
               value={service.rate || ""}
-              onChange={e => onUpdate(service.id, "rate", e.target.value)}
-              style={{ ...inp, fontFamily: "'DM Mono',monospace", flex: 1 }}
+              onChange={handleRateChange}
+              style={{ ...inp, fontFamily: "'DM Mono',monospace", flex: 1, borderColor: fieldErrors.rate ? "#EF4444" : undefined }}
             />
             <select
               value={service.rateType || "day"}
@@ -249,35 +297,39 @@ function ServiceCard({
               <option value="year">per year</option>
             </select>
           </div>
+          {fieldErrors.rate && <p style={errStyle}>⚠ {fieldErrors.rate}</p>}
         </div>
         <div>
           <label style={lbl}>Primary Location</label>
           <input
             placeholder="e.g. Nairobi, Kenya or Remote"
             value={service.location || ""}
-            onChange={e => onUpdate(service.id, "location", e.target.value)}
-            style={inp}
+            onChange={handleTextChange("location")}
+            style={{ ...inp, borderColor: fieldErrors.location ? "#EF4444" : undefined }}
           />
+          {fieldErrors.location && <p style={errStyle}>⚠ {fieldErrors.location}</p>}
         </div>
       </div>
 
       {/* Skills */}
       <label style={lbl}>Specific Skills</label>
-      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: fieldErrors.skill ? 4 : 12 }}>
         <input
           placeholder="Type a skill and press Add or Enter…"
           value={newSkill}
-          onChange={e => setNewSkill(e.target.value)}
+          onChange={handleSkillChange}
           onKeyDown={e => e.key === "Enter" && addSkill()}
-          style={{ ...inp, marginBottom: 0 }}
+          style={{ ...inp, marginBottom: 0, borderColor: fieldErrors.skill ? "#EF4444" : undefined }}
         />
         <button
           onClick={addSkill}
-          style={{ padding: "0 16px", background: "#111827", color: "#fff", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}
+          disabled={!!fieldErrors.skill}
+          style={{ padding: "0 16px", background: fieldErrors.skill ? "#9CA3AF" : "#111827", color: "#fff", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: fieldErrors.skill ? "not-allowed" : "pointer", fontFamily: "'DM Sans',sans-serif" }}
         >
           Add
         </button>
       </div>
+      {fieldErrors.skill && <p style={{ ...errStyle, marginBottom: 10 }}>⚠ {fieldErrors.skill}</p>}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
         {currentSkills.map((sk, i) => (
           <span key={i} style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 8px 4px 12px", background: "#E5E7EB", color: "#374151", fontSize: 13, borderRadius: 20, fontWeight: 600 }}>
@@ -315,26 +367,37 @@ function ServiceCard({
       </div>
 
       {/* Actions */}
-      <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 24, paddingTop: 16, borderTop: "1.5px solid #F3F4F6" }}>
-        {!isNew && (
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, marginTop: 24, paddingTop: 16, borderTop: "1.5px solid #F3F4F6" }}>
+        <div style={{ display: "flex", gap: 10 }}>
+          {!isNew && (
+            <button
+              onClick={() => setExpanded(false)}
+              style={{ padding: "10px 18px", background: "#fff", border: "1.5px solid #E5E7EB", color: "#374151", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}
+            >
+              Collapse
+            </button>
+          )}
           <button
-            onClick={() => setExpanded(false)}
-            style={{ padding: "10px 18px", background: "#fff", border: "1.5px solid #E5E7EB", color: "#374151", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}
+            disabled={saving || hasErrors}
+            onClick={() => { onSave(service.id); if (!isNew) setExpanded(false); }}
+            style={{
+              padding: "10px 20px",
+              background: hasErrors ? "#9CA3AF" : "#111827",
+              color: "#fff", border: "none",
+              borderRadius: 8, fontSize: 14, fontWeight: 700,
+              cursor: saving || hasErrors ? "not-allowed" : "pointer",
+              fontFamily: "'DM Sans',sans-serif", opacity: saving ? 0.7 : 1,
+              transition: "background 0.2s",
+            }}
           >
-            Collapse
+            {saving ? "Saving…" : "Save Service"}
           </button>
+        </div>
+        {hasErrors && (
+          <p style={{ margin: 0, fontSize: 12, color: "#EF4444", fontFamily: "'DM Sans',sans-serif" }}>
+            ⚠ Fix the errors above before saving.
+          </p>
         )}
-        <button
-          disabled={saving}
-          onClick={() => { onSave(service.id); if (!isNew) setExpanded(false); }}
-          style={{
-            padding: "10px 20px", background: "#111827", color: "#fff", border: "none",
-            borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer",
-            fontFamily: "'DM Sans',sans-serif", opacity: saving ? 0.7 : 1,
-          }}
-        >
-          {saving ? "Saving…" : "Save Service"}
-        </button>
       </div>
     </div>
   );
