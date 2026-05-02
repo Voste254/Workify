@@ -55,7 +55,12 @@ const daysAgo = (dateStr: string) => {
 //   new Date(dateStr).toLocaleDateString("en-KE", { day: "2-digit", month: "long", year: "numeric" });
 
 // ── Job Detail View ─────────────────────────────────────────────────────────────
-function JobDetailView({ job, onBack }: { job: Job; onBack: () => void }) {
+function JobDetailView({
+  job, onBack, onApply, applying, alreadyApplied,
+}: {
+  job: Job; onBack: () => void;
+  onApply: () => void; applying: boolean; alreadyApplied: boolean;
+}) {
   return (
     <div className="bg-white border-[1.5px] border-gray-200 mt-6 mx-auto mb-10 max-w-4xl shadow-sm">
       {/* Header */}
@@ -72,10 +77,21 @@ function JobDetailView({ job, onBack }: { job: Job; onBack: () => void }) {
             <p className="text-base text-gray-500 mt-1">{job.company_name}</p>
           </div>
         </div>
-        <div className="text-right">
-          <button className="h-11 px-8 bg-gray-900 text-white text-sm font-semibold hover:bg-gray-700 transition-colors shadow-md">
-            Apply Now
+        <div className="text-right flex flex-col items-end gap-2">
+          <button
+            onClick={onApply}
+            disabled={applying || alreadyApplied}
+            className={`h-11 px-8 text-sm font-semibold transition-colors shadow-md ${
+              alreadyApplied
+                ? 'bg-emerald-600 text-white cursor-default'
+                : applying
+                ? 'bg-gray-400 text-white cursor-not-allowed'
+                : 'bg-gray-900 text-white hover:bg-gray-700'
+            }`}
+          >
+            {alreadyApplied ? '✓ Applied' : applying ? 'Applying…' : 'Apply Now'}
           </button>
+          {alreadyApplied && <p className="text-xs text-emerald-600 font-medium">You have already applied for this job.</p>}
         </div>
       </div>
 
@@ -176,11 +192,22 @@ export default function FindJobsPage() {
 
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All Categories");
-  const [jobType, setJobType] = useState("All");       // "All" | "Corporate" | "Manual/Casual"
+  const [jobType, setJobType] = useState("All");
   const [contract, setContract] = useState("All");
   const [location, setLocation] = useState("All Locations");
   const [sort, setSort] = useState<typeof SORT_OPTIONS[number]>("Newest");
   const [page, setPage] = useState(1);
+
+  // ── Apply flow ──
+  const [appliedJobIds,  setAppliedJobIds]  = useState<Set<string>>(new Set());
+  const [applying,       setApplying]       = useState(false);
+  const [applyToast,     setApplyToast]     = useState<{ msg: string; ok: boolean } | null>(null);
+  const [seekerProfile,  setSeekerProfile]  = useState({ name: "", phone: "", location: "" });
+
+  const showApplyToast = (msg: string, ok: boolean) => {
+    setApplyToast({ msg, ok });
+    setTimeout(() => setApplyToast(null), 4000);
+  };
 
   // ── Fetch active jobs from Supabase ──
   const fetchJobs = async () => {
@@ -249,6 +276,60 @@ export default function FindJobsPage() {
   };
 
   useEffect(() => { fetchJobs(); }, [user?.id]);
+
+  // ── Fetch seeker profile + already-applied job IDs ──
+  useEffect(() => {
+    if (!user?.id) return;
+    (async () => {
+      const [{ data: prof }, { data: apps }] = await Promise.all([
+        supabase.from("profiles").select("first_name,last_name,phone,seeker_location").eq("id", user.id).single(),
+        supabase.from("applications").select("job_id").eq("seeker_id", user.id).not("job_id", "is", null),
+      ]);
+      if (prof) setSeekerProfile({
+        name: `${prof.first_name || ""} ${prof.last_name || ""}`.trim(),
+        phone: prof.phone || "",
+        location: prof.seeker_location || "",
+      });
+      if (apps) setAppliedJobIds(new Set(apps.map((a: any) => a.job_id).filter(Boolean)));
+    })();
+  }, [user?.id]);
+
+  // ── Submit application ──
+  const handleApply = async (job: Job) => {
+    if (!user?.id) { showApplyToast("Please sign in to apply.", false); return; }
+    if (appliedJobIds.has(job.id)) { showApplyToast("You have already applied for this job.", false); return; }
+
+    setApplying(true);
+    const validCats = new Set(["Corporate", "Casual", ...CATEGORIES]);
+    const jobCategory = validCats.has(job.category)
+      ? job.category
+      : isCasual(job.job_type) ? "Casual" : "Corporate";
+
+    const { error: insertErr } = await supabase.from("applications").insert({
+      seeker_id:           user.id,
+      employer_id:         job.employer_id,
+      job_id:              job.id,
+      applicant_name:      seekerProfile.name     || null,
+      applicant_phone:     seekerProfile.phone    || null,
+      applicant_location:  seekerProfile.location || null,
+      job_title:           job.title,
+      company:             job.company_name ?? "Unknown Company",
+      location:            job.location,
+      job_category:        jobCategory,
+      job_type:            job.job_type,
+      salary:              job.salary_rate,
+      company_logo_letter: (job.company_name ?? "U").charAt(0).toUpperCase(),
+      stage:               "applied",
+    });
+    setApplying(false);
+
+    if (insertErr) {
+      showApplyToast("Failed to submit: " + insertErr.message, false);
+    } else {
+      setAppliedJobIds(prev => new Set(prev).add(job.id));
+      showApplyToast("Application submitted successfully! 🎉", true);
+    }
+  };
 
   // ── Dynamic location list from fetched data ──
   const locationOptions = useMemo(() => {
@@ -407,7 +488,13 @@ export default function FindJobsPage() {
         )}
 
         {selectedJob ? (
-          <JobDetailView job={selectedJob} onBack={() => setSelectedJob(null)} />
+          <JobDetailView
+            job={selectedJob}
+            onBack={() => setSelectedJob(null)}
+            onApply={() => handleApply(selectedJob)}
+            applying={applying}
+            alreadyApplied={appliedJobIds.has(selectedJob.id)}
+          />
         ) : (
           loading ? (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "16px" }}>
@@ -447,6 +534,15 @@ export default function FindJobsPage() {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
+
+      {/* Apply toast */}
+      {applyToast && (
+        <div className={`fixed bottom-6 right-6 z-[9999] flex items-center gap-2.5 px-5 py-3.5 rounded-xl shadow-2xl text-sm font-semibold ${
+          applyToast.ok ? "bg-gray-900 text-white" : "bg-red-500 text-white"
+        }`}>
+          {applyToast.msg}
+        </div>
+      )}
     </div>
   );
 }
