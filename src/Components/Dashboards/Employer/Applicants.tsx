@@ -1,7 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { supabase } from "../../../lib/supabaseClient";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // ── Types & Config ─────────────────────────────────────────────────────────────
-type Stage = "applied" | "screening" | "interview" | "offer" | "hired" | "rejected";
+type Stage = "applied" | "screening" | "interview" | "assessment" | "offer" | "hired" | "rejected" | "withdrawn" | string;
 
 interface StageHistoryEntry {
   from_stage: Stage | null;
@@ -17,39 +19,19 @@ interface Application {
   stageHistory: StageHistoryEntry[];
 }
 
-const SC: Record<Stage, { label: string; textClass: string; bgClass: string; step: number }> = {
+const SC: Record<string, { label: string; textClass: string; bgClass: string; step: number }> = {
   applied: { label: "Applied", textClass: "text-gray-500", bgClass: "bg-gray-100", step: 1 },
   screening: { label: "Screening", textClass: "text-amber-600", bgClass: "bg-amber-50", step: 2 },
   interview: { label: "Interview", textClass: "text-blue-600", bgClass: "bg-blue-100", step: 3 },
+  assessment: { label: "Assessment", textClass: "text-indigo-600", bgClass: "bg-indigo-100", step: 3.5 },
   offer: { label: "Offer", textClass: "text-purple-600", bgClass: "bg-purple-100", step: 4 },
   hired: { label: "Hired", textClass: "text-emerald-600", bgClass: "bg-emerald-100", step: 5 },
   rejected: { label: "Rejected", textClass: "text-white", bgClass: "bg-red-600", step: 0 },
+  withdrawn: { label: "Withdrawn", textClass: "text-gray-500", bgClass: "bg-gray-200", step: 0 },
 };
 
 const STAGES_FLOW: Stage[] = ["applied", "screening", "interview", "offer", "hired"];
-// TODO : 
-const MOCK_APPS: Application[] = [
-  {
-    id: "1", applicantName: "John Omondi", jobTitle: "Construction Foreman", jobCategory: "Casual", appliedDate: "2025-03-20", lastUpdated: "2025-03-22", stage: "screening", avatar: "https://i.pravatar.cc/150?img=11", phone: "0712 345 678", location: "Nairobi, Kenya", note: "Has 5 years site experience in Westlands.", rateRequest: "KES 2,500/day",
-    stageHistory: [{ from_stage: null, to_stage: "applied", employer_note: "Application received.", changed_at: "2025-03-20" }, { from_stage: "applied", to_stage: "screening", employer_note: "CV looks strong — moved to screening.", changed_at: "2025-03-22" }]
-  },
-  {
-    id: "2", applicantName: "Sarah Wanjiku", jobTitle: "Senior DevOps Engineer", jobCategory: "Corporate", appliedDate: "2025-03-15", lastUpdated: "2025-03-21", stage: "interview", avatar: "https://i.pravatar.cc/150?img=5", phone: "0723 456 789", location: "Remote", note: "Scheduled for technical round on Friday.", rateRequest: "KES 250,000/mo",
-    stageHistory: [{ from_stage: null, to_stage: "applied", employer_note: "Application received.", changed_at: "2025-03-15" }, { from_stage: "applied", to_stage: "screening", employer_note: "Passed initial CV review.", changed_at: "2025-03-18" }, { from_stage: "screening", to_stage: "interview", employer_note: "Screening call went well. Technical interview scheduled for Friday.", changed_at: "2025-03-21" }]
-  },
-  {
-    id: "3", applicantName: "Brian Mutisya", jobTitle: "Electrician", jobCategory: "Casual", appliedDate: "2025-03-21", lastUpdated: "2025-03-21", stage: "applied", avatar: "https://i.pravatar.cc/150?img=12", phone: "0734 567 890", location: "Mombasa, Kenya", rateRequest: "KES 1,800/day",
-    stageHistory: [{ from_stage: null, to_stage: "applied", employer_note: "Application received.", changed_at: "2025-03-21" }]
-  },
-  {
-    id: "4", applicantName: "Mercy Kiprotich", jobTitle: "Marketing Manager", jobCategory: "Corporate", appliedDate: "2025-03-10", lastUpdated: "2025-03-18", stage: "offer", avatar: "https://i.pravatar.cc/150?img=9", phone: "0745 678 901", location: "Nairobi, Kenya", note: "Negotiating final bonus structure.", rateRequest: "KES 180,000/mo",
-    stageHistory: [{ from_stage: null, to_stage: "applied", employer_note: "Application received.", changed_at: "2025-03-10" }, { from_stage: "applied", to_stage: "offer", employer_note: "Outstanding interviews. Extending an offer — please review the attached terms.", changed_at: "2025-03-18" }]
-  },
-  {
-    id: "5", applicantName: "Peter Kamau", jobTitle: "Plumber", jobCategory: "Casual", appliedDate: "2025-03-16", lastUpdated: "2025-03-17", stage: "rejected", avatar: "https://i.pravatar.cc/150?img=14", phone: "0700 111 222", location: "Nakuru, Kenya", note: "Did not have the necessary pipe-threading tools.", rateRequest: "KES 1,500/day",
-    stageHistory: [{ from_stage: null, to_stage: "applied", employer_note: "Application received.", changed_at: "2025-03-16" }, { from_stage: "applied", to_stage: "rejected", employer_note: "Unfortunately you did not meet the minimum tool requirements for this role. We encourage you to re-apply in 2026.", changed_at: "2025-03-17" }]
-  },
-];
+// MOCK_APPS removed as we're fetching from DB
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -75,8 +57,8 @@ const sectionLabel = "m-[0_0_8px] text-[13px] font-bold uppercase tracking-[0.1e
 
 // ── Progress Bar ───────────────────────────────────────────────────────────────
 function StageBar({ stage }: { stage: Stage }) {
-  const cfg = SC[stage];
-  if (stage === "rejected") return (
+  const cfg = SC[stage] || { label: stage, textClass: "text-gray-500", bgClass: "bg-gray-200", step: 0 };
+  if (stage === "rejected" || stage === "withdrawn") return (
     <span className={`text-[13px] font-semibold tracking-[0.06em] uppercase px-2.5 py-[3px] rounded-[3px] ${cfg.textClass} ${cfg.bgClass}`}>{cfg.label}</span>
   );
   return (
@@ -92,7 +74,7 @@ function StageBar({ stage }: { stage: Stage }) {
 
 // ── Detail Panel ───────────────────────────────────────────────────────────────
 function DetailPanel({ app, onClose, onAdvance, onReject }: { app: Application; onClose: () => void; onAdvance: (note: string) => void; onReject: (note: string) => void }) {
-  const cfg = SC[app.stage];
+  const cfg = SC[app.stage] || { label: app.stage, textClass: "text-gray-500", bgClass: "bg-gray-200", step: 0 };
   const activeIdx = STAGES_FLOW.indexOf(app.stage);
   const nextStage = activeIdx >= 0 && activeIdx < STAGES_FLOW.length - 1 ? STAGES_FLOW[activeIdx + 1] : null;
   const [managerNote, setManagerNote] = useState("");
@@ -220,11 +202,46 @@ function DetailPanel({ app, onClose, onAdvance, onReject }: { app: Application; 
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function Applicants() {
-  const [apps, setApps] = useState<Application[]>(MOCK_APPS);
-  const [selectedId, setSelectedId] = useState<string | null>("1");
+  const { user } = useAuth();
+  const [apps, setApps] = useState<Application[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [filterStage, setFilterStage] = useState<Stage | "all">("all");
   const [filterType, setFilterType] = useState("all");
+
+  useEffect(() => {
+    async function fetchApplicants() {
+      if (!user?.id) return;
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("applications")
+        .select("*")
+        .eq("employer_id", user.id);
+
+      if (!error && data) {
+        const mapped: Application[] = data.map(app => ({
+          id: app.id,
+          applicantName: app.applicant_name || "Unknown Applicant",
+          jobTitle: app.job_title || "Unknown Job",
+          jobCategory: app.job_category || "Corporate",
+          appliedDate: app.applied_date || new Date().toISOString(),
+          lastUpdated: app.last_updated || new Date().toISOString(),
+          stage: app.stage as Stage,
+          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(app.applicant_name || "A")}&background=random`,
+          phone: app.applicant_phone || "Not provided",
+          location: app.applicant_location || "Not specified",
+          note: app.employer_notes || "",
+          rateRequest: app.salary || "Not specified",
+          stageHistory: app.stage_history || []
+        }));
+        setApps(mapped);
+        if (mapped.length > 0) setSelectedId(mapped[0].id);
+      }
+      setLoading(false);
+    }
+    fetchApplicants();
+  }, [user?.id]);
 
   const q = search.toLowerCase();
   const filtered = useMemo(() => apps.filter(a =>
@@ -235,7 +252,16 @@ export default function Applicants() {
 
   const selected = apps.find(a => a.id === selectedId) || null;
 
-  const handleAdvance = (note: string) => {
+  const updateApplicationDb = async (appId: string, newStage: Stage, newHistory: StageHistoryEntry[], note: string) => {
+    await supabase.from("applications").update({
+      stage: newStage,
+      last_updated: new Date().toISOString(),
+      stage_history: newHistory,
+      employer_notes: note
+    }).eq("id", appId);
+  };
+
+  const handleAdvance = async (note: string) => {
     if (!selected) return;
     const currIdx = STAGES_FLOW.indexOf(selected.stage);
     if (currIdx >= 0 && currIdx < STAGES_FLOW.length - 1) {
@@ -246,14 +272,16 @@ export default function Applicants() {
         employer_note: note,
         changed_at: new Date().toISOString().split("T")[0],
       };
+      const newHistory = [...selected.stageHistory, historyEntry];
       setApps(prev => prev.map(a => a.id === selectedId
-        ? { ...a, stage: nextStatus, stageHistory: [...a.stageHistory, historyEntry] }
+        ? { ...a, stage: nextStatus, stageHistory: newHistory, lastUpdated: new Date().toISOString() }
         : a
       ));
+      await updateApplicationDb(selected.id, nextStatus, newHistory, note);
     }
   };
 
-  const handleReject = (note: string) => {
+  const handleReject = async (note: string) => {
     if (!selected) return;
     const historyEntry: StageHistoryEntry = {
       from_stage: selected.stage,
@@ -261,10 +289,12 @@ export default function Applicants() {
       employer_note: note,
       changed_at: new Date().toISOString().split("T")[0],
     };
+    const newHistory = [...selected.stageHistory, historyEntry];
     setApps(prev => prev.map(a => a.id === selectedId
-      ? { ...a, stage: "rejected", stageHistory: [...a.stageHistory, historyEntry] }
+      ? { ...a, stage: "rejected", stageHistory: newHistory, lastUpdated: new Date().toISOString() }
       : a
     ));
+    await updateApplicationDb(selected.id, "rejected", newHistory, note);
   };
 
   return (
@@ -286,7 +316,7 @@ export default function Applicants() {
         </div>
         <select value={filterStage} onChange={e => setFilterStage(e.target.value as Stage | "all")} className={sel}>
           <option value="all">All Stages</option>
-          {(Object.keys(SC) as Stage[]).map(s => <option key={s} value={s}>{SC[s].label}</option>)}
+          {Object.keys(SC).map(s => <option key={s} value={s}>{SC[s].label}</option>)}
         </select>
         <select value={filterType} onChange={e => setFilterType(e.target.value)} className={sel}>
           <option value="all">Corporate & Casual</option>
@@ -299,7 +329,9 @@ export default function Applicants() {
       {/* Content */}
       <div className={`flex-1 grid gap-4 p-5 items-start ${selected ? "grid-cols-[1fr_380px]" : "grid-cols-1"}`}>
         <div className="flex flex-col gap-2.5">
-          {filtered.length === 0
+          {loading 
+            ? <div className="p-12 text-center border-[1.5px] border-dashed border-gray-200 rounded-[10px] bg-white"><p className="m-0 text-base text-gray-400">Loading applications...</p></div>
+            : filtered.length === 0
             ? <div className="p-12 text-center border-[1.5px] border-dashed border-gray-200 rounded-[10px] bg-white"><p className="m-0 text-base text-gray-400">No applications match your filters.</p></div>
             : filtered.map(app => (
               <div key={app.id} onClick={() => setSelectedId(p => p === app.id ? null : app.id)} className={`bg-white border-[1.5px] rounded-lg px-[18px] py-4 cursor-pointer transition-colors duration-150 ${selectedId === app.id ? "border-gray-900" : "border-gray-200"} ${app.stage === "rejected" ? "opacity-70" : "opacity-100"}`}>
@@ -309,7 +341,7 @@ export default function Applicants() {
                     <p className="m-0 text-base font-semibold text-gray-900">{app.applicantName}</p>
                     <p className="m-[2px_0_0] text-sm text-gray-500">{app.jobTitle}</p>
                     <div className="flex gap-2.5 mt-2">
-                      <span className="flex items-center gap-[3px] text-[13px] text-gray-400">{Ico.pin} {app.location}</span>
+                       <span className="flex items-center gap-[3px] text-[13px] text-gray-400">{Ico.pin} {app.location}</span>
                       <span className="flex items-center gap-1 text-[13px] text-gray-500 px-[7px] py-[2px] bg-gray-100 rounded-[3px] font-medium">
                         {app.jobCategory === "Corporate" ? Ico.briefcase : Ico.tool} {app.jobCategory}
                       </span>
