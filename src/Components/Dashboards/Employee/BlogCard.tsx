@@ -21,11 +21,12 @@ const BlogCard = ({
   avatar,
   date,
   readTime,
-}: BlogCardProps) => {
+  onClick,
+}: BlogCardProps & { onClick?: () => void }) => {
   const [saved, setSaved] = useState(false);
 
   return (
-    <div className="border rounded-xl overflow-hidden bg-white">
+    <div className="border rounded-xl overflow-hidden bg-white cursor-pointer hover:shadow-md transition" onClick={onClick}>
 
       {/* Image Section */}
       <div className="relative">
