@@ -483,20 +483,21 @@ export default function FindJobsPage() {
   };
 
   // ── Save Job ──
-  const toggleSaveJob = async (jobId: string, employerId: string) => {
+  const toggleSaveJob = async (jobId: string) => {
     if (!user?.id) { showApplyToast("Please sign in to save jobs.", false); return; }
     
     const isSaved = savedJobIds.has(jobId);
     if (isSaved) {
       setSavedJobIds(prev => { const n = new Set(prev); n.delete(jobId); return n; });
-      await supabase.from("saved_items").delete().eq("user_id", user.id).eq("job_id", jobId);
+      const { error } = await supabase.from("saved_items").delete().eq("user_id", user.id).eq("job_id", jobId);
+      if (error) console.error("Error unsaving job:", error);
     } else {
       setSavedJobIds(prev => new Set(prev).add(jobId));
-      await supabase.from("saved_items").insert({
+      const { error } = await supabase.from("saved_items").insert({
         user_id: user.id,
-        job_id: jobId,
-        employer_id: employerId
+        job_id: jobId
       });
+      if (error) console.error("Error saving job:", error);
     }
   };
 
@@ -702,7 +703,7 @@ export default function FindJobsPage() {
                     daysAgo={daysAgo(job.created_at)}
                     onView={() => setSelectedJob(job)}
                     saved={savedJobIds.has(job.id)}
-                    onToggleSave={() => toggleSaveJob(job.id, job.employer_id)}
+                    onToggleSave={() => toggleSaveJob(job.id)}
                   />
                 ))}
               </div>

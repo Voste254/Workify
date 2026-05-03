@@ -51,8 +51,9 @@ const Card = ({ children, className = "" }: { children: React.ReactNode; classNa
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 export default function Dashboard({ setActivePage }: { setActivePage: (page: string) => void }) {
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const [recommendedJobs, setRecommendedJobs] = useState<any[]>([]);
+  const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
   const [loadingJobs, setLoadingJobs] = useState(true);
 
   const firstName = profile?.first_name;
@@ -62,6 +63,17 @@ export default function Dashboard({ setActivePage }: { setActivePage: (page: str
   useEffect(() => {
     async function fetchRecommendedJobs() {
       setLoadingJobs(true);
+      
+      // Fetch saved jobs for the user
+      if (user?.id) {
+        const { data: savedItems } = await supabase
+          .from("saved_items")
+          .select("job_id")
+          .eq("user_id", user.id)
+          .not("job_id", "is", null);
+        if (savedItems) setSavedJobIds(new Set(savedItems.map(s => s.job_id).filter(Boolean)));
+      }
+
       const { data } = await supabase
         .from("jobs")
         .select(`id, title, location, salary_rate, job_type, created_at, employer_id`)
@@ -97,7 +109,21 @@ export default function Dashboard({ setActivePage }: { setActivePage: (page: str
       setLoadingJobs(false);
     }
     fetchRecommendedJobs();
-  }, []);
+  }, [user?.id]);
+
+  const toggleSaveJob = async (jobId: string) => {
+    if (!user?.id) return;
+    const isSaved = savedJobIds.has(jobId);
+    if (isSaved) {
+      setSavedJobIds(prev => { const n = new Set(prev); n.delete(jobId); return n; });
+      const { error } = await supabase.from("saved_items").delete().eq("user_id", user.id).eq("job_id", jobId);
+      if (error) console.error("Error unsaving job from dashboard:", error);
+    } else {
+      setSavedJobIds(prev => new Set(prev).add(jobId));
+      const { error } = await supabase.from("saved_items").insert({ user_id: user.id, job_id: jobId });
+      if (error) console.error("Error saving job from dashboard:", error);
+    }
+  };
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -238,6 +264,8 @@ export default function Dashboard({ setActivePage }: { setActivePage: (page: str
                   type={job.type} 
                   daysAgo={job.daysAgo} 
                   onView={() => setActivePage("jobs")} 
+                  saved={savedJobIds.has(job.id)}
+                  onToggleSave={() => toggleSaveJob(job.id)}
                 />
               ))}
             </div>
