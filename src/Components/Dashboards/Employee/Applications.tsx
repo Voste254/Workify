@@ -14,6 +14,7 @@ interface Application {
   stage: Stage; logo: string; isBookmarked: boolean;
   nextAction?: string; nextActionDate?: string; notes?: string;
   recruiterName?: string; recruiterEmail?: string;
+  employerFeedback?: string;
 }
 
 const SC: Record<Stage,{label:string;color:string;bg:string;step:number}> = {
@@ -198,11 +199,19 @@ function DetailPanel({ app, onClose, onBookmark }: { app:Application; onClose:()
           </div>
         </>}
 
-        {/* Notes */}
+        {/* My Notes */}
         {app.notes && <>
-          <p style={sectionLabel}>Notes</p>
+          <p style={sectionLabel}>My Notes</p>
           <div style={{ padding:"12px 14px", borderRadius:6, background:"#FFFBEB", border:"1px solid #FDE68A", marginBottom:20 }}>
             <p style={{ margin:0, fontSize: 14, color:"#78350F", lineHeight:1.6 }}>{app.notes}</p>
+          </div>
+        </>}
+
+        {/* Employer Feedback */}
+        {app.employerFeedback && <>
+          <p style={sectionLabel}>Employer Feedback</p>
+          <div style={{ padding:"12px 14px", borderRadius:6, background:"#F0FDF4", border:"1px solid #BBF7D0", marginBottom:20 }}>
+            <p style={{ margin:0, fontSize: 14, color:"#14532D", lineHeight:1.6 }}>{app.employerFeedback}</p>
           </div>
         </>}
 
@@ -245,7 +254,8 @@ export default function ApplicationsTracker() {
           id, job_title, company, location, job_type, salary,
           applied_date, last_updated, stage, company_logo_letter,
           is_bookmarked, next_action, next_action_date,
-          seeker_notes, recruiter_name, recruiter_email
+          seeker_notes, recruiter_name, recruiter_email,
+          latest_employer_note
         `)
         .eq("seeker_id", session.user.id)
         .order("last_updated", { ascending: false });
@@ -268,6 +278,7 @@ export default function ApplicationsTracker() {
           notes:          r.seeker_notes     ?? undefined,
           recruiterName:  r.recruiter_name   ?? undefined,
           recruiterEmail: r.recruiter_email  ?? undefined,
+          employerFeedback: r.latest_employer_note ?? undefined,
         })));
         if (data.length > 0) setSelectedId(data[0].id);
       }

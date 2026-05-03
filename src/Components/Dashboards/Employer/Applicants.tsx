@@ -231,8 +231,8 @@ export default function Applicants() {
           avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(app.applicant_name || "A")}&background=random`,
           phone: app.applicant_phone || "Not provided",
           location: app.applicant_location || "Not specified",
-          note: app.employer_notes || "",
-          rateRequest: app.salary || "Not specified",
+          note: app.latest_employer_note || "",
+          rateRequest: app.rate_request || app.salary || "Not specified",
           stageHistory: app.stage_history || []
         }));
         setApps(mapped);
@@ -252,11 +252,12 @@ export default function Applicants() {
 
   const selected = apps.find(a => a.id === selectedId) || null;
 
-  const updateApplicationDb = async (appId: string, newStage: Stage, note: string) => {
+  const updateApplicationDb = async (appId: string, newStage: Stage, newHistory: StageHistoryEntry[], note: string) => {
     const { error } = await supabase.from("applications").update({
       stage: newStage,
       last_updated: new Date().toISOString(),
-      employer_notes: note
+      stage_history: newHistory,
+      latest_employer_note: note
     }).eq("id", appId);
     
     if (error) {
@@ -280,7 +281,7 @@ export default function Applicants() {
         ? { ...a, stage: nextStatus, stageHistory: newHistory, lastUpdated: new Date().toISOString() }
         : a
       ));
-      await updateApplicationDb(selected.id, nextStatus, note);
+      await updateApplicationDb(selected.id, nextStatus, newHistory, note);
     }
   };
 
@@ -297,7 +298,7 @@ export default function Applicants() {
       ? { ...a, stage: "rejected", stageHistory: newHistory, lastUpdated: new Date().toISOString() }
       : a
     ));
-    await updateApplicationDb(selected.id, "rejected", note);
+    await updateApplicationDb(selected.id, "rejected", newHistory, note);
   };
 
   return (
