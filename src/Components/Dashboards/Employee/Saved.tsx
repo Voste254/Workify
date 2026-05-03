@@ -1,28 +1,18 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Pagination from "./Pagination";
+import { supabase } from "../../../lib/supabaseClient";
+import { useAuth } from "../../../contexts/AuthContext";
 
 const PAGE_SIZE = 9;
 
 interface SavedJob {
-  id: string; title: string; company: string; location: string;
+  id: string; savedItemId: string; title: string; company: string; location: string;
   salary: string; jobType: string; savedDaysAgo: number; logo: string; tags: string[];
 }
 interface SavedEmployer {
-  id: string; name: string; industry: string; location: string;
+  id: string; savedItemId: string; name: string; industry: string; location: string;
   rating: number; openRoles: number; size: string; logo: string;
 }
-
-const JOBS: SavedJob[] = [
-  { id:"1", title:"Frontend Developer", company:"TechCorp Kenya", location:"Nairobi, Kenya", salary:"KES 180,000–220,000", jobType:"Corporate – Permanent", savedDaysAgo:2, logo:"T", tags:["React","TypeScript","Tailwind"] },
-  { id:"2", title:"Data Analyst", company:"KCB Group", location:"Nairobi, Kenya", salary:"KES 150,000–200,000", jobType:"Corporate – Contract", savedDaysAgo:5, logo:"K", tags:["SQL","Python","Power BI"] },
-  { id:"3", title:"Graphic Designer", company:"Nation Media Group", location:"Nairobi, Kenya", salary:"KES 85,000–110,000", jobType:"Corporate – Contract", savedDaysAgo:1, logo:"N", tags:["Figma","Adobe XD","Illustrator"] },
-  { id:"4", title:"Electrician – Site Work", company:"PowerGrid Kenya", location:"Kisumu, Kenya", salary:"KES 2,800/day", jobType:"Casual – Daily", savedDaysAgo:3, logo:"P", tags:["Wiring","Industrial","Safety"] },
-];
-const EMPLOYERS: SavedEmployer[] = [
-  { id:"1", name:"Safaricom PLC", industry:"Telecommunications", location:"Nairobi, Kenya", rating:4.7, openRoles:12, size:"5,000+ employees", logo:"S" },
-  { id:"2", name:"Africa Fintech", industry:"Financial Technology", location:"Lagos, Nigeria", rating:4.5, openRoles:6, size:"200–500 employees", logo:"A" },
-  { id:"3", name:"Andela", industry:"Technology Staffing", location:"Remote / Pan-Africa", rating:4.8, openRoles:34, size:"1,000–5,000 employees", logo:"A" },
-];
 
 // ── Shared styles ──────────────────────────────────────────────────────────────
 const S = {
@@ -134,12 +124,118 @@ function EmployerCard({ employer, onUnsave }: { employer:SavedEmployer; onUnsave
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function SavedPage() {
-  const [jobs, setJobs] = useState(JOBS);
-  const [employers, setEmployers] = useState(EMPLOYERS);
+  const { user } = useAuth();
+  const [jobs, setJobs] = useState<SavedJob[]>([]);
+  const [employers, setEmployers] = useState<SavedEmployer[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<"jobs"|"employers">("jobs");
   const [jobPage, setJobPage] = useState(1);
   const [empPage, setEmpPage] = useState(1);
+
+  useEffect(() => {
+    if (!user) return;
+    
+    async function fetchData() {
+      setLoading(true);
+      const { data: savedItems, error: savedError } = await supabase
+        .from("saved_items")
+        .select("*")
+        .eq("user_id", user?.id);
+        
+      if (savedError || !savedItems) {
+        console.error("Error fetching saved items:", savedError);
+        setLoading(false);
+        return;
+      }
+      
+      const jobSaves = savedItems.filter((s: any) => s.job_id);
+      const empSaves = savedItems.filter((s: any) => s.employer_id);
+      
+      let fetchedJobs: SavedJob[] = [];
+      if (jobSaves.length > 0) {
+        const jobIds = jobSaves.map((s: any) => s.job_id);
+        const { data: jobsData } = await supabase.from("jobs").select("*").in("id", jobIds);
+        
+        if (jobsData) {
+          const employerIds = [...new Set(jobsData.map(j => j.employer_id).filter(Boolean))];
+          let companyMap: Record<string, string> = {};
+          if (employerIds.length > 0) {
+             const { data: companiesData } = await supabase.from("companies").select("owner_id, company_name").in("owner_id", employerIds);
+             companyMap = Object.fromEntries((companiesData || []).map(c => [c.owner_id, c.company_name]));
+          }
+          
+          fetchedJobs = jobSaves.map((save: any) => {
+            const job = jobsData.find(j => j.id === save.job_id);
+            if (!job) return null;
+            const companyName = companyMap[job.employer_id] || "Unknown Company";
+            const daysAgo = Math.max(0, Math.floor((Date.now() - new Date(save.created_at || Date.now()).getTime()) / 86400000));
+            
+            return {
+              id: job.id,
+              savedItemId: save.id,
+              title: job.title,
+              company: companyName,
+              location: job.location,
+              salary: job.salary_rate || "N/A",
+              jobType: job.job_type,
+              savedDaysAgo: daysAgo,
+              logo: companyName.charAt(0).toUpperCase(),
+              tags: job.required_skills ? job.required_skills.slice(0, 3) : [job.category].filter(Boolean)
+            };
+          }).filter(Boolean) as SavedJob[];
+        }
+      }
+      
+      let fetchedEmps: SavedEmployer[] = [];
+      if (empSaves.length > 0) {
+        const empIds = empSaves.map((s: any) => s.employer_id);
+        const { data: compsData } = await supabase.from("companies").select("*").in("owner_id", empIds);
+        
+        if (compsData) {
+          const { data: jobsCountData } = await supabase.from("jobs").select("employer_id").in("employer_id", empIds).eq("status", "active");
+          
+          const roleCounts = (jobsCountData || []).reduce((acc: any, j: any) => {
+             acc[j.employer_id] = (acc[j.employer_id] || 0) + 1;
+             return acc;
+          }, {});
+          
+          fetchedEmps = empSaves.map((save: any) => {
+            const comp = compsData.find(c => c.owner_id === save.employer_id);
+            if (!comp) return null;
+            
+            return {
+              id: comp.owner_id,
+              savedItemId: save.id,
+              name: comp.company_name,
+              industry: comp.industry || "Not specified",
+              location: comp.company_location || "Not specified",
+              rating: 4.5,
+              openRoles: roleCounts[comp.owner_id] || 0,
+              size: comp.company_size || "Not specified",
+              logo: comp.company_name.charAt(0).toUpperCase()
+            };
+          }).filter(Boolean) as SavedEmployer[];
+        }
+      }
+      
+      setJobs(fetchedJobs);
+      setEmployers(fetchedEmps);
+      setLoading(false);
+    }
+    
+    fetchData();
+  }, [user]);
+
+  const handleUnsaveJob = async (job: SavedJob) => {
+    setJobs(p => p.filter(x => x.savedItemId !== job.savedItemId));
+    await supabase.from("saved_items").delete().eq("id", job.savedItemId);
+  };
+  
+  const handleUnsaveEmployer = async (employer: SavedEmployer) => {
+    setEmployers(p => p.filter(x => x.savedItemId !== employer.savedItemId));
+    await supabase.from("saved_items").delete().eq("id", employer.savedItemId);
+  };
 
   const q = search.toLowerCase();
   const fJobs = useMemo(() => jobs.filter(j=>[j.title,j.company,...j.tags].some(s=>s.toLowerCase().includes(q))), [jobs,q]);
@@ -196,7 +292,11 @@ export default function SavedPage() {
 
       {/* Grid */}
       <div style={{ padding:"22px 26px" }}>
-        {count===0 ? (
+        {loading ? (
+          <div style={{ padding:56, textAlign:"center" as const, borderRadius:10, background:"#fff" }}>
+            <p style={{ margin:0, fontSize: 17, color:"#9CA3AF" }}>Loading saved items...</p>
+          </div>
+        ) : count===0 ? (
           <div style={{ padding:56, textAlign:"center" as const, border:"1.5px dashed #E5E7EB", borderRadius:10, background:"#fff" }}>
             <p style={{ margin:0, fontSize: 17, color:"#9CA3AF" }}>{search?`No saved ${tab} match your search.`:`You have no saved ${tab} yet.`}</p>
           </div>
@@ -204,8 +304,8 @@ export default function SavedPage() {
           <>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))", gap:14 }}>
               {tab==="jobs"
-                ? pJobs.map(j=><JobCard key={j.id} job={j} onUnsave={()=>setJobs(p=>p.filter(x=>x.id!==j.id))}/>)
-                : pEmps.map(e=><EmployerCard key={e.id} employer={e} onUnsave={()=>setEmployers(p=>p.filter(x=>x.id!==e.id))}/>)
+                ? pJobs.map(j=><JobCard key={j.savedItemId} job={j} onUnsave={()=>handleUnsaveJob(j)}/>)
+                : pEmps.map(e=><EmployerCard key={e.savedItemId} employer={e} onUnsave={()=>handleUnsaveEmployer(e)}/>)
               }
             </div>
             <Pagination
