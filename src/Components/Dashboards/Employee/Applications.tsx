@@ -72,7 +72,7 @@ function StageBar({ stage }: { stage: Stage }) {
 }
 
 // ── Application Card ───────────────────────────────────────────────────────────
-function AppCard({ app, selected, onSelect, onBookmark, onWithdraw }: { app:Application; selected:boolean; onSelect:()=>void; onBookmark:()=>void; onWithdraw:()=>void }) {
+function AppCard({ app, selected, onSelect, onBookmark, onWithdraw, onDelete }: { app:Application; selected:boolean; onSelect:()=>void; onBookmark:()=>void; onWithdraw:()=>void; onDelete:()=>void }) {
   const terminal = isTerminal(app.stage);
   const urgent = app.nextActionDate && ["Today","Tomorrow"].includes(daysUntil(app.nextActionDate));
   return (
@@ -104,6 +104,11 @@ function AppCard({ app, selected, onSelect, onBookmark, onWithdraw }: { app:Appl
             {!terminal && app.stage!=="hired" && (
               <button onClick={e=>{e.stopPropagation();onWithdraw();}} style={{ background:"none", border:"none", cursor:"pointer", fontSize: 13, color:"#9CA3AF", display:"flex", alignItems:"center", gap:3 }}>
                 {Ico.withdraw} Withdraw
+              </button>
+            )}
+            {app.stage === "withdrawn" && (
+              <button onClick={e=>{e.stopPropagation();onDelete();}} style={{ background:"none", border:"none", cursor:"pointer", fontSize: 13, color:"#DC2626", display:"flex", alignItems:"center", gap:3 }}>
+                {Ico.close} Delete
               </button>
             )}
           </div>
@@ -299,6 +304,13 @@ export default function ApplicationsTracker() {
     await supabase.from("applications").update({ stage: "withdrawn" }).eq("id", id);
   };
 
+  // ── Persist delete ──
+  const deleteApp = async (id: string) => {
+    setApps(p => p.filter(a => a.id !== id));
+    if (selectedId === id) setSelectedId(null);
+    await supabase.from("applications").delete().eq("id", id);
+  };
+
   const stats = {
     active: apps.filter(a=>!["rejected","withdrawn","hired"].includes(a.stage)).length,
     interviews: apps.filter(a=>a.stage==="interview").length,
@@ -363,7 +375,7 @@ export default function ApplicationsTracker() {
             <div style={{ padding:48, textAlign:"center" as const, border:"1.5px dashed #E5E7EB", borderRadius:10, background:"#fff" }}><p style={{ margin:0, fontSize: 16, color:"#9CA3AF" }}>No applications match your filters.</p></div>
           ) : (
             <>
-              {paginated.map(app=><AppCard key={app.id} app={app} selected={selectedId===app.id} onSelect={()=>setSelectedId(p=>p===app.id?null:app.id)} onBookmark={()=>toggleBookmark(app.id)} onWithdraw={()=>withdraw(app.id)}/>)}
+              {paginated.map(app=><AppCard key={app.id} app={app} selected={selectedId===app.id} onSelect={()=>setSelectedId(p=>p===app.id?null:app.id)} onBookmark={()=>toggleBookmark(app.id)} onWithdraw={()=>withdraw(app.id)} onDelete={()=>deleteApp(app.id)}/>)}
               <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
             </>
           )}

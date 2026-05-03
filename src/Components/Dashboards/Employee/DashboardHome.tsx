@@ -1,7 +1,9 @@
+import { useState, useEffect } from "react";
 import { MapPin, Briefcase, TrendingUp, Clock, ChevronRight, Bell, CheckCircle, AlertCircle, FileText, Star } from "lucide-react";
 import JobCard from "./JobCard";
 import BlogPreview from "./BlogPreview";
 import { useAuth } from "../../../contexts/AuthContext";
+import { supabase } from "../../../lib/supabaseClient";
 
 // TODO: fetch all data from Supabase
 const USER = { avatar: "https://randomuser.me/api/portraits/men/32.jpg", profileStrength: 50 };
@@ -50,10 +52,52 @@ const Card = ({ children, className = "" }: { children: React.ReactNode; classNa
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 export default function Dashboard({ setActivePage }: { setActivePage: (page: string) => void }) {
   const { profile } = useAuth();
+  const [recommendedJobs, setRecommendedJobs] = useState<any[]>([]);
+  const [loadingJobs, setLoadingJobs] = useState(true);
 
   const firstName = profile?.first_name;
   const profession = profile?.profession;
   const location = profile?.seeker_location;
+
+  useEffect(() => {
+    async function fetchRecommendedJobs() {
+      setLoadingJobs(true);
+      const { data } = await supabase
+        .from("jobs")
+        .select(`id, title, location, salary_rate, job_type, created_at, employer_id`)
+        .eq("status", "active")
+        .limit(20);
+
+      if (data && data.length > 0) {
+        const shuffled = [...data].sort(() => 0.5 - Math.random());
+        const selected = shuffled.slice(0, 4);
+
+        const empIds = [...new Set(selected.map(j => j.employer_id).filter(Boolean))];
+        let companyMap: Record<string, string> = {};
+        if (empIds.length > 0) {
+          const { data: companiesData } = await supabase.from("companies").select("owner_id, company_name").in("owner_id", empIds);
+          companyMap = Object.fromEntries((companiesData || []).map(c => [c.owner_id, c.company_name]));
+        }
+
+        const mapped = selected.map(job => {
+          let cType = "Contractual";
+          if (job.job_type === "Permanent") cType = "Permanent";
+          else if (job.job_type === "Internship") cType = "Internship";
+
+          return {
+            ...job,
+            type: cType,
+            company: companyMap[job.employer_id] || "Unknown Company",
+            daysAgo: Math.max(0, Math.floor((Date.now() - new Date(job.created_at).getTime()) / 86400000))
+          };
+        });
+
+        setRecommendedJobs(mapped);
+      }
+      setLoadingJobs(false);
+    }
+    fetchRecommendedJobs();
+  }, []);
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -178,12 +222,26 @@ export default function Dashboard({ setActivePage }: { setActivePage: (page: str
         {/* ── Recommended jobs ── */}
         <div>
           <SectionHeader title="Jobs you might like" action="Browse all" onActionClick={() => setActivePage("jobs")} />
-          <div className="grid md:grid-cols-2 gap-4">
-            <JobCard title="Frontend Developer" company="Nairobi Tech Ltd" location="Nairobi County" salary="120,000–180,000" type="Permanent" rating={4.5} daysAgo={2} />
-            <JobCard title="Data Analyst Intern" company="Mombasa Analytics" location="Mombasa County" salary="30,000–50,000" type="Internship" rating={4.2} daysAgo={5} />
-            <JobCard title="Plumber" company="Kisumu Contractors" location="Kisumu County" salary="2,500/day" type="Contractual" rating={4.7} daysAgo={1} />
-            <JobCard title="Backend Engineer" company="Eldoret Systems" location="Uasin Gishu County" salary="150,000–220,000" type="Permanent" rating={4.8} daysAgo={3} />
-          </div>
+          {loadingJobs ? (
+            <div className="p-8 text-center text-gray-500 border-[1.5px] border-dashed border-gray-200 bg-white">Loading recommended jobs...</div>
+          ) : recommendedJobs.length === 0 ? (
+            <div className="p-8 text-center text-gray-500 border-[1.5px] border-dashed border-gray-200 bg-white">No active jobs found at the moment.</div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-4">
+              {recommendedJobs.map(job => (
+                <JobCard 
+                  key={job.id} 
+                  title={job.title} 
+                  company={job.company} 
+                  location={job.location || "Location not specified"} 
+                  salary={job.salary_rate || "N/A"} 
+                  type={job.type} 
+                  daysAgo={job.daysAgo} 
+                  onView={() => setActivePage("jobs")} 
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* ── Blog preview ── */}

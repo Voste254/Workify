@@ -348,6 +348,7 @@ export default function FindJobsPage() {
 
   // ── Apply flow ──
   const [appliedJobIds,  setAppliedJobIds]  = useState<Set<string>>(new Set());
+  const [savedJobIds,    setSavedJobIds]    = useState<Set<string>>(new Set());
   const [applying,       setApplying]       = useState(false);
   const [applyToast,     setApplyToast]     = useState<{ msg: string; ok: boolean } | null>(null);
   const [seekerProfile,  setSeekerProfile]  = useState({ name: "", phone: "", location: "" });
@@ -425,13 +426,14 @@ export default function FindJobsPage() {
 
   useEffect(() => { fetchJobs(); }, [user?.id]);
 
-  // ── Fetch seeker profile + already-applied job IDs ──
+  // ── Fetch seeker profile + already-applied job IDs + saved items ──
   useEffect(() => {
     if (!user?.id) return;
     (async () => {
-      const [{ data: prof }, { data: apps }] = await Promise.all([
+      const [{ data: prof }, { data: apps }, { data: savedItems }] = await Promise.all([
         supabase.from("profiles").select("first_name,last_name,phone,seeker_location").eq("id", user.id).single(),
         supabase.from("applications").select("job_id").eq("seeker_id", user.id).not("job_id", "is", null),
+        supabase.from("saved_items").select("job_id").eq("user_id", user.id).not("job_id", "is", null),
       ]);
       if (prof) setSeekerProfile({
         name: `${prof.first_name || ""} ${prof.last_name || ""}`.trim(),
@@ -439,6 +441,7 @@ export default function FindJobsPage() {
         location: prof.seeker_location || "",
       });
       if (apps) setAppliedJobIds(new Set(apps.map((a: any) => a.job_id).filter(Boolean)));
+      if (savedItems) setSavedJobIds(new Set(savedItems.map((s: any) => s.job_id).filter(Boolean)));
     })();
   }, [user?.id]);
 
@@ -476,6 +479,24 @@ export default function FindJobsPage() {
     } else {
       setAppliedJobIds(prev => new Set(prev).add(job.id));
       showApplyToast("Application submitted successfully! 🎉", true);
+    }
+  };
+
+  // ── Save Job ──
+  const toggleSaveJob = async (jobId: string, employerId: string) => {
+    if (!user?.id) { showApplyToast("Please sign in to save jobs.", false); return; }
+    
+    const isSaved = savedJobIds.has(jobId);
+    if (isSaved) {
+      setSavedJobIds(prev => { const n = new Set(prev); n.delete(jobId); return n; });
+      await supabase.from("saved_items").delete().eq("user_id", user.id).eq("job_id", jobId);
+    } else {
+      setSavedJobIds(prev => new Set(prev).add(jobId));
+      await supabase.from("saved_items").insert({
+        user_id: user.id,
+        job_id: jobId,
+        employer_id: employerId
+      });
     }
   };
 
@@ -680,6 +701,8 @@ export default function FindJobsPage() {
                     type={toCardType(job.job_type)}
                     daysAgo={daysAgo(job.created_at)}
                     onView={() => setSelectedJob(job)}
+                    saved={savedJobIds.has(job.id)}
+                    onToggleSave={() => toggleSaveJob(job.id, job.employer_id)}
                   />
                 ))}
               </div>

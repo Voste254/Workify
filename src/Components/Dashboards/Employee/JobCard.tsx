@@ -11,10 +11,14 @@ interface JobCardProps {
   daysAgo: number;
   logo?: string;
   onView?: () => void;
+  saved?: boolean;
+  onToggleSave?: () => void;
 }
 
-export default function JobCard({ title, company, location, salary, type, rating, daysAgo, logo, onView }: JobCardProps) {
-  const [saved, setSaved] = useState(false);
+export default function JobCard({ title, company, location, salary, type, rating, daysAgo, logo, onView, saved: controlledSaved, onToggleSave }: JobCardProps) {
+  const [localSaved, setLocalSaved] = useState(false);
+  
+  const isSaved = controlledSaved !== undefined ? controlledSaved : localSaved;
 
   return (
     <div 
@@ -35,11 +39,12 @@ export default function JobCard({ title, company, location, salary, type, rating
         <button 
           onClick={(e) => {
             e.stopPropagation();
-            setSaved(!saved);
+            if (onToggleSave) onToggleSave();
+            else setLocalSaved(!localSaved);
           }} 
-          className={`flex-shrink-0 transition-colors ${saved ? "text-amber-500" : "text-gray-300 hover:text-gray-500"}`}
+          className={`flex-shrink-0 transition-colors ${isSaved ? "text-amber-500" : "text-gray-300 hover:text-gray-500"}`}
         >
-          <Bookmark size={16} fill={saved ? "currentColor" : "none"} />
+          <Bookmark size={16} fill={isSaved ? "currentColor" : "none"} />
         </button>
       </div>
 
