@@ -308,7 +308,10 @@ export default function ApplicationsTracker() {
   const deleteApp = async (id: string) => {
     setApps(p => p.filter(a => a.id !== id));
     if (selectedId === id) setSelectedId(null);
-    await supabase.from("applications").delete().eq("id", id);
+    const { error } = await supabase.from("applications").delete().eq("id", id);
+    if (error) {
+      console.error("Failed to delete application from database:", error);
+    }
   };
 
   const stats = {

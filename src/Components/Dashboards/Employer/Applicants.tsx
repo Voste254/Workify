@@ -252,13 +252,16 @@ export default function Applicants() {
 
   const selected = apps.find(a => a.id === selectedId) || null;
 
-  const updateApplicationDb = async (appId: string, newStage: Stage, newHistory: StageHistoryEntry[], note: string) => {
-    await supabase.from("applications").update({
+  const updateApplicationDb = async (appId: string, newStage: Stage, note: string) => {
+    const { error } = await supabase.from("applications").update({
       stage: newStage,
       last_updated: new Date().toISOString(),
-      stage_history: newHistory,
       employer_notes: note
     }).eq("id", appId);
+    
+    if (error) {
+      console.error("Failed to update application:", error);
+    }
   };
 
   const handleAdvance = async (note: string) => {
@@ -277,7 +280,7 @@ export default function Applicants() {
         ? { ...a, stage: nextStatus, stageHistory: newHistory, lastUpdated: new Date().toISOString() }
         : a
       ));
-      await updateApplicationDb(selected.id, nextStatus, newHistory, note);
+      await updateApplicationDb(selected.id, nextStatus, note);
     }
   };
 
@@ -294,7 +297,7 @@ export default function Applicants() {
       ? { ...a, stage: "rejected", stageHistory: newHistory, lastUpdated: new Date().toISOString() }
       : a
     ));
-    await updateApplicationDb(selected.id, "rejected", newHistory, note);
+    await updateApplicationDb(selected.id, "rejected", note);
   };
 
   return (
