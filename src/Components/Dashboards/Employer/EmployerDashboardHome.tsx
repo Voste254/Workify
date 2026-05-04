@@ -1,6 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import DashboardCharts from "./Charts/DashboardCharts";
 import { useAuth } from "../../../contexts/AuthContext";
+import { supabase } from "../../../lib/supabaseClient";
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 const I = (d: string, s = 20, fill = "none") => <svg width={s} height={s} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: d }} />;
@@ -17,10 +18,56 @@ interface EmployerDashboardHomeProps {
   setActivePage?: (page: string) => void;
 }
 
-export default function EmployerDashboardHome({ setActivePage }: EmployerDashboardHomeProps) {
-  const { profile } = useAuth();
+const daysAgo = (d: string) => { 
+  const n = Math.floor((Date.now() - new Date(d).getTime()) / 86400000); 
+  if (n === 0) return "Today";
+  if (n === 1) return "Yesterday";
+  return `${n}d ago`; 
+};
 
-  // Mock Data Definition
+const mapStageToStatus = (stage: string) => {
+  const s = stage?.toLowerCase() || "";
+  if (s === "applied") return "New";
+  if (s === "screening") return "Reviewing";
+  if (s === "interview") return "Interview";
+  if (s === "rejected") return "Rejected";
+  return s.charAt(0).toUpperCase() + s.slice(1);
+};
+
+export default function EmployerDashboardHome({ setActivePage }: EmployerDashboardHomeProps) {
+  const { profile, user } = useAuth();
+  const [recentCandidates, setRecentCandidates] = useState<any[]>([]);
+  const [loadingApps, setLoadingApps] = useState(true);
+
+  // Fetch actual recent applications from supabase
+  useEffect(() => {
+    async function fetchRecentApps() {
+      if (!user?.id) return;
+      setLoadingApps(true);
+      const { data, error } = await supabase
+        .from("applications")
+        .select("*")
+        .eq("employer_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(4);
+
+      if (!error && data) {
+        const mapped = data.map((app: any) => ({
+          id: app.id,
+          name: app.applicant_name || "Unknown Applicant",
+          role: app.job_title || "Unknown Role",
+          appliedAt: daysAgo(app.created_at || app.applied_date || new Date().toISOString()),
+          status: mapStageToStatus(app.stage),
+          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(app.applicant_name || "A")}&background=random`
+        }));
+        setRecentCandidates(mapped);
+      }
+      setLoadingApps(false);
+    }
+    fetchRecentApps();
+  }, [user?.id]);
+
+  // Mock Data Definition for other metrics
   const STATS = [
     { title: "Active Jobs", value: "3", icon: Ico.briefcase, bgClass: "bg-blue-50", textClass: "text-blue-600" },
     { title: "New Applications", value: "128", icon: Ico.users, bgClass: "bg-amber-50", textClass: "text-amber-600" },
@@ -51,13 +98,6 @@ export default function EmployerDashboardHome({ setActivePage }: EmployerDashboa
     { name: "Offered", value: 5 },
     { name: "Rejected", value: 33 },
   ], []);
-
-  const recentCandidates = [
-    { id: 1, name: "Alice Johnson", role: "Frontend Developer", appliedAt: "2 hours ago", status: "New", avatar: "https://i.pravatar.cc/150?u=alice" },
-    { id: 2, name: "Bob Smith", role: "UX Designer", appliedAt: "4 hours ago", status: "Reviewing", avatar: "https://i.pravatar.cc/150?u=bob" },
-    { id: 3, name: "Charlie Davis", role: "Product Manager", appliedAt: "Yesterday", status: "Interview", avatar: "https://i.pravatar.cc/150?u=charlie" },
-    { id: 4, name: "Diana Prince", role: "Backend Engineer", appliedAt: "2 days ago", status: "Rejected", avatar: "https://i.pravatar.cc/150?u=diana" },
-  ];
 
   return (
     <div className="font-sans min-h-screen bg-gray-50 flex flex-col p-6 gap-8">
@@ -127,7 +167,23 @@ export default function EmployerDashboardHome({ setActivePage }: EmployerDashboa
                   </tr>
                </thead>
                <tbody className="divide-y divide-gray-100">
-                  {recentCandidates.map((candidate) => (
+                  {loadingApps ? (
+                     <tr>
+                        <td colSpan={4} className="px-6 py-8 text-center text-sm text-gray-500">
+                           <div className="flex justify-center items-center gap-2">
+                              <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+                              Loading applications...
+                           </div>
+                        </td>
+                     </tr>
+                  ) : recentCandidates.length === 0 ? (
+                     <tr>
+                        <td colSpan={4} className="px-6 py-8 text-center text-sm text-gray-500">
+                           No recent applications found.
+                        </td>
+                     </tr>
+                  ) : (
+                     recentCandidates.map((candidate) => (
                      <tr key={candidate.id} className="hover:bg-gray-50/50 transition">
                         <td className="px-6 py-4 whitespace-nowrap">
                            <div className="flex items-center gap-3">
@@ -152,7 +208,7 @@ export default function EmployerDashboardHome({ setActivePage }: EmployerDashboa
                            </span>
                         </td>
                      </tr>
-                  ))}
+                  )))}
                </tbody>
             </table>
          </div>
