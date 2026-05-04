@@ -142,14 +142,8 @@ export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | n
   };
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const raw = e.target.value;
-    const filtered = raw.replace(/[0-9]/g, "");
-    setDescription(filtered);
-    if (raw !== filtered) {
-      setDescError("Description should not contain numbers");
-    } else {
-      setDescError("");
-    }
+    setDescription(e.target.value);
+    setDescError("");
   };
 
   const handleSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -178,11 +172,7 @@ export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | n
       setError("Job title contains numbers. Please remove them.");
       return;
     }
-    if (/\d/.test(description)) {
-      setDescError("Description must not contain numbers");
-      setError("Description contains numbers. Please remove them.");
-      return;
-    }
+    // Description numeric validation removed to allow numbers
     // Salary numeric validation removed to allow custom text (e.g. "per month")
 
     if (!user) { setError("You must be logged in to post a job."); return; }
@@ -369,7 +359,7 @@ export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | n
                 required
               />
               {descError && <p className="text-xs text-red-500 mt-1">{descError}</p>}
-              <p className={hintStyle}>A compelling description attracts higher-quality applicants. Numbers are not allowed.</p>
+              <p className={hintStyle}>A compelling description attracts higher-quality applicants.</p>
             </div>
 
             {/* Expected Roles / Responsibilities */}
