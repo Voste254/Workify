@@ -153,14 +153,8 @@ export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | n
   };
 
   const handleSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value;
-    const filtered = raw.replace(/[^0-9]/g, ""); // Only digits allowed
-    setSalary(filtered);
-    if (raw !== filtered) {
-      setSalaryError("Salary must contain only numbers (e.g., 150000)");
-    } else {
-      setSalaryError("");
-    }
+    setSalary(e.target.value);
+    setSalaryError("");
   };
 
   const submitJob = async (status: "active" | "draft") => {
@@ -189,11 +183,7 @@ export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | n
       setError("Description contains numbers. Please remove them.");
       return;
     }
-    if (salary && !/^\d+$/.test(salary)) {
-      setSalaryError("Salary must be numeric only");
-      setError("Salary must be numeric only.");
-      return;
-    }
+    // Salary numeric validation removed to allow custom text (e.g. "per month")
 
     if (!user) { setError("You must be logged in to post a job."); return; }
 
@@ -351,7 +341,7 @@ export default function PostJobs({ editingJob, onSaved }: { editingJob?: Job | n
                   <span className={inputIcon}>{Ico.coins}</span>
                   <input
                     type="text"
-                    placeholder="e.g. 150000"
+                    placeholder="e.g. KES 150,000 / month"
                     className={`${inputStyle} ${salaryError ? errorInputStyle : ""}`}
                     value={salary}
                     onChange={handleSalaryChange}
