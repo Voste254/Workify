@@ -36,36 +36,20 @@ interface DashboardChartsProps {
 
 const COLORS = ["#111827", "#7C3AED", "#10B981", "#F59E0B", "#EF4444"];
 
-const cardStyle = {
-  background: "#fff",
-  border: "1.5px solid #E5E7EB",
-  borderRadius: 10,
-  padding: 24,
-  fontFamily: "'DM Sans', sans-serif",
-  display: "flex",
-  flexDirection: "column" as const,
-};
-
-const titleStyle = {
-  margin: "0 0 24px",
-  fontSize: 13,
-  fontWeight: 700,
-  textTransform: "uppercase" as const,
-  letterSpacing: "0.1em",
-  color: "#9CA3AF"
-};
+const cardClass = "bg-white border-[1.5px] border-gray-200 rounded-[10px] p-6 font-sans flex flex-col";
+const titleClass = "mb-6 text-[13px] font-bold uppercase tracking-[0.1em] text-gray-400";
 
 export default function DashboardCharts({ lineData, barData, pieData }: DashboardChartsProps) {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 24, marginTop: 24, fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="grid grid-cols-1 gap-6 mt-6 font-sans">
 
       {/* Top Row: Area & Bar Charts */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 24 }}>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6">
         
         {/* Area Chart: Applications Over Time */}
-        <div style={cardStyle}>
-          <h3 style={titleStyle}>Applications Over Time</h3>
-          <div style={{ height: 280, width: "100%" }}>
+        <div className={cardClass}>
+          <h3 className={titleClass}>Applications Over Time</h3>
+          <div className="h-[280px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={lineData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
@@ -87,9 +71,9 @@ export default function DashboardCharts({ lineData, barData, pieData }: Dashboar
         </div>
 
         {/* Bar Chart: Top Performing Jobs */}
-        <div style={cardStyle}>
-          <h3 style={titleStyle}>Applications by Job</h3>
-          <div style={{ height: 280, width: "100%" }}>
+        <div className={cardClass}>
+          <h3 className={titleClass}>Applications by Job</h3>
+          <div className="h-[280px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={barData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
@@ -107,10 +91,10 @@ export default function DashboardCharts({ lineData, barData, pieData }: Dashboar
       </div>
 
       {/* Pie Chart: Application Status Funnel */}
-      <div style={cardStyle}>
-        <h3 style={titleStyle}>Hiring Funnel Status</h3>
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 32, height: "auto", minHeight: 280, width: "100%" }}>
-          <div style={{ height: 250, width: 250, flexShrink: 0 }}>
+      <div className={cardClass}>
+        <h3 className={titleClass}>Hiring Funnel Status</h3>
+        <div className="flex flex-wrap items-center justify-center gap-8 h-auto min-h-[280px] w-full">
+          <div className="h-[250px] w-[250px] shrink-0">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -135,13 +119,13 @@ export default function DashboardCharts({ lineData, barData, pieData }: Dashboar
             </ResponsiveContainer>
           </div>
           {/* Custom Legend */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 16, justifyContent: "center" }}>
+          <div className="flex flex-col gap-4 justify-center">
             {pieData.map((entry, i) => (
-              <div key={entry.name} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ width: 16, height: 16, borderRadius: "50%", backgroundColor: COLORS[i % COLORS.length] }}></span>
+              <div key={entry.name} className="flex items-center gap-3">
+                <span className="w-4 h-4 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }}></span>
                 <div>
-                  <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 700, color: "#111827" }}>{entry.name}</p>
-                  <p style={{ margin: 0, fontSize: 12, color: "#6B7280", fontFamily: "'DM Mono', monospace" }}>{entry.value} Candidates</p>
+                  <p className="m-0 mb-1 text-sm font-bold text-gray-900">{entry.name}</p>
+                  <p className="m-0 text-xs text-gray-500 font-mono">{entry.value} Candidates</p>
                 </div>
               </div>
             ))}
