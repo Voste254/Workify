@@ -10,6 +10,7 @@ import SavedPage from "./Saved";
 import ApplicationsPage from "./Applications";
 import WorkifyAI from "./WorkifyAI";
 import SupportPage from "../Shared/Support";
+import ReportsPage from "./Reports";
 
 const DashboardLayout = () => {
   const [activePage, setActivePage] = useState("dashboard");
@@ -26,6 +27,8 @@ const DashboardLayout = () => {
         return <Profile/>;
       case "saved":
         return <SavedPage/>;
+      case "reports":
+        return <ReportsPage/>;
       case "blog":
         return <BlogsPage/>;
       case "workify-ai":
