@@ -72,7 +72,7 @@ const jobs = [
 
 export default function FeaturedJobs() {
   return (
-    <section className="py-16 px-6 lg:px-20 bg-gray-50">
+    <section id="jobs" className="py-16 px-6 lg:px-20 bg-gray-50">
       <div className="text-center mb-12">
         <h2 className="text-4xl font-bold text-gray-900">Featured Jobs</h2>
         <p className="text-gray-500 mt-2">

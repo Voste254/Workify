@@ -1,6 +1,6 @@
 const Hero = () => {
   return (
-    <section className="relative w-full min-h-screen flex items-center overflow-hidden">
+    <section id="home" className="relative w-full min-h-screen flex items-center overflow-hidden">
 
       {/* BACKGROUND */}
       <div className="absolute inset-0 bg-gray-50"></div>

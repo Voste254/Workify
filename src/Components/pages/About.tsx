@@ -1,6 +1,6 @@
 const AboutUs = () => {
   return (
-    <section className="relative bg-white py-16 px-6 lg:px-20 h-screen">
+    <section id="about" className="relative bg-white py-16 px-6 lg:px-20 h-screen">
       {/* Title */}
       <h2 className="text-4xl font-bold text-gray-900 mb-12 text-center lg:text-left">
         ABOUT US
