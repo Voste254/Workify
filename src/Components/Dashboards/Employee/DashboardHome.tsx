@@ -1,26 +1,27 @@
 import { useState, useEffect } from "react";
-import { MapPin, Briefcase, TrendingUp, Clock, ChevronRight, Bell, CheckCircle, AlertCircle, FileText, Star } from "lucide-react";
+import { MapPin, Briefcase, TrendingUp, Clock, ChevronRight, Bell, CheckCircle, AlertCircle, FileText, Star, Award, UserCheck } from "lucide-react";
 import JobCard from "./JobCard";
 import BlogPreview from "./BlogPreview";
 import { useAuth } from "../../../contexts/AuthContext";
 import { supabase } from "../../../lib/supabaseClient";
 
-// TODO: fetch all data from Supabase
-const USER = { avatar: "https://randomuser.me/api/portraits/men/32.jpg", profileStrength: 50 };
+const daysAgo = (d: string) => {
+  const n = Math.floor((Date.now() - new Date(d).getTime()) / 86400000);
+  if (n === 0) return "Today";
+  if (n === 1) return "Yesterday";
+  return `${n}d ago`;
+};
 
-const STATS = [
-  { label: "Applications", value: 12, sub: "3 this week", icon: <FileText size={15} />, dark: false },
-  { label: "Profile Views", value: 84, sub: "+12 from last week", icon: <TrendingUp size={15} />, dark: false },
-  { label: "Saved Jobs", value: 7, sub: "2 closing soon", icon: <Star size={15} />, dark: false },
-  { label: "Interviews", value: 2, sub: "Next: Thursday", icon: <Briefcase size={15} />, dark: true },
-];
-
-const APPLICATIONS = [
-  { company: "Safaricom PLC", title: "Senior Data Analyst", stage: "Interview", stageColor: "bg-blue-50 text-blue-700 border-blue-200", days: "Updated 2d ago" },
-  { company: "Andela", title: "Backend Engineer", stage: "Offer", stageColor: "bg-green-50 text-green-700 border-green-200", days: "Updated 1d ago" },
-  { company: "Nation Media", title: "Graphic Designer", stage: "Assessment", stageColor: "bg-purple-50 text-purple-700 border-purple-200", days: "Updated 4d ago" },
-  { company: "Equity Bank", title: "Marketing Manager", stage: "Applied", stageColor: "bg-gray-100 text-gray-600 border-gray-200", days: "Updated 6d ago" },
-];
+const stageColorMap: Record<string, string> = {
+  applied: "bg-gray-100 text-gray-600 border-gray-200",
+  screening: "bg-amber-50 text-amber-700 border-amber-200",
+  interview: "bg-blue-50 text-blue-700 border-blue-200",
+  assessment: "bg-purple-50 text-purple-700 border-purple-200",
+  offer: "bg-green-50 text-green-700 border-green-200",
+  hired: "bg-gray-900 text-white border-gray-900",
+  rejected: "bg-red-50 text-red-700 border-red-200",
+  withdrawn: "bg-gray-100 text-gray-500 border-gray-200",
+};
 
 const ALERTS = [
   { icon: <AlertCircle size={14} className="text-amber-500 flex-shrink-0" />, text: "Portfolio task due tomorrow — Nation Media Group" },
@@ -55,25 +56,68 @@ export default function Dashboard({ setActivePage }: { setActivePage: (page: str
   const [recommendedJobs, setRecommendedJobs] = useState<any[]>([]);
   const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
   const [loadingJobs, setLoadingJobs] = useState(true);
+  const [recentApps, setRecentApps] = useState<any[]>([]);
+  const [loadingApps, setLoadingApps] = useState(true);
+  const [stats, setStats] = useState({ applications: 0, weekApps: 0, savedJobs: 0, offers: 0, hired: 0 });
 
   const firstName = profile?.first_name;
   const profession = profile?.profession;
   const location = profile?.seeker_location;
 
+  // Fetch stats + recent applications + recommended jobs
   useEffect(() => {
-    async function fetchRecommendedJobs() {
-      setLoadingJobs(true);
-      
-      // Fetch saved jobs for the user
-      if (user?.id) {
-        const { data: savedItems } = await supabase
-          .from("saved_items")
-          .select("job_id")
-          .eq("user_id", user.id)
-          .not("job_id", "is", null);
-        if (savedItems) setSavedJobIds(new Set(savedItems.map(s => s.job_id).filter(Boolean)));
+    if (!user?.id) return;
+
+    async function fetchDashboardData() {
+      // 1. Fetch all seeker applications for stats
+      const { data: allApps } = await supabase
+        .from("applications")
+        .select("id, stage, last_updated, created_at")
+        .eq("seeker_id", user!.id);
+
+      if (allApps) {
+        const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
+        setStats({
+          applications: allApps.length,
+          weekApps: allApps.filter(a => new Date(a.created_at) >= weekAgo).length,
+          savedJobs: 0, // will be set below
+          offers: allApps.filter(a => a.stage === "offer").length,
+          hired: allApps.filter(a => a.stage === "hired").length,
+        });
       }
 
+      // 2. Fetch recent applications (last 4)
+      setLoadingApps(true);
+      const { data: recent } = await supabase
+        .from("applications")
+        .select("id, job_title, company, stage, last_updated")
+        .eq("seeker_id", user!.id)
+        .order("last_updated", { ascending: false })
+        .limit(4);
+      if (recent) {
+        setRecentApps(recent.map((a: any) => ({
+          company: a.company || "Unknown",
+          title: a.job_title || "Unknown Role",
+          stage: (a.stage || "applied").charAt(0).toUpperCase() + (a.stage || "applied").slice(1),
+          stageColor: stageColorMap[a.stage] || stageColorMap.applied,
+          days: `Updated ${daysAgo(a.last_updated || a.created_at)}`,
+        })));
+      }
+      setLoadingApps(false);
+
+      // 3. Fetch saved jobs
+      const { data: savedItems } = await supabase
+        .from("saved_items")
+        .select("job_id")
+        .eq("user_id", user!.id)
+        .not("job_id", "is", null);
+      if (savedItems) {
+        setSavedJobIds(new Set(savedItems.map(s => s.job_id).filter(Boolean)));
+        setStats(prev => ({ ...prev, savedJobs: savedItems.length }));
+      }
+
+      // 4. Fetch recommended jobs
+      setLoadingJobs(true);
       const { data } = await supabase
         .from("jobs")
         .select(`id, title, location, salary_rate, job_type, created_at, employer_id`)
@@ -95,7 +139,6 @@ export default function Dashboard({ setActivePage }: { setActivePage: (page: str
           let cType = "Contractual";
           if (job.job_type === "Permanent") cType = "Permanent";
           else if (job.job_type === "Internship") cType = "Internship";
-
           return {
             ...job,
             type: cType,
@@ -103,12 +146,11 @@ export default function Dashboard({ setActivePage }: { setActivePage: (page: str
             daysAgo: Math.max(0, Math.floor((Date.now() - new Date(job.created_at).getTime()) / 86400000))
           };
         });
-
         setRecommendedJobs(mapped);
       }
       setLoadingJobs(false);
     }
-    fetchRecommendedJobs();
+    fetchDashboardData();
   }, [user?.id]);
 
   const toggleSaveJob = async (jobId: string) => {
@@ -131,7 +173,9 @@ export default function Dashboard({ setActivePage }: { setActivePage: (page: str
       {/* ── Top bar ── */}
       <div className="bg-white border-b border-gray-200 px-6 lg:px-10 py-5 flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
-          <img src={USER.avatar} alt="avatar" className="w-10 h-10 object-cover border-[1.5px] border-gray-200 flex-shrink-0" />
+          <div className="w-10 h-10 rounded-full bg-gray-100 border-[1.5px] border-gray-200 flex items-center justify-center flex-shrink-0 text-gray-600">
+            <UserCheck size={20} />
+          </div>
           <div>
             <h1 className="text-lg font-bold text-gray-900">Hello, {firstName} 👋</h1>
             <p className="text-sm text-gray-400 font-mono mt-0.5">{profession} · {location}</p>
@@ -149,7 +193,12 @@ export default function Dashboard({ setActivePage }: { setActivePage: (page: str
 
         {/* ── Stat tiles ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {STATS.map(({ label, value, sub, icon, dark }) => (
+          {[
+            { label: "Applications", value: stats.applications, sub: `${stats.weekApps} this week`, icon: <FileText size={15} />, dark: false },
+            { label: "Saved Jobs", value: stats.savedJobs, sub: "Bookmarked", icon: <Star size={15} />, dark: false },
+            { label: "Offers", value: stats.offers, sub: "Received", icon: <Award size={15} />, dark: false },
+            { label: "Hired", value: stats.hired, sub: "Accepted", icon: <UserCheck size={15} />, dark: true },
+          ].map(({ label, value, sub, icon, dark }) => (
             <Card key={label} className={`p-4 ${dark ? "bg-gray-900 border-gray-900" : ""}`}>
               <div className={`flex items-center justify-between mb-3 ${dark ? "text-gray-400" : "text-gray-400"}`}>
                 <span className="text-sm font-semibold uppercase tracking-widest">{label}</span>
@@ -183,11 +232,11 @@ export default function Dashboard({ setActivePage }: { setActivePage: (page: str
             <SectionHeader title="Profile strength" action="Edit profile" onActionClick={() => setActivePage("profile")} />
             <Card className="p-4">
               <div className="flex items-end justify-between mb-2">
-                <p className="text-4xl font-bold text-gray-900 font-mono">{USER.profileStrength}%</p>
+                <p className="text-4xl font-bold text-gray-900 font-mono">50%</p>
                 <p className="text-sm text-gray-400 mb-1">{MISSING.filter(m => m.done).length}/{MISSING.length} complete</p>
               </div>
               <div className="w-full h-1.5 bg-gray-100 mb-4">
-                <div className="h-full bg-gray-900 transition-all" style={{ width: `${USER.profileStrength}%` }} />
+                <div className="h-full bg-gray-900 transition-all" style={{ width: `50%` }} />
               </div>
               <div className="space-y-2">
                 {MISSING.map(({ label, done }) => (
@@ -208,22 +257,31 @@ export default function Dashboard({ setActivePage }: { setActivePage: (page: str
         <div>
           <SectionHeader title="Recent applications" action="View all" onActionClick={() => setActivePage("applications")} />
           <Card>
-            {APPLICATIONS.map((a, i) => (
-              <div key={i} className="flex items-center gap-4 px-4 py-3.5 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition cursor-pointer">
-                <div className="w-9 h-9 bg-gray-50 border border-gray-200 flex items-center justify-center text-base font-bold text-gray-900 font-mono flex-shrink-0">
-                  {a.company.charAt(0)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-base font-semibold text-gray-900 truncate">{a.title}</p>
-                  <p className="text-sm text-gray-400 mt-0.5">{a.company}</p>
-                </div>
-                <span className={`text-sm font-semibold px-2.5 py-1 border flex-shrink-0 ${a.stageColor}`}>{a.stage}</span>
-                <div className="flex items-center gap-1 text-sm text-gray-400 flex-shrink-0 sm:flex">
-                  <Clock size={11} /> {a.days}
-                </div>
-                <ChevronRight size={14} className="text-gray-300 flex-shrink-0" />
+            {loadingApps ? (
+              <div className="flex items-center justify-center gap-2 px-4 py-8 text-sm text-gray-500">
+                <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+                Loading applications...
               </div>
-            ))}
+            ) : recentApps.length === 0 ? (
+              <div className="px-4 py-8 text-center text-sm text-gray-500">No applications yet.</div>
+            ) : (
+              recentApps.map((a, i) => (
+                <div key={i} className="flex items-center gap-4 px-4 py-3.5 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition cursor-pointer">
+                  <div className="w-9 h-9 bg-gray-50 border border-gray-200 flex items-center justify-center text-base font-bold text-gray-900 font-mono flex-shrink-0">
+                    {a.company.charAt(0)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-base font-semibold text-gray-900 truncate">{a.title}</p>
+                    <p className="text-sm text-gray-400 mt-0.5">{a.company}</p>
+                  </div>
+                  <span className={`text-sm font-semibold px-2.5 py-1 border flex-shrink-0 ${a.stageColor}`}>{a.stage}</span>
+                  <div className="flex items-center gap-1 text-sm text-gray-400 flex-shrink-0 sm:flex">
+                    <Clock size={11} /> {a.days}
+                  </div>
+                  <ChevronRight size={14} className="text-gray-300 flex-shrink-0" />
+                </div>
+              ))
+            )}
           </Card>
         </div>
 

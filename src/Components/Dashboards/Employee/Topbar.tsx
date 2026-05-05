@@ -1,4 +1,4 @@
-import { Bell, LogOut, Menu, X } from "lucide-react";
+import { Bell, LogOut, Menu, X, User } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import NotificationModal from "./NotificationModal";
@@ -98,11 +98,9 @@ const TopBar = () => {
         </button>
 
         {/* Avatar */}
-        <img
-          src="https://i.pravatar.cc/40"
-          className="w-9 h-9 rounded-full"
-          alt="User"
-        />
+        <div className="w-9 h-9 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-600">
+          <User size={18} />
+        </div>
       </div>
 
       {/* Mobile Dropdown Menu */}
@@ -136,11 +134,9 @@ const TopBar = () => {
 
           <div className="flex items-center justify-between border-t pt-4">
             <div className="flex items-center gap-3">
-              <img
-                src="https://i.pravatar.cc/40"
-                className="w-10 h-10 rounded-full"
-                alt="User"
-              />
+              <div className="w-10 h-10 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-600">
+                <User size={20} />
+              </div>
               <span className="font-medium text-gray-800">My Profile</span>
             </div>
             <button
