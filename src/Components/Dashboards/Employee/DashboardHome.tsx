@@ -290,8 +290,8 @@ export default function Dashboard({ setActivePage }: { setActivePage: (page: str
           <SectionHeader title="Job market snapshot" />
           <div className="grid sm:grid-cols-3 gap-4">
             {[
-              { label: "Corporate roles open", value: "3,200+", icon: <Briefcase size={13} />, change: "+8% this week" },
-              { label: "Casual roles near you", value: "1,080+", icon: <MapPin size={13} />, change: "+15% this week" },
+              { label: "Corporate roles open", value: "50+", icon: <Briefcase size={13} />, change: "+8% this week" },
+              { label: "Casual roles near you", value: "80+", icon: <MapPin size={13} />, change: "+15% this week" },
               { label: "Avg. salary for your role", value: "KES 185K", icon: <TrendingUp size={13} />, change: "↑ from last month" },
             ].map(({ label, value, icon, change }) => (
               <Card key={label} className="p-4 flex flex-col gap-2">

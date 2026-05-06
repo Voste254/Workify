@@ -34,6 +34,12 @@ interface ContactData {
   phone: string;
 }
 
+// ── Validation helpers ─────────────────────────────────────────────────────
+const hasDigit = (s: string) => /\d/.test(s);
+const isValidEmail = (s: string) => !s || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+const isValidPhone = (s: string) => !s || /^[+\d\s()-]{7,20}$/.test(s);
+const isValidUrl = (s: string) => !s || /^https?:\/\/.+/.test(s);
+
 export default function EmployerProfile() {
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -46,6 +52,19 @@ export default function EmployerProfile() {
     companyName: "", industry: "", companySize: "",
     companyLocation: "", companyEmail: "", companyPhone: "", website: "",
   });
+
+  // Real-time validation errors
+  const errors = {
+    firstName: contact.firstName && hasDigit(contact.firstName) ? "Numbers not allowed" : "",
+    lastName: contact.lastName && hasDigit(contact.lastName) ? "Numbers not allowed" : "",
+    contactPhone: contact.phone && !isValidPhone(contact.phone) ? "Invalid phone format" : "",
+    companyName: company.companyName && company.companyName.length < 2 ? "Name too short" : "",
+    companyLocation: company.companyLocation && hasDigit(company.companyLocation) ? "Numbers not allowed in location" : "",
+    companyEmail: company.companyEmail && !isValidEmail(company.companyEmail) ? "Invalid email format" : "",
+    companyPhone: company.companyPhone && !isValidPhone(company.companyPhone) ? "Invalid phone format" : "",
+    website: company.website && !isValidUrl(company.website) ? "Must start with http:// or https://" : "",
+  };
+  const hasErrors = Object.values(errors).some(e => !!e);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -96,6 +115,7 @@ export default function EmployerProfile() {
 
   const handleSave = async () => {
     if (!userId) return;
+    if (hasErrors) return;
     setSaving(true);
 
     // Update personal info in profiles
@@ -130,12 +150,14 @@ export default function EmployerProfile() {
   };
 
   // ── Shared Styles ────────────────────────────────────────────────────────────
-  const inp = (editable = true, extraClasses = "") => `w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm text-gray-900 outline-none font-sans transition-colors duration-150 mb-0 ${editMode && editable ? "bg-white opacity-100 cursor-text" : "bg-gray-50 opacity-80 cursor-default"} ${extraClasses}`;
+  const inp = (editable = true, extraClasses = "", error = "") => `w-full px-3.5 py-2.5 border-[1.5px] rounded-lg text-sm text-gray-900 outline-none font-sans transition-colors duration-150 mb-0 ${error ? "border-red-400 focus:border-red-500" : "border-gray-200"} ${editMode && editable ? "bg-white opacity-100 cursor-text" : "bg-gray-50 opacity-80 cursor-default"} ${extraClasses}`;
   const lbl = "block text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-[0.06em] font-sans";
-  const field = (label: string, node: React.ReactNode) => (
+  const errText = (msg: string) => msg ? <p className="text-xs text-red-500 mt-1 m-0 font-medium">{msg}</p> : null;
+  const field = (label: string, node: React.ReactNode, error = "") => (
     <div>
       <label className={lbl}>{label}</label>
       {node}
+      {errText(error)}
     </div>
   );
 
@@ -207,9 +229,9 @@ export default function EmployerProfile() {
           <div className="bg-white border-[1.5px] border-gray-200 rounded-xl p-7">
             <h3 className="m-[0_0_20px] text-base font-bold text-gray-900 border-b-[1.5px] border-gray-100 pb-3.5">Contact Person</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {field("First Name", <input disabled={!editMode} value={contact.firstName} onChange={e => setContact(p => ({ ...p, firstName: e.target.value }))} className={inp()} />)}
-              {field("Last Name",  <input disabled={!editMode} value={contact.lastName}  onChange={e => setContact(p => ({ ...p, lastName: e.target.value }))}  className={inp()} />)}
-              {field("Personal Phone", <input disabled={!editMode} value={contact.phone} onChange={e => setContact(p => ({ ...p, phone: e.target.value }))} className={inp(true, "font-mono")} />)}
+              {field("First Name", <input disabled={!editMode} value={contact.firstName} onChange={e => setContact(p => ({ ...p, firstName: e.target.value }))} className={inp(true, "", errors.firstName)} />, errors.firstName)}
+              {field("Last Name",  <input disabled={!editMode} value={contact.lastName}  onChange={e => setContact(p => ({ ...p, lastName: e.target.value }))}  className={inp(true, "", errors.lastName)} />, errors.lastName)}
+              {field("Personal Phone", <input disabled={!editMode} value={contact.phone} onChange={e => setContact(p => ({ ...p, phone: e.target.value }))} className={inp(true, "font-mono", errors.contactPhone)} />, errors.contactPhone)}
               {field("Email (Read Only)", <input disabled value={contact.email} className={inp(false)} />)}
             </div>
           </div>
@@ -220,7 +242,8 @@ export default function EmployerProfile() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
               {field("Company Name",
-                <input disabled={!editMode} value={company.companyName} onChange={e => setCompany(p => ({ ...p, companyName: e.target.value }))} placeholder="e.g. Safaricom PLC" className={inp()} />
+                <input disabled={!editMode} value={company.companyName} onChange={e => setCompany(p => ({ ...p, companyName: e.target.value }))} placeholder="e.g. Safaricom PLC" className={inp(true, "", errors.companyName)} />,
+                errors.companyName
               )}
 
               {field("Industry",
@@ -231,7 +254,8 @@ export default function EmployerProfile() {
               )}
 
               {field("Company Location",
-                <input disabled={!editMode} value={company.companyLocation} onChange={e => setCompany(p => ({ ...p, companyLocation: e.target.value }))} placeholder="e.g. Nairobi, Kenya or Remote" className={inp()} />
+                <input disabled={!editMode} value={company.companyLocation} onChange={e => setCompany(p => ({ ...p, companyLocation: e.target.value }))} placeholder="e.g. Nairobi, Kenya or Remote" className={inp(true, "", errors.companyLocation)} />,
+                errors.companyLocation
               )}
 
               {field("Company Size",
@@ -242,15 +266,18 @@ export default function EmployerProfile() {
               )}
 
               {field("Company Email",
-                <input type="email" disabled={!editMode} value={company.companyEmail} onChange={e => setCompany(p => ({ ...p, companyEmail: e.target.value }))} placeholder="e.g. info@company.com" className={inp()} />
+                <input type="email" disabled={!editMode} value={company.companyEmail} onChange={e => setCompany(p => ({ ...p, companyEmail: e.target.value }))} placeholder="e.g. info@company.com" className={inp(true, "", errors.companyEmail)} />,
+                errors.companyEmail
               )}
 
               {field("Company Phone",
-                <input type="tel" disabled={!editMode} value={company.companyPhone} onChange={e => setCompany(p => ({ ...p, companyPhone: e.target.value }))} placeholder="e.g. +254 700 000 000" className={inp(true, "font-mono")} />
+                <input type="tel" disabled={!editMode} value={company.companyPhone} onChange={e => setCompany(p => ({ ...p, companyPhone: e.target.value }))} placeholder="e.g. +254 700 000 000" className={inp(true, "font-mono", errors.companyPhone)} />,
+                errors.companyPhone
               )}
 
               {field("Website",
-                <input type="url" disabled={!editMode} value={company.website} onChange={e => setCompany(p => ({ ...p, website: e.target.value }))} placeholder="e.g. https://company.com" className={inp()} />
+                <input type="url" disabled={!editMode} value={company.website} onChange={e => setCompany(p => ({ ...p, website: e.target.value }))} placeholder="e.g. https://company.com" className={inp(true, "", errors.website)} />,
+                errors.website
               )}
 
             </div>
@@ -258,11 +285,12 @@ export default function EmployerProfile() {
 
           {/* Save Button */}
           {editMode && (
-            <div className="flex justify-end">
+            <div className="flex items-center justify-end gap-4">
+              {hasErrors && <span className="text-xs text-red-500 font-medium">Fix errors above before saving</span>}
               <button
-                disabled={saving || loading}
+                disabled={saving || loading || hasErrors}
                 onClick={handleSave}
-                className={`px-7 py-3 bg-gray-900 text-white border-none rounded-lg text-[15px] font-bold font-sans transition-opacity ${saving ? "cursor-not-allowed opacity-70" : "cursor-pointer opacity-100"}`}
+                className={`px-7 py-3 bg-gray-900 text-white border-none rounded-lg text-[15px] font-bold font-sans transition-opacity ${(saving || hasErrors) ? "cursor-not-allowed opacity-70" : "cursor-pointer opacity-100"}`}
               >
                 {saving ? "Saving..." : "Save Changes"}
               </button>
