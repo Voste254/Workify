@@ -1,5 +1,5 @@
 import { Bell, LogOut, Menu, X, User } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import NotificationModal from "./NotificationModal";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -9,6 +9,23 @@ const TopBar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const notificationRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [open]);
 
   const { profile, signOut } = useAuth();
 
@@ -78,15 +95,16 @@ const TopBar = () => {
         )}
 
         {/* Notifications */}
-        <button
-          onClick={() => setOpen(!open)}
-          className="relative text-gray-600 hover:text-black"
-        >
-          <Bell />
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-sm px-1 rounded-full">
-            3
-          </span>
-        </button>
+        <div className="relative" ref={notificationRef}>
+          <button
+            onClick={() => setOpen(!open)}
+            className="relative text-gray-600 hover:text-black flex items-center"
+          >
+            <Bell size={24} />
+            <span className="absolute top-0 right-0 h-2.5 w-2.5 bg-red-500 border-2 border-white rounded-full"></span>
+          </button>
+          {open && <NotificationModal />}
+        </div>
 
         {/* Logout */}
         <button
@@ -147,9 +165,7 @@ const TopBar = () => {
               className="relative p-2 bg-gray-100 rounded-full text-gray-600"
             >
               <Bell size={20} />
-              <span className="absolute top-0 right-0 bg-red-500 text-white text-xs px-1.5 rounded-full">
-                3
-              </span>
+              <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 border border-white rounded-full"></span>
             </button>
           </div>
 
@@ -163,7 +179,6 @@ const TopBar = () => {
         </div>
       )}
 
-      {open && <NotificationModal />}
     </div>
   );
 };
