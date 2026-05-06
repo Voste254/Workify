@@ -1,5 +1,19 @@
 import { supabase } from "../lib/supabaseClient";
 
+export const checkEmailExists = async (email: string) => {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("email", email)
+    .maybeSingle();
+  
+  if (error) {
+    console.error("Error checking email existence:", error.message);
+    return false;
+  }
+  return !!data;
+};
+
 export type Role = "seeker" | "employer";
 
 export interface SignupFormData {

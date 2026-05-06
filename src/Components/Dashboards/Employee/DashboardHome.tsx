@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type JSX } from "react";
 import { MapPin, Briefcase, TrendingUp, Clock, ChevronRight, Bell, CheckCircle, AlertCircle, FileText, Star, Award, UserCheck } from "lucide-react";
 import JobCard from "./JobCard";
 import BlogPreview from "./BlogPreview";

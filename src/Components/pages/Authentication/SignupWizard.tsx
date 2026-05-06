@@ -1,20 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { signUpUser, type Role, type SignupFormData } from "../../../services/authService";
+import { signUpUser, checkEmailExists, type Role, type SignupFormData } from "../../../services/authService";
 
 const STEPS = ["Account", "Role", "Profile", "Confirm"];
 
-
-const Field = ({ label, error, children }: { label: string; error?: string | false; children: React.ReactNode }) => (
+const Field = ({ label, error, children, success }: { label: string; error?: string | false; children: React.ReactNode; success?: boolean }) => (
   <div>
     <label className="block text-xs font-semibold text-gray-700 uppercase tracking-widest mb-1.5">{label}</label>
-    {children}
-    {error && <p className="text-xs text-red-500 mt-1.5">{error}</p>}
+    <div className="relative">
+      {children}
+      {success && !error && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600 text-xs font-bold">✓</span>}
+      {error && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500 text-xs font-bold">✗</span>}
+    </div>
+    {error && <p className="text-xs text-red-500 mt-1.5 animate-pulse font-medium">{error}</p>}
   </div>
 );
 
 const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
-  <input {...props} className="w-full h-11 border border-gray-200 px-3 text-sm text-gray-900 outline-none focus:border-gray-900 transition placeholder:text-gray-400"/>
+  <input {...props} className="w-full h-11 border border-gray-200 px-3 text-sm text-gray-900 outline-none focus:border-gray-900 transition placeholder:text-gray-400" />
 );
 
 const Select = ({ children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) => (
@@ -39,7 +42,7 @@ function StepBar({ step }: { step: number }) {
             </div>
             <span className={`text-xs whitespace-nowrap ${i + 1 === step ? "text-gray-900 font-semibold" : "text-gray-400"}`}>{label}</span>
           </div>
-          {i < STEPS.length - 1 && <div className={`flex-1 h-px mx-1 mb-5 ${i + 1 < step ? "bg-green-600" : "bg-gray-200"}`}/>}
+          {i < STEPS.length - 1 && <div className={`flex-1 h-px mx-1 mb-5 ${i + 1 < step ? "bg-green-600" : "bg-gray-200"}`} />}
         </div>
       ))}
     </div>
@@ -56,11 +59,13 @@ export default function Signup() {
   const [submitting, setSubmitting] = useState(false);
   const [authError, setAuthError] = useState("");
   const [attemptedSteps, setAttemptedSteps] = useState({ 1: false, 2: false, 3: false });
+  const [emailTaken, setEmailTaken] = useState(false);
+  const [checkingEmail, setCheckingEmail] = useState(false);
 
   const [form, setForm] = useState<SignupFormData & { confirm: string }>({
-    fname:"", lname:"", email:"", phone:"", password:"", confirm:"",
-    profession:"", location:"", emptype:"", bio:"",
-    company:"", industry:"", size:"", elocation:"",
+    fname: "", lname: "", email: "", phone: "", password: "", confirm: "",
+    profession: "", location: "", emptype: "", bio: "",
+    company: "", industry: "", size: "", elocation: "",
     terms: false, marketing: true,
   });
 
@@ -70,6 +75,21 @@ export default function Signup() {
 
   const isSeeker = roles.includes("seeker");
   const isEmployer = roles.includes("employer");
+
+  // Real-time Email Check
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (isValidEmail(form.email)) {
+        setCheckingEmail(true);
+        const exists = await checkEmailExists(form.email);
+        setEmailTaken(exists);
+        setCheckingEmail(false);
+      } else {
+        setEmailTaken(false);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [form.email]);
 
   // ----- Validation helpers -----
   const isValidEmail = (email: string) => {
@@ -87,10 +107,10 @@ export default function Signup() {
 
   // ----- Step validity -----
   const pwValid = form.password.length >= 8 && /[A-Z]/.test(form.password) && /[a-z]/.test(form.password) && /[0-9]/.test(form.password) && /[^A-Za-z0-9]/.test(form.password);
-  const step1Valid = form.fname && form.lname && isValidEmail(form.email) && isValidPhone(form.phone) && pwValid && form.password === form.confirm;
+  const step1Valid = form.fname && form.lname && isValidEmail(form.email) && !emailTaken && isValidPhone(form.phone) && pwValid && form.password === form.confirm;
   const step2Valid = roles.length > 0;
   const step3Valid = (!isSeeker || (form.profession && form.location && !hasDigits(form.profession) && !hasDigits(form.location))) &&
-                     (!isEmployer || (form.company && form.industry && form.elocation && !hasDigits(form.elocation)));
+    (!isEmployer || (form.company && form.industry && form.elocation && !hasDigits(form.elocation)));
 
   const roleCards: { role: Role; icon: string; title: string; desc: string }[] = [
     { role: "seeker", icon: "🔍", title: "Job Seeker", desc: "Find jobs, build profile, track applications" },
@@ -160,28 +180,43 @@ export default function Signup() {
       <div className="flex items-center justify-center bg-white p-8 overflow-y-auto">
         <div className="w-full max-w-sm py-8">
           <div className="lg:hidden text-xl font-bold text-gray-900 mb-8">Workify</div>
-          <StepBar step={step}/>
+          <StepBar step={step} />
 
           {/* ── Step 1: Account ── */}
           {step === 1 && <>
             <h2 className="text-2xl font-bold text-gray-900 mb-1">Create account</h2>
             <p className="text-sm text-gray-500 mb-6">Already have one?
-            <Link to='/login'><button className="text-gray-900 font-semibold hover:underline">Sign in</button></Link> </p>
-         
-           <div className="space-y-4">
+              <Link to='/login'><button className="text-gray-900 font-semibold hover:underline">Sign in</button></Link> </p>
+
+            <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
-                <Field label="First name" error={attemptedSteps[1] && !form.fname && "Required"}><Input placeholder="John" value={form.fname} onChange={e => set("fname", e.target.value.replace(/[^a-zA-Z\s-]/g, ""))}/></Field>
-                <Field label="Last name" error={attemptedSteps[1] && !form.lname && "Required"}><Input placeholder="Doe" value={form.lname} onChange={e => set("lname", e.target.value.replace(/[^a-zA-Z\s-]/g, ""))}/></Field>
+                <Field label="First name" error={attemptedSteps[1] && !form.fname && "Required"} success={!!form.fname}>
+                  <Input placeholder="John" value={form.fname} onChange={e => set("fname", e.target.value.replace(/[^a-zA-Z\s-]/g, ""))} />
+                </Field>
+                <Field label="Last name" error={attemptedSteps[1] && !form.lname && "Required"} success={!!form.lname}>
+                  <Input placeholder="Doe" value={form.lname} onChange={e => set("lname", e.target.value.replace(/[^a-zA-Z\s-]/g, ""))} />
+                </Field>
               </div>
-              <Field label="Email" error={(form.email && !isValidEmail(form.email)) ? "Invalid email format" : (attemptedSteps[1] && !form.email && "Required")}>
-                <Input type="email" placeholder="you@example.com" required value={form.email} onChange={e => set("email", e.target.value)}/>
+
+              <Field
+                label="Email"
+                error={(form.email && !isValidEmail(form.email)) ? "Invalid email format" : (emailTaken ? "This email is already in use" : (attemptedSteps[1] && !form.email && "Required"))}
+                success={isValidEmail(form.email) && !emailTaken && !checkingEmail}
+              >
+                <Input type="email" placeholder="you@example.com" value={form.email} onChange={e => set("email", e.target.value)} />
+                {checkingEmail && <div className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin" />}
               </Field>
-              <Field label="Phone" error={(form.phone && !isValidPhone(form.phone)) ? "Phone must contain 10–13 digits" : (attemptedSteps[1] && !form.phone && "Required")}>
-                <Input type="tel" placeholder="+254 7xx xxx xxx" value={form.phone} onChange={e => set("phone", e.target.value.replace(/[^0-9+\s-]/g, ""))}/>
+
+              <Field
+                label="Phone"
+                error={(form.phone && !isValidPhone(form.phone)) ? "Phone must contain 10–13 digits" : (attemptedSteps[1] && !form.phone && "Required")}
+                success={isValidPhone(form.phone)}
+              >
+                <Input type="tel" placeholder="+254 7xx xxx xxx" value={form.phone} onChange={e => set("phone", e.target.value.replace(/[^0-9+\s-]/g, ""))} />
               </Field>
               <Field label="Password" error={attemptedSteps[1] && !pwValid && "Password must meet all rules below"}>
                 <div className="relative">
-                  <Input type={showPw ? "text" : "password"} placeholder="Min. 8 characters" value={form.password} onChange={e => set("password", e.target.value)}/>
+                  <Input type={showPw ? "text" : "password"} placeholder="Min. 8 characters" value={form.password} onChange={e => set("password", e.target.value)} />
                   <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-mono">{showPw ? "hide" : "show"}</button>
                 </div>
                 {form.password && (() => {
@@ -200,7 +235,7 @@ export default function Signup() {
                           <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-200 ${met ? "bg-green-500 border-green-500" : "border-gray-300 bg-white"}`}>
                             {met && (
                               <svg className="w-2 h-2" viewBox="0 0 10 8" fill="none">
-                                <path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                               </svg>
                             )}
                           </div>
@@ -213,7 +248,7 @@ export default function Signup() {
               </Field>
               <Field label="Confirm password" error={attemptedSteps[1] && form.password !== form.confirm && "Passwords must match"}>
                 <div className="relative">
-                  <Input type="password" placeholder="Repeat your password" value={form.confirm} onChange={e => set("confirm", e.target.value)}/>
+                  <Input type="password" placeholder="Repeat your password" value={form.confirm} onChange={e => set("confirm", e.target.value)} />
                   {form.confirm && <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono ${form.confirm === form.password ? "text-green-600" : "text-red-500"}`}>{form.confirm === form.password ? "✓" : "✗"}</span>}
                 </div>
               </Field>
@@ -229,7 +264,7 @@ export default function Signup() {
             <div className="grid grid-cols-2 gap-3 mb-4">
               {roleCards.map(({ role, icon, title, desc }) => (
                 <div key={role} onClick={() => toggleRole(role)} className={`border-2 p-5 cursor-pointer transition relative ${roles.includes(role) ? "border-gray-900 bg-gray-50" : "border-gray-200 hover:border-gray-300"}`}>
-                  {roles.includes(role) && <div className="absolute top-2 right-2 w-4 h-4 bg-gray-900 flex items-center justify-center"><svg className="w-2.5 h-2.5" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5"/></svg></div>}
+                  {roles.includes(role) && <div className="absolute top-2 right-2 w-4 h-4 bg-gray-900 flex items-center justify-center"><svg className="w-2.5 h-2.5" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" /></svg></div>}
                   <div className="text-2xl mb-3">{icon}</div>
                   <div className="text-sm font-semibold text-gray-900 mb-1">{title}</div>
                   <div className="text-xs text-gray-400 leading-relaxed">{desc}</div>
@@ -249,42 +284,42 @@ export default function Signup() {
             <div className="space-y-4">
               {isSeeker && <>
                 {isEmployer && <div className="text-xs font-semibold text-gray-900 uppercase tracking-widest border-b pb-2 mb-4">Job Seeker Profile</div>}
-                <Field label="Profession / Service offered" error={(form.profession && hasDigits(form.profession)) ? "Should not contain digits" : (attemptedSteps[3] && !form.profession && "Required")}>
-                  <Input placeholder="e.g. Graphic Designer, Plumber" value={form.profession} onChange={e => set("profession", e.target.value.replace(/\d/g, ''))}/>
+                <Field label="Profession / Service offered" error={(form.profession && hasDigits(form.profession)) ? "Should not contain digits" : (attemptedSteps[3] && !form.profession && "Required")} success={!!form.profession && !hasDigits(form.profession)}>
+                  <Input placeholder="e.g. Graphic Designer, Plumber" value={form.profession} onChange={e => set("profession", e.target.value.replace(/\d/g, ''))} />
                 </Field>
-                <Field label="Location" error={(form.location && hasDigits(form.location)) ? "Should not contain digits" : (attemptedSteps[3] && !form.location && "Required")}>
+                <Field label="Location" error={(form.location && hasDigits(form.location)) ? "Should not contain digits" : (attemptedSteps[3] && !form.location && "Required")} success={!!form.location && !hasDigits(form.location)}>
                   <Input placeholder="e.g. Nairobi, Kenya or remote" value={form.location} onChange={e => set("location", e.target.value.replace(/\d/g, ''))} />
                 </Field>
-                <Field label="Employment type preference">
+                <Field label="Employment type preference" success={!!form.emptype}>
                   <Select value={form.emptype} onChange={e => set("emptype", e.target.value)}>
                     <option value="">Select preference</option>
-                    {["Corporate – Permanent","Corporate – Contract","Casual – Daily","Casual – Hourly","Open to all"].map(t => <option key={t}>{t}</option>)}
+                    {["Corporate – Permanent", "Corporate – Contract", "Casual – Daily", "Casual – Hourly", "Open to all"].map(t => <option key={t}>{t}</option>)}
                   </Select>
                 </Field>
-                <Field label="Brief bio (optional)">
-                  <textarea maxLength={200} value={form.bio} onChange={e => set("bio", e.target.value)} placeholder="Describe your experience..." className="w-full border border-gray-200 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-gray-900 transition placeholder:text-gray-400 resize-none h-20"/>
+                <Field label="Brief bio (optional)" success={!!form.bio}>
+                  <textarea maxLength={200} value={form.bio} onChange={e => set("bio", e.target.value)} placeholder="Describe your experience..." className="w-full border border-gray-200 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-gray-900 transition placeholder:text-gray-400 resize-none h-20" />
                   <p className="text-xs text-gray-400 mt-1">{form.bio.length}/200</p>
                 </Field>
               </>}
               {isEmployer && <>
                 {isSeeker && <div className="text-xs font-semibold text-gray-900 uppercase tracking-widest border-b pb-2 mb-4 mt-8">Company Profile</div>}
-                <Field label="Company name" error={attemptedSteps[3] && !form.company && "Required"}>
-                  <Input placeholder="e.g. Safaricom PLC" value={form.company} onChange={e => set("company", e.target.value)}/>
+                <Field label="Company name" error={attemptedSteps[3] && !form.company && "Required"} success={!!form.company}>
+                  <Input placeholder="e.g. Safaricom PLC" value={form.company} onChange={e => set("company", e.target.value)} />
                 </Field>
-                <Field label="Industry" error={attemptedSteps[3] && !form.industry && "Required"}>
+                <Field label="Industry" error={attemptedSteps[3] && !form.industry && "Required"} success={!!form.industry}>
                   <Select value={form.industry} onChange={e => set("industry", e.target.value)}>
                     <option value="">Select industry</option>
-                    {["Technology","Finance & Banking","Telecommunications","Construction","Hospitality","Healthcare","Media & Creative","Logistics","Agriculture","Education","Other"].map(i => <option key={i}>{i}</option>)}
+                    {["Technology", "Finance & Banking", "Telecommunications", "Construction", "Hospitality", "Healthcare", "Media & Creative", "Logistics", "Agriculture", "Education", "Other"].map(i => <option key={i}>{i}</option>)}
                   </Select>
                 </Field>
                 <div className="grid grid-cols-2 gap-3">
-                  <Field label="Company size">
+                  <Field label="Company size" success={!!form.size}>
                     <Select value={form.size} onChange={e => set("size", e.target.value)}>
                       <option value="">Select</option>
-                      {["1–10","11–50","51–200","201–1,000","1,000+"].map(s => <option key={s}>{s} employees</option>)}
+                      {["1–10", "11–50", "51–200", "201–1,000", "1,000+"].map(s => <option key={s}>{s} employees</option>)}
                     </Select>
                   </Field>
-                  <Field label="Location" error={(form.elocation && hasDigits(form.elocation)) ? "Should not contain digits" : (attemptedSteps[3] && !form.elocation && "Required")}>
+                  <Field label="Location" error={(form.elocation && hasDigits(form.elocation)) ? "Should not contain digits" : (attemptedSteps[3] && !form.elocation && "Required")} success={!!form.elocation && !hasDigits(form.elocation)}>
                     <Input placeholder="e.g. Nairobi, Kenya or remote" value={form.elocation} onChange={e => set("elocation", e.target.value.replace(/\d/g, ''))} />
                   </Field>
                 </div>
@@ -315,11 +350,11 @@ export default function Signup() {
             </div>
             <div className="space-y-3 mb-5">
               <label className="flex items-start gap-2.5 cursor-pointer">
-                <input type="checkbox" checked={form.terms} onChange={e => set("terms", e.target.checked)} className="accent-gray-900 mt-0.5 w-4 h-4 flex-shrink-0"/>
+                <input type="checkbox" checked={form.terms} onChange={e => set("terms", e.target.checked)} className="accent-gray-900 mt-0.5 w-4 h-4 flex-shrink-0" />
                 <span className="text-sm text-gray-600">I agree to the <a href="#" className="text-gray-900 font-semibold underline">Terms of Service</a> and <a href="#" className="text-gray-900 font-semibold underline">Privacy Policy</a></span>
               </label>
               <label className="flex items-start gap-2.5 cursor-pointer">
-                <input type="checkbox" checked={form.marketing} onChange={e => set("marketing", e.target.checked)} className="accent-gray-900 mt-0.5 w-4 h-4 flex-shrink-0"/>
+                <input type="checkbox" checked={form.marketing} onChange={e => set("marketing", e.target.checked)} className="accent-gray-900 mt-0.5 w-4 h-4 flex-shrink-0" />
                 <span className="text-sm text-gray-600">Send me job alerts and career insights</span>
               </label>
             </div>
