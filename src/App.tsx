@@ -14,6 +14,8 @@ import Signup from "./Components/pages/Authentication/SignupWizard";
 import Employer from "./Components/Dashboards/Employer/EmployerDashboardLayout";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./Components/ProtectedRoute";
+import AdminProtectedRoute from "./Components/AdminProtectedRoute";
+import AdminDashboard from "./Components/Dashboards/Admin/AdminDashboard";
 
 function Landing() {
   return (
@@ -44,6 +46,11 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Employee />} />
           <Route path="/EmployerDashboard" element={<Employer />} />
+        </Route>
+
+        {/* Admin routes */}
+        <Route element={<AdminProtectedRoute />}>
+          <Route path="/admin" element={<AdminDashboard />} />
         </Route>
       </Routes>
     </AuthProvider>

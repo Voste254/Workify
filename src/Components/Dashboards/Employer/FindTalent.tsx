@@ -175,12 +175,19 @@ export default function FindTalent() {
 
   useEffect(() => {
     (async () => {
-      const { data, error } = await supabase
-        .from("services")
-        .select(`id, title, rate, rate_type, skills, availability, location, rating, number_of_reviews, profiles(id, first_name, last_name, bio)`);
-      if (error) { console.error("FindTalent:", error.message); return; }
+      const [{ data: servicesData, error: servicesError }, { data: savedData }] = await Promise.all([
+        supabase
+          .from("services")
+          .select(`id, title, rate, rate_type, skills, availability, location, rating, number_of_reviews, profiles(id, first_name, last_name, bio)`),
+        user ? supabase.from("saved_items").select("service_id").eq("user_id", user.id).not("service_id", "is", null) : Promise.resolve({ data: [] })
+      ]);
+
+      if (servicesError) { console.error("FindTalent:", servicesError.message); return; }
+      
+      const savedIds = new Set((savedData || []).map((s: any) => s.service_id));
       const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='1.5'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
-      setCandidates((data || []).map((s: any) => {
+      
+      setCandidates((servicesData || []).map((s: any) => {
         const p = Array.isArray(s.profiles) ? s.profiles[0] : s.profiles;
         const days: string[] = s.availability || [];
         const available = days.length > 0 ? days.map((d: string) => d.slice(0, 3)).join(", ") : "—";
@@ -200,12 +207,12 @@ export default function FindTalent() {
           image:    PLACEHOLDER,
           available,
           bio:      p?.bio || "",
-          isSaved:  false,
+          isSaved:  savedIds.has(s.id),
           userId:   p?.id || "",
         };
       }));
     })();
-  }, []);
+  }, [user]);
 
   const q = search.toLowerCase();
   const filtered = useMemo(() => candidates
@@ -213,7 +220,21 @@ export default function FindTalent() {
     [candidates, q, filterRole]);
 
   const selected = candidates.find(c => c.id === selectedId) || null;
-  const toggleBookmark = (id: string) => setCandidates(p => p.map(c => c.id === id ? { ...c, isSaved: !c.isSaved } : c));
+
+  const toggleBookmark = async (id: string) => {
+    if (!user) return;
+    const cand = candidates.find(c => c.id === id);
+    if (!cand) return;
+
+    const newSaved = !cand.isSaved;
+    setCandidates(prev => prev.map(c => c.id === id ? { ...c, isSaved: newSaved } : c));
+
+    if (newSaved) {
+      await supabase.from("saved_items").insert({ user_id: user.id, service_id: id });
+    } else {
+      await supabase.from("saved_items").delete().eq("user_id", user.id).eq("service_id", id);
+    }
+  };
 
   const handleRate = async (id: string, newRating: number) => {
     if (ratedIds.includes(id)) return;

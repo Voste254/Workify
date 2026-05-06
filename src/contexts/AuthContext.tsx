@@ -14,6 +14,7 @@ export interface Profile {
   email: string;
   phone: string | null;
   role: UserRole[];
+  is_admin: boolean;
   // seeker fields
   profession: string | null;
   seeker_location: string | null;
@@ -57,7 +58,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq("id", userId)
       .single();
 
-    if (!error && data) {
+    if (error) {
+      console.error("Error fetching profile:", error.message, error.details);
+      setProfile(null);
+    } else if (data) {
       setProfile(data as Profile);
     } else {
       setProfile(null);
