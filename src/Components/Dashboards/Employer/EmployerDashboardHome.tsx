@@ -38,6 +38,38 @@ export default function EmployerDashboardHome({ setActivePage }: EmployerDashboa
   const { profile, user } = useAuth();
   const [recentCandidates, setRecentCandidates] = useState<any[]>([]);
   const [loadingApps, setLoadingApps] = useState(true);
+  const [stats, setStats] = useState({
+    activeJobs: 0,
+    newApps: 0,
+    interviews: 0,
+    shortlisted: 0
+  });
+
+  // Fetch actual stats from supabase
+  useEffect(() => {
+    async function fetchStats() {
+      if (!user?.id) return;
+      const [
+        { count: activeJobs },
+        { count: newApps },
+        { count: interviews },
+        { count: shortlisted }
+      ] = await Promise.all([
+        supabase.from("jobs").select("*", { count: "exact", head: true }).eq("employer_id", user.id).eq("status", "active"),
+        supabase.from("applications").select("*", { count: "exact", head: true }).eq("employer_id", user.id),
+        supabase.from("applications").select("*", { count: "exact", head: true }).eq("employer_id", user.id).eq("stage", "interview"),
+        supabase.from("saved_items").select("*", { count: "exact", head: true }).eq("user_id", user.id)
+      ]);
+
+      setStats({
+        activeJobs: activeJobs || 0,
+        newApps: newApps || 0,
+        interviews: interviews || 0,
+        shortlisted: shortlisted || 0
+      });
+    }
+    fetchStats();
+  }, [user?.id]);
 
   // Fetch actual recent applications from supabase
   useEffect(() => {
@@ -67,12 +99,12 @@ export default function EmployerDashboardHome({ setActivePage }: EmployerDashboa
     fetchRecentApps();
   }, [user?.id]);
 
-  // Mock Data Definition for other metrics
-  const STATS = [
-    { title: "Active Jobs", value: "3", icon: Ico.briefcase, bgClass: "bg-blue-50", textClass: "text-blue-600" },
-    { title: "New Applications", value: "128", icon: Ico.users, bgClass: "bg-amber-50", textClass: "text-amber-600" },
-    { title: "Interviews Scheduled", value: "14", icon: Ico.calendar, bgClass: "bg-lime-100", textClass: "text-lime-600" },
-    { title: "Profile Views", value: "2.4k", icon: Ico.trending, bgClass: "bg-purple-100", textClass: "text-purple-600" },
+  // Stats Data Definition
+  const STAT_CARDS = [
+    { title: "Active Jobs", value: stats.activeJobs, icon: Ico.briefcase, bgClass: "bg-blue-50", textClass: "text-blue-600" },
+    { title: "Total Applications", value: stats.newApps, icon: Ico.users, bgClass: "bg-amber-50", textClass: "text-amber-600" },
+    { title: "Interviews", value: stats.interviews, icon: Ico.calendar, bgClass: "bg-lime-100", textClass: "text-lime-600" },
+    { title: "Shortlisted", value: stats.shortlisted, icon: Ico.trending, bgClass: "bg-purple-100", textClass: "text-purple-600" },
   ];
 
   const lineData = useMemo(() => [
@@ -127,7 +159,7 @@ export default function EmployerDashboardHome({ setActivePage }: EmployerDashboa
 
       {/* ── Key Metrics (KPIs) ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {STATS.map((stat, i) => (
+        {STAT_CARDS.map((stat, i) => (
           <div key={i} className="bg-white p-5 cursor-pointer border-[1.5px] border-gray-200 rounded-[10px]">
             <div className="flex justify-between items-start mb-4">
               <div className={`p-3 rounded-xl flex items-center justify-center ${stat.bgClass} ${stat.textClass}`}>

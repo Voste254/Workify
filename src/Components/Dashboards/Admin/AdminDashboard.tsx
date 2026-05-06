@@ -71,8 +71,11 @@ export default function AdminDashboard() {
         supabase.from("support_requests").select("*").order("created_at", { ascending: false })
       ]);
 
-      if (userErr) console.error("User Fetch Error:", userErr.message);
-      if (jobErr) console.error("Job Fetch Error:", jobErr.message);
+      if (userErr) console.error("User Count Error:", userErr.message);
+      if (jobErr) console.error("Job Count Error:", jobErr.message);
+      if (appErr) console.error("App Count Error:", appErr.message);
+      if (usersErr) console.error("Users Fetch Error:", usersErr.message);
+      if (jobsErr) console.error("Jobs Fetch Error:", jobsErr.message);
       if (supportErr) console.error("Support Fetch Error:", supportErr.message);
 
       setStats({
@@ -250,277 +253,283 @@ export default function AdminDashboard() {
         </header>
 
         <div className="p-8">
-          {/* Overview Tab */}
-          {activeTab === "overview" && (
-            <div className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard icon={Users} label="Total Users" value={stats.totalUsers} color="bg-blue-600" />
-                <StatCard icon={Briefcase} label="Active Jobs" value={stats.totalJobs} color="bg-emerald-600" />
-                <StatCard icon={FileText} label="Applications" value={stats.totalApplications} color="bg-amber-600" />
-                <StatCard icon={Activity} label="Active Sessions" value={stats.activeUsers} color="bg-indigo-600" />
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-                  <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-                    <TrendingUp className="text-emerald-500" size={20} />
-                    Platform Activity
-                  </h3>
-                  <div className="h-64 flex items-center justify-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                    <p className="text-gray-400 text-sm italic">Activity chart coming soon</p>
-                  </div>
-                </div>
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-                  <h3 className="text-lg font-bold text-gray-900 mb-6">Recent Applications</h3>
-                  <div className="space-y-4">
-                    {stats.totalApplications === 0 ? (
-                      <p className="text-gray-400 text-center py-8 text-sm italic">No applications yet</p>
-                    ) : (
-                      <p className="text-gray-400 text-center py-8 text-sm italic">Application feed loading...</p>
-                    )}
-                  </div>
-                </div>
-              </div>
+          {loading ? (
+            <div className="min-h-[400px] flex flex-col items-center justify-center gap-4">
+              <div className="w-12 h-12 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin" />
+              <p className="text-gray-500 font-medium animate-pulse">Syncing system data...</p>
             </div>
-          )}
+          ) : (
+            <>
+              {/* Overview Tab */}
+              {activeTab === "overview" && (
+                <div className="space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <StatCard icon={Users} label="Total Users" value={stats.totalUsers} color="bg-blue-600" />
+                    <StatCard icon={Briefcase} label="Active Jobs" value={stats.totalJobs} color="bg-emerald-600" />
+                    <StatCard icon={FileText} label="Applications" value={stats.totalApplications} color="bg-amber-600" />
+                    <StatCard icon={Activity} label="Active Sessions" value={stats.activeUsers} color="bg-indigo-600" />
+                  </div>
 
-          {/* User Management Tab */}
-          {activeTab === "users" && (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-gray-50/50 border-b border-gray-100">
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">User</th>
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Roles</th>
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Location</th>
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {filteredUsers.map((u) => (
-                    <tr key={u.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center font-bold text-gray-900 border border-gray-200">
-                            {u.first_name?.[0]}{u.last_name?.[0]}
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-gray-900">{u.first_name} {u.last_name}</p>
-                            <p className="text-xs text-gray-500">{u.email}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-wrap gap-1.5">
-                          {u.role?.map((r: string) => (
-                            <span key={r} className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-100">
-                              {r}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                      <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                        <TrendingUp className="text-emerald-500" size={20} />
+                        Platform Activity
+                      </h3>
+                      <div className="h-64 flex items-center justify-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                        <p className="text-gray-400 text-sm italic">Activity chart coming soon</p>
+                      </div>
+                    </div>
+                    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                      <h3 className="text-lg font-bold text-gray-900 mb-6">Recent Applications</h3>
+                      <div className="space-y-4">
+                        {stats.totalApplications === 0 ? (
+                          <p className="text-gray-400 text-center py-8 text-sm italic">No applications yet</p>
+                        ) : (
+                          <p className="text-gray-400 text-center py-8 text-sm italic">Application feed loading...</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* User Management Tab */}
+              {activeTab === "users" && (
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-gray-50/50 border-b border-gray-100">
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">User</th>
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Roles</th>
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Location</th>
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {filteredUsers.map((u) => (
+                        <tr key={u.id} className="hover:bg-gray-50/50 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center font-bold text-gray-900 border border-gray-200">
+                                {u.first_name?.[0]}{u.last_name?.[0]}
+                              </div>
+                              <div>
+                                <p className="text-sm font-bold text-gray-900">{u.first_name} {u.last_name}</p>
+                                <p className="text-xs text-gray-500">{u.email}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-wrap gap-1.5">
+                              {u.role?.map((r: string) => (
+                                <span key={r} className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-100">
+                                  {r}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <p className="text-sm text-gray-600">{u.seeker_location || u.company_location || "—"}</p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${u.status === "deactivated"
+                                ? "bg-red-50 text-red-600 border border-red-100"
+                                : "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                              }`}>
+                              {u.status === "deactivated" ? <XCircle size={14} /> : <CheckCircle size={14} />}
+                              {u.status === "deactivated" ? "Deactivated" : "Active"}
                             </span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <button
+                              onClick={() => handleDeactivate(u.id, u.status)}
+                              className={`p-2 rounded-lg transition-colors ${u.status === "deactivated"
+                                  ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
+                                  : "bg-red-50 text-red-600 hover:bg-red-100"
+                                }`}
+                              title={u.status === "deactivated" ? "Reactivate" : "Deactivate"}
+                            >
+                              <Power size={18} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Job Management Tab */}
+              {activeTab === "jobs" && (
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-gray-50/50 border-b border-gray-100">
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Job Title</th>
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Company</th>
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Type</th>
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {filteredJobs.map((j) => (
+                        <tr key={j.id} className="hover:bg-gray-50/50 transition-colors">
+                          <td className="px-6 py-4">
+                            <p className="text-sm font-bold text-gray-900">{j.title}</p>
+                            <p className="text-xs text-gray-500">{new Date(j.created_at).toLocaleDateString()}</p>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600">{j.company_name || "—"}</td>
+                          <td className="px-6 py-4">
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-gray-100 text-gray-600 border border-gray-200">
+                              {j.job_type}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <button
+                              onClick={() => handleDeleteJob(j.id)}
+                              className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                              title="Delete Posting"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Support Requests Tab */}
+              {activeTab === "support" && (
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-gray-50/50 border-b border-gray-100">
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">User / Email</th>
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Subject</th>
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Message</th>
+                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {filteredSupport.length === 0 ? (
+                        <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-400 text-sm italic">No support requests found.</td></tr>
+                      ) : filteredSupport.map((s) => (
+                        <tr key={s.id} className="hover:bg-gray-50/50 transition-colors">
+                          <td className="px-6 py-4">
+                            <p className="text-sm font-bold text-gray-900">{s.name || "Anonymous"}</p>
+                            <p className="text-xs text-gray-500">{s.email}</p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-100">
+                              {s.subject}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <p className="text-sm text-gray-600 line-clamp-2 max-w-xs">{s.message}</p>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <p className="text-xs text-gray-400 font-mono">{new Date(s.created_at).toLocaleDateString()}</p>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Create Account Tab */}
+              {activeTab === "create-account" && (
+                <div className="max-w-2xl mx-auto">
+                  <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+                    <div className="mb-8">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Manually Create User</h3>
+                      <p className="text-sm text-gray-500 leading-relaxed">
+                        Fill out the details below to create a new user account. A verification email will be sent to the user's email address.
+                      </p>
+                    </div>
+
+                    <form onSubmit={handleCreateAccount} className="space-y-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">First Name</label>
+                          <input
+                            required
+                            type="text"
+                            value={newAccount.firstName}
+                            onChange={e => setNewAccount({ ...newAccount, firstName: e.target.value })}
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gray-900 outline-none transition-all"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Last Name</label>
+                          <input
+                            required
+                            type="text"
+                            value={newAccount.lastName}
+                            onChange={e => setNewAccount({ ...newAccount, lastName: e.target.value })}
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gray-900 outline-none transition-all"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Email Address</label>
+                        <input
+                          required
+                          type="email"
+                          value={newAccount.email}
+                          onChange={e => setNewAccount({ ...newAccount, email: e.target.value })}
+                          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gray-900 outline-none transition-all"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Initial Password</label>
+                        <input
+                          required
+                          type="password"
+                          value={newAccount.password}
+                          onChange={e => setNewAccount({ ...newAccount, password: e.target.value })}
+                          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gray-900 outline-none transition-all"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Initial Role</label>
+                        <div className="flex gap-4">
+                          {["seeker", "employer"].map(r => (
+                            <button
+                              key={r}
+                              type="button"
+                              onClick={() => setNewAccount({ ...newAccount, role: r as any })}
+                              className={`flex-1 py-3 rounded-xl text-sm font-bold border transition-all ${newAccount.role === r
+                                  ? "bg-gray-900 text-white border-gray-900"
+                                  : "bg-white text-gray-500 border-gray-200 hover:border-gray-400"
+                                }`}
+                            >
+                              {r.charAt(0).toUpperCase() + r.slice(1)}
+                            </button>
                           ))}
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="text-sm text-gray-600">{u.seeker_location || u.company_location || "—"}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${
-                          u.status === "deactivated" 
-                            ? "bg-red-50 text-red-600 border border-red-100" 
-                            : "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                        }`}>
-                          {u.status === "deactivated" ? <XCircle size={14} /> : <CheckCircle size={14} />}
-                          {u.status === "deactivated" ? "Deactivated" : "Active"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button 
-                          onClick={() => handleDeactivate(u.id, u.status)}
-                          className={`p-2 rounded-lg transition-colors ${
-                            u.status === "deactivated" 
-                              ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100" 
-                              : "bg-red-50 text-red-600 hover:bg-red-100"
-                          }`}
-                          title={u.status === "deactivated" ? "Reactivate" : "Deactivate"}
-                        >
-                          <Power size={18} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                      </div>
 
-          {/* Job Management Tab */}
-          {activeTab === "jobs" && (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-gray-50/50 border-b border-gray-100">
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Job Title</th>
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Company</th>
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Type</th>
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {filteredJobs.map((j) => (
-                    <tr key={j.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <p className="text-sm font-bold text-gray-900">{j.title}</p>
-                        <p className="text-xs text-gray-500">{new Date(j.created_at).toLocaleDateString()}</p>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{j.company_name || "—"}</td>
-                      <td className="px-6 py-4">
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-gray-100 text-gray-600 border border-gray-200">
-                          {j.job_type}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button 
-                          onClick={() => handleDeleteJob(j.id)}
-                          className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
-                          title="Delete Posting"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* Support Requests Tab */}
-          {activeTab === "support" && (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-gray-50/50 border-b border-gray-100">
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">User / Email</th>
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Subject</th>
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Message</th>
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {filteredSupport.length === 0 ? (
-                    <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-400 text-sm italic">No support requests found.</td></tr>
-                  ) : filteredSupport.map((s) => (
-                    <tr key={s.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <p className="text-sm font-bold text-gray-900">{s.name || "Anonymous"}</p>
-                        <p className="text-xs text-gray-500">{s.email}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-100">
-                          {s.subject}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="text-sm text-gray-600 line-clamp-2 max-w-xs">{s.message}</p>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <p className="text-xs text-gray-400 font-mono">{new Date(s.created_at).toLocaleDateString()}</p>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* Create Account Tab */}
-          {activeTab === "create-account" && (
-            <div className="max-w-2xl mx-auto">
-              <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
-                <div className="mb-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Manually Create User</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">
-                    Fill out the details below to create a new user account. A verification email will be sent to the user's email address.
-                  </p>
+                      <button
+                        disabled={creating}
+                        type="submit"
+                        className="w-full py-4 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 disabled:bg-gray-400 transition-all shadow-lg shadow-gray-200 flex items-center justify-center gap-2"
+                      >
+                        {creating && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                        {creating ? "Creating..." : "Create Account"}
+                      </button>
+                    </form>
+                  </div>
                 </div>
-
-                <form onSubmit={handleCreateAccount} className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">First Name</label>
-                      <input 
-                        required
-                        type="text" 
-                        value={newAccount.firstName}
-                        onChange={e => setNewAccount({...newAccount, firstName: e.target.value})}
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gray-900 outline-none transition-all"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Last Name</label>
-                      <input 
-                        required
-                        type="text" 
-                        value={newAccount.lastName}
-                        onChange={e => setNewAccount({...newAccount, lastName: e.target.value})}
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gray-900 outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Email Address</label>
-                    <input 
-                      required
-                      type="email" 
-                      value={newAccount.email}
-                      onChange={e => setNewAccount({...newAccount, email: e.target.value})}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gray-900 outline-none transition-all"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Initial Password</label>
-                    <input 
-                      required
-                      type="password" 
-                      value={newAccount.password}
-                      onChange={e => setNewAccount({...newAccount, password: e.target.value})}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gray-900 outline-none transition-all"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Initial Role</label>
-                    <div className="flex gap-4">
-                      {["seeker", "employer"].map(r => (
-                        <button
-                          key={r}
-                          type="button"
-                          onClick={() => setNewAccount({...newAccount, role: r as any})}
-                          className={`flex-1 py-3 rounded-xl text-sm font-bold border transition-all ${
-                            newAccount.role === r 
-                              ? "bg-gray-900 text-white border-gray-900" 
-                              : "bg-white text-gray-500 border-gray-200 hover:border-gray-400"
-                          }`}
-                        >
-                          {r.charAt(0).toUpperCase() + r.slice(1)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <button 
-                    disabled={creating}
-                    type="submit" 
-                    className="w-full py-4 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 disabled:bg-gray-400 transition-all shadow-lg shadow-gray-200 flex items-center justify-center gap-2"
-                  >
-                    {creating && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-                    {creating ? "Creating..." : "Create Account"}
-                  </button>
-                </form>
-              </div>
-            </div>
+              )}
+            </>
           )}
         </div>
       </main>

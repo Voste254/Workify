@@ -44,7 +44,7 @@ export default function Messages() {
   const filteredConvos = MOCK_CONVOS.filter(c => (!q || c.name.toLowerCase().includes(q)));
 
   return (
-    <div className="font-sans bg-gray-50 h-screen flex flex-col">
+    <div className="font-sans bg-gray-50 h-screen flex flex-col relative">
 
       {/* Top bar */}
       <div className="bg-white border-b border-gray-200 px-6 py-3.5 flex items-center justify-between shrink-0">
@@ -142,7 +142,20 @@ export default function Messages() {
           </div>
 
         </div>
+      </div>
 
+      {/* Coming Soon Overlay */}
+      <div className="absolute inset-0 z-50 flex items-center justify-center backdrop-blur-[1.5px] bg-white/10">
+         <div className="bg-white/90 p-10 rounded-[30px] shadow-2xl border border-white/50 flex flex-col items-center gap-3 transform -rotate-1 hover:rotate-0 transition-transform duration-500 cursor-default">
+            <div className="px-3 py-1 bg-gray-900 text-white text-[10px] font-bold uppercase tracking-[0.2em] rounded-full mb-2">
+              Development
+            </div>
+            <h2 className="text-4xl font-black text-gray-900 tracking-tighter italic">
+              Messaging <span className="text-gray-400">Coming Soon</span>
+            </h2>
+            <p className="text-gray-500 text-sm font-medium">Real-time candidate chat is currently in production.</p>
+            <div className="w-16 h-1.5 bg-gray-900 rounded-full mt-4" />
+         </div>
       </div>
     </div>
   );
