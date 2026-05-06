@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import NotificationModal from "./NotificationModal";
 import { useAuth } from "../../../contexts/AuthContext";
+import { supabase } from "../../../lib/supabaseClient";
 
 const TopBar = () => {
   const [open, setOpen] = useState(false);
@@ -27,7 +28,49 @@ const TopBar = () => {
     };
   }, [open]);
 
-  const { profile, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchUnreadCount = async () => {
+      const { count, error } = await supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("is_read", false);
+      
+      if (!error) setUnreadCount(count || 0);
+    };
+
+    fetchUnreadCount();
+
+    // Subscribe to new notifications
+    const channel = supabase
+      .channel("notifications-changes")
+      .on("postgres_changes", { 
+        event: "INSERT", 
+        schema: "public", 
+        table: "notifications",
+        filter: `user_id=eq.${user.id}`
+      }, () => {
+        fetchUnreadCount();
+      })
+      .on("postgres_changes", {
+        event: "UPDATE",
+        schema: "public",
+        table: "notifications",
+        filter: `user_id=eq.${user.id}`
+      }, () => {
+        fetchUnreadCount();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   // Detect current dashboard
   const isEmployer = location.pathname.includes("Employer");
@@ -101,7 +144,9 @@ const TopBar = () => {
             className="relative text-gray-600 hover:text-black flex items-center"
           >
             <Bell size={24} />
-            <span className="absolute top-0 right-0 h-2.5 w-2.5 bg-red-500 border-2 border-white rounded-full"></span>
+            {unreadCount > 0 && (
+              <span className="absolute top-0 right-0 h-2.5 w-2.5 bg-red-500 border-2 border-white rounded-full"></span>
+            )}
           </button>
           {open && <NotificationModal />}
         </div>
@@ -165,7 +210,9 @@ const TopBar = () => {
               className="relative p-2 bg-gray-100 rounded-full text-gray-600"
             >
               <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 border border-white rounded-full"></span>
+              {unreadCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 border border-white rounded-full"></span>
+              )}
             </button>
           </div>
 

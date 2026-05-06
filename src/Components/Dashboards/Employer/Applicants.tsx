@@ -79,6 +79,7 @@ function DetailPanel({ app, onClose, onAdvance, onReject }: { app: Application; 
   const nextStage = activeIdx >= 0 && activeIdx < STAGES_FLOW.length - 1 ? STAGES_FLOW[activeIdx + 1] : null;
   const [managerNote, setManagerNote] = useState("");
   const [noteError, setNoteError] = useState(false);
+  const [showResumeError, setShowResumeError] = useState(false);
 
   const handleAction = (action: "advance" | "reject") => {
     if (!managerNote.trim()) { setNoteError(true); return; }
@@ -190,10 +191,36 @@ function DetailPanel({ app, onClose, onAdvance, onReject }: { app: Application; 
         {/* Resources */}
         <p className={sectionLabel}>Documents</p>
         <div className="flex gap-2">
-          <button className="flex-1 p-2 bg-white text-gray-700 border border-gray-200 rounded-md text-sm font-semibold cursor-pointer font-sans flex gap-1.5 items-center justify-center">
+          <button
+            onClick={() => setShowResumeError(true)}
+            className="flex-1 p-2 bg-white text-gray-700 border border-gray-200 rounded-md text-sm font-semibold cursor-pointer font-sans flex gap-1.5 items-center justify-center hover:bg-gray-50 transition-colors"
+          >
             {Ico.download} View Resume
           </button>
         </div>
+
+        {/* No Resume Modal */}
+        {showResumeError && (
+          <div className="fixed inset-0 z-[10000] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
+              <div className="p-8 flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mb-5">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Resume Unavailable</h3>
+                <p className="text-gray-500 text-sm leading-relaxed mb-8">
+                  This applicant has not yet uploaded a resume to their profile. You can message them to request one.
+                </p>
+                <button
+                  onClick={() => setShowResumeError(false)}
+                  className="w-full py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-colors shadow-lg shadow-gray-200"
+                >
+                  Understood
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

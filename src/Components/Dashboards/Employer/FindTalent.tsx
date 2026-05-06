@@ -1,9 +1,10 @@
 import { useState, useMemo, useEffect } from "react";
 import { supabase } from "../../../lib/supabaseClient";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // ── Types & Config ─────────────────────────────────────────────────────────────
 interface Candidate {
-  id: string; name: string; role: string; location: string; rate: string;
+  id: string; userId: string; name: string; role: string; location: string; rate: string;
   rating: number; reviews: number; skills: string[]; image: string; isSaved: boolean; available: string; bio: string;
 }
 
@@ -77,7 +78,14 @@ function InteractiveStars({ rating, onRate }: { rating: number, onRate: (r: numb
 }
 
 // ── Detail Panel ───────────────────────────────────────────────────────────────
-function DetailPanel({ cand, onClose, onBookmark, onRate }: { cand: Candidate; onClose: () => void; onBookmark: () => void; onRate: (r: number) => void }) {
+function DetailPanel({ cand, onClose, onBookmark, onRate, onMessage, onInvite }: { 
+  cand: Candidate; 
+  onClose: () => void; 
+  onBookmark: () => void; 
+  onRate: (r: number) => void;
+  onMessage: () => void;
+  onInvite: () => void;
+}) {
   return (
     <div className="bg-white border-[1.5px] border-gray-200 rounded-[10px] h-full flex flex-col overflow-hidden">
       {/* Header */}
@@ -109,10 +117,16 @@ function DetailPanel({ cand, onClose, onBookmark, onRate }: { cand: Candidate; o
 
         <p className={sectionLabel}>Quick Actions</p>
         <div className="grid grid-cols-2 gap-2 mb-5">
-          <button className="p-2 bg-gray-900 text-white border-none rounded-md text-sm font-semibold cursor-pointer font-sans flex items-center justify-center gap-1.5 hover:bg-gray-800 transition-colors">
+          <button 
+            onClick={onMessage}
+            className="p-2 bg-gray-900 text-white border-none rounded-md text-sm font-semibold cursor-pointer font-sans flex items-center justify-center gap-1.5 hover:bg-gray-800 transition-colors"
+          >
             {Ico.mail} Message
           </button>
-          <button className="p-2 bg-white text-gray-900 border border-gray-200 rounded-md text-sm font-semibold cursor-pointer font-sans hover:bg-gray-50 transition-colors">
+          <button 
+            onClick={onInvite}
+            className="p-2 bg-white text-gray-900 border border-gray-200 rounded-md text-sm font-semibold cursor-pointer font-sans hover:bg-gray-50 transition-colors"
+          >
             Invite to Apply
           </button>
         </div>
@@ -147,17 +161,23 @@ function DetailPanel({ cand, onClose, onBookmark, onRate }: { cand: Candidate; o
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function FindTalent() {
+  const { user, profile: employerProfile } = useAuth();
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState("all");
   const [ratedIds, setRatedIds] = useState<string[]>([]);
+  
+  // Feedback states
+  const [showComingSoon, setShowComingSoon] = useState(false);
+  const [showInviteSuccess, setShowInviteSuccess] = useState(false);
+  const [isInviting, setIsInviting] = useState(false);
 
   useEffect(() => {
     (async () => {
       const { data, error } = await supabase
         .from("services")
-        .select(`id, title, rate, rate_type, skills, availability, location, rating, number_of_reviews, profiles(first_name, last_name, bio)`);
+        .select(`id, title, rate, rate_type, skills, availability, location, rating, number_of_reviews, profiles(id, first_name, last_name, bio)`);
       if (error) { console.error("FindTalent:", error.message); return; }
       const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='1.5'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E";
       setCandidates((data || []).map((s: any) => {
@@ -181,6 +201,7 @@ export default function FindTalent() {
           available,
           bio:      p?.bio || "",
           isSaved:  false,
+          userId:   p?.id || "",
         };
       }));
     })();
@@ -224,6 +245,33 @@ export default function FindTalent() {
     total: candidates.length,
     saved: candidates.filter(c => c.isSaved).length,
     available: candidates.filter(c => c.available === "Immediate").length,
+  };
+
+  const handleInvite = async (candidate: Candidate) => {
+    if (!user || isInviting) return;
+    
+    setIsInviting(true);
+    const employerName = `${employerProfile?.first_name || "An employer"} ${employerProfile?.last_name || ""}`.trim();
+    
+    const { error } = await supabase.from("notifications").insert([{
+      user_id: candidate.userId,
+      title: "New Job Invitation",
+      message: `${employerName} has invited you to apply for their project.`,
+      type: "invite",
+      metadata: {
+        employer_id: user.id,
+        employer_name: employerName,
+        service_id: candidate.id
+      }
+    }]);
+
+    setIsInviting(false);
+    if (!error) {
+      setShowInviteSuccess(true);
+    } else {
+      console.error("Invite error:", error.message);
+      alert("Failed to send invitation. Please try again.");
+    }
   };
 
   return (
@@ -270,10 +318,71 @@ export default function FindTalent() {
         </div>
         {selected && (
           <div className="sticky top-5 h-[calc(100vh-175px)] overflow-hidden">
-            <DetailPanel cand={selected} onClose={() => setSelectedId(null)} onBookmark={() => toggleBookmark(selected.id)} onRate={(rating) => handleRate(selected.id, rating)} />
+            <DetailPanel 
+              cand={selected} 
+              onClose={() => setSelectedId(null)} 
+              onBookmark={() => toggleBookmark(selected.id)} 
+              onRate={(rating) => handleRate(selected.id, rating)}
+              onMessage={() => setShowComingSoon(true)}
+              onInvite={() => handleInvite(selected)}
+            />
           </div>
         )}
       </div>
+
+      {/* Modals */}
+      {showComingSoon && (
+        <div className="fixed inset-0 z-[10000] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-8 flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-5">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Messaging Coming Soon</h3>
+              <p className="text-gray-500 text-sm leading-relaxed mb-8">
+                We're currently building our real-time messaging system. You'll be able to chat with talent directly very soon!
+              </p>
+              <button
+                onClick={() => setShowComingSoon(false)}
+                className="w-full py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-colors shadow-lg shadow-gray-200"
+              >
+                Great, thanks!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showInviteSuccess && (
+        <div className="fixed inset-0 z-[10000] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-8 flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-5">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Invitation Sent!</h3>
+              <p className="text-gray-500 text-sm leading-relaxed mb-8">
+                Your invitation has been sent to {selected?.name}. They will receive a notification on their dashboard.
+              </p>
+              <button
+                onClick={() => setShowInviteSuccess(false)}
+                className="w-full py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-100"
+              >
+                Awesome
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isInviting && (
+        <div className="fixed inset-0 z-[10000] bg-black/20 backdrop-blur-[2px] flex items-center justify-center">
+          <div className="bg-white p-6 rounded-2xl shadow-xl flex items-center gap-4">
+            <div className="w-6 h-6 border-3 border-gray-200 border-t-gray-900 rounded-full animate-spin" />
+            <span className="font-semibold text-gray-900">Sending invitation...</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
