@@ -69,7 +69,7 @@ export default function JobCard({ title, company, location, salary, type, rating
       {/* Footer */}
       <div className="flex items-center justify-between pt-3 border-t border-gray-100">
         <div>
-          <p className="text-base font-semibold text-gray-900 font-mono">KES {salary}</p>
+          <p className="text-base font-semibold text-gray-900 font-mono">{salary}</p>
           <p className="text-sm text-gray-400 mt-0.5">{daysAgo}d ago</p>
         </div>
         <button 

@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "../../../lib/supabaseClient";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 const I = (d: string, s = 14, fill = "none") => <svg width={s} height={s} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: d }} />;
@@ -11,45 +13,112 @@ const Ico = {
   dots: I('<circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/>', 14)
 };
 
-// ── Mock Data ──────────────────────────────────────────────────────────────────
-type NotifType = "application" | "system" | "rating" | "message";
+// ── Types ──────────────────────────────────────────────────────────────────────
+type NotifType = "application" | "system" | "rating" | "message" | "invite" | string;
 
 interface Notification {
   id: string;
   type: NotifType;
   title: string;
   message: string;
-  time: string;
-  read: boolean;
-  avatar?: string;
+  created_at: string;
+  is_read: boolean;
+  metadata?: any;
 }
 
-const MOCK_NOTIFS: Notification[] = [
-  { id: "1", type: "application", title: "New Application Received", message: "Sarah Wanjiku applied for Senior DevOps Engineer.", time: "10 mins ago", read: false, avatar: "https://i.pravatar.cc/150?img=5" },
-  { id: "2", type: "application", title: "New Application Received", message: "John Omondi applied for Construction Foreman.", time: "2 hours ago", read: false, avatar: "https://i.pravatar.cc/150?img=11" },
-  { id: "3", type: "message", title: "New Message", message: "Brian Mutisya sent you a message regarding the interview.", time: "1 day ago", read: true },
-  { id: "4", type: "rating", title: "New Rating Received", message: "You received a 5-star rating for the recent Gig project.", time: "2 days ago", read: true },
-  { id: "5", type: "system", title: "Job Posting Expiring Soon", message: "Your 'Marketing Manager' job post will expire in 2 days. Renew now to keep it active.", time: "3 days ago", read: true }
-];
+const daysAgo = (dateStr: string) => {
+  const n = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
+  return n === 0 ? "Today" : n === 1 ? "Yesterday" : `${n}d ago`;
+};
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function Notifications() {
-  const [notifs, setNotifs] = useState(MOCK_NOTIFS);
+  const { user } = useAuth();
+  const [notifs, setNotifs] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "unread">("all");
 
-  const unreadCount = notifs.filter(n => !n.read).length;
-  const filteredNotifs = filter === "all" ? notifs : notifs.filter(n => !n.read);
+  const fetchNotifications = async () => {
+    if (!user) return;
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
 
-  const markAllRead = () => setNotifs(notifs.map(n => ({ ...n, read: true })));
-  const markAsRead = (id: string) => setNotifs(notifs.map(n => n.id === id ? { ...n, read: true } : n));
-  const deleteNotif = (id: string) => setNotifs(notifs.filter(n => n.id !== id));
+    if (!error && data) {
+      setNotifs(data);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+
+    if (!user) return;
+    const channel = supabase
+      .channel("employer-notifications")
+      .on("postgres_changes", { 
+        event: "*", 
+        schema: "public", 
+        table: "notifications",
+        filter: `user_id=eq.${user.id}`
+      }, () => {
+        fetchNotifications();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
+  const unreadCount = notifs.filter(n => !n.is_read).length;
+  const filteredNotifs = filter === "all" ? notifs : notifs.filter(n => !n.is_read);
+
+  const markAllRead = async () => {
+    if (!user) return;
+    const { error } = await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("user_id", user.id)
+      .eq("is_read", false);
+    
+    if (!error) {
+      setNotifs(notifs.map(n => ({ ...n, is_read: true })));
+    }
+  };
+
+  const markAsRead = async (id: string) => {
+    const { error } = await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("id", id);
+    
+    if (!error) {
+      setNotifs(notifs.map(n => n.id === id ? { ...n, is_read: true } : n));
+    }
+  };
+
+  const deleteNotif = async (id: string) => {
+    const { error } = await supabase
+      .from("notifications")
+      .delete()
+      .eq("id", id);
+    
+    if (!error) {
+      setNotifs(notifs.filter(n => n.id !== id));
+    }
+  };
 
   const getIcon = (type: NotifType) => {
     switch(type) {
       case "application": return { i: Ico.briefcase, bgClass: "bg-blue-100", textClass: "text-blue-600" };
+      case "invite":      return { i: Ico.star,      bgClass: "bg-indigo-100", textClass: "text-indigo-600" };
       case "message":     return { i: Ico.user,      bgClass: "bg-amber-100", textClass: "text-amber-600" };
       case "rating":      return { i: Ico.star,      bgClass: "bg-emerald-100", textClass: "text-emerald-600" };
-      case "system":      return { i: Ico.bell,      bgClass: "bg-gray-100", textClass: "text-gray-500" };
+      default:            return { i: Ico.bell,      bgClass: "bg-gray-100", textClass: "text-gray-500" };
     }
   };
 
@@ -78,38 +147,36 @@ export default function Notifications() {
         </div>
 
         {/* List */}
-        <div className="bg-white border-[1.5px] border-gray-200 rounded-[10px] overflow-hidden">
-           {filteredNotifs.length === 0 ? (
+        <div className="bg-white border-[1.5px] border-gray-200 rounded-[10px] overflow-hidden shadow-sm">
+           {loading ? (
+             <div className="p-16 text-center text-gray-400 text-sm">Loading notifications...</div>
+           ) : filteredNotifs.length === 0 ? (
              <div className="p-16 text-center text-gray-400 text-sm">No notifications found.</div>
            ) : (
              <div className="flex flex-col">
                {filteredNotifs.map((n, idx) => {
                  const icn = getIcon(n.type);
                  return (
-                   <div key={n.id} onClick={() => markAsRead(n.id)} className={`flex gap-4 px-6 py-5 items-start cursor-pointer transition-colors duration-150 ${idx < filteredNotifs.length - 1 ? "border-b border-gray-200" : "border-none"} ${n.read ? "bg-white hover:bg-gray-50" : "bg-slate-50 hover:bg-slate-100"}`}>
+                   <div key={n.id} onClick={() => !n.is_read && markAsRead(n.id)} className={`flex gap-4 px-6 py-5 items-start cursor-pointer transition-colors duration-150 ${idx < filteredNotifs.length - 1 ? "border-b border-gray-200" : "border-none"} ${n.is_read ? "bg-white hover:bg-gray-50" : "bg-blue-50/40 hover:bg-blue-50/60"}`}>
                      
                      <div className="relative shrink-0">
-                       {n.avatar ? (
-                         <img src={n.avatar} alt="Sender" className="w-11 h-11 rounded-full object-cover border-[1.5px] border-gray-200" />
-                       ) : (
-                         <div className={`w-11 h-11 rounded-full flex items-center justify-center ${icn.bgClass} ${icn.textClass}`}>
-                           {icn.i}
-                         </div>
-                       )}
-                       {!n.read && <div className="absolute top-0 right-0 w-3 h-3 bg-blue-500 border-2 border-white rounded-full" />}
+                        <div className={`w-11 h-11 rounded-full flex items-center justify-center ${icn.bgClass} ${icn.textClass}`}>
+                          {icn.i}
+                        </div>
+                       {!n.is_read && <div className="absolute top-0 right-0 w-3 h-3 bg-blue-500 border-2 border-white rounded-full" />}
                      </div>
 
                      <div className="flex-1 min-w-0">
                        <div className="flex justify-between items-start">
-                         <p className={`m-[0_0_4px] text-sm text-gray-900 ${n.read ? "font-semibold" : "font-bold"}`}>{n.title}</p>
+                         <p className={`m-[0_0_4px] text-sm text-gray-900 ${n.is_read ? "font-semibold" : "font-bold"}`}>{n.title}</p>
                          <div className="flex items-center gap-3">
-                           <span className="text-xs text-gray-400 font-mono">{n.time}</span>
+                           <span className="text-xs text-gray-400 font-mono">{daysAgo(n.created_at)}</span>
                            <button onClick={(e) => { e.stopPropagation(); deleteNotif(n.id); }} title="Delete" className="bg-transparent border-none text-gray-400 cursor-pointer p-1 hover:text-gray-600 transition-colors">
                              {Ico.dots}
                            </button>
                          </div>
                        </div>
-                       <p className={`m-0 text-[13px] leading-relaxed ${n.read ? "text-gray-500" : "text-gray-700"}`}>{n.message}</p>
+                       <p className={`m-0 text-[13px] leading-relaxed ${n.is_read ? "text-gray-500" : "text-gray-700"}`}>{n.message}</p>
                      </div>
                      
                    </div>

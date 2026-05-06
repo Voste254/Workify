@@ -479,6 +479,19 @@ export default function FindJobsPage() {
     } else {
       setAppliedJobIds(prev => new Set(prev).add(job.id));
       showApplyToast("Application submitted successfully! 🎉", true);
+
+      // Notify the employer
+      await supabase.from("notifications").insert([{
+        user_id: job.employer_id,
+        title: "New Application Received",
+        message: `${seekerProfile.name || "A candidate"} has applied for the "${job.title}" position.`,
+        type: "application",
+        metadata: { 
+          job_id: job.id, 
+          seeker_id: user.id, 
+          applicant_name: seekerProfile.name 
+        }
+      }]);
     }
   };
 

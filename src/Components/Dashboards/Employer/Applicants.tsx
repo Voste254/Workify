@@ -13,7 +13,7 @@ interface StageHistoryEntry {
 }
 
 interface Application {
-  id: string; applicantName: string; jobTitle: string; jobCategory: "Corporate" | "Casual";
+  id: string; seekerId: string; applicantName: string; jobTitle: string; jobCategory: "Corporate" | "Casual";
   appliedDate: string; lastUpdated: string; stage: Stage; avatar: string;
   phone: string; location: string; note?: string; rateRequest: string;
   stageHistory: StageHistoryEntry[];
@@ -249,6 +249,7 @@ export default function Applicants() {
       if (!error && data) {
         const mapped: Application[] = data.map(app => ({
           id: app.id,
+          seekerId: app.seeker_id,
           applicantName: app.applicant_name || "Unknown Applicant",
           jobTitle: app.job_title || "Unknown Job",
           jobCategory: app.job_category || "Corporate",
@@ -309,6 +310,15 @@ export default function Applicants() {
         : a
       ));
       await updateApplicationDb(selected.id, nextStatus, newHistory, note);
+
+      // Notify the applicant
+      await supabase.from("notifications").insert([{
+        user_id: selected.seekerId,
+        title: "Application Status Update",
+        message: `Your application for "${selected.jobTitle}" has been moved to ${SC[nextStatus].label}.`,
+        type: "application",
+        metadata: { application_id: selected.id, stage: nextStatus }
+      }]);
     }
   };
 
@@ -326,6 +336,15 @@ export default function Applicants() {
       : a
     ));
     await updateApplicationDb(selected.id, "rejected", newHistory, note);
+
+    // Notify the applicant
+    await supabase.from("notifications").insert([{
+      user_id: selected.seekerId,
+      title: "Application Status Update",
+      message: `We regret to inform you that your application for "${selected.jobTitle}" has been rejected.`,
+      type: "application",
+      metadata: { application_id: selected.id, stage: "rejected" }
+    }]);
   };
 
   return (
