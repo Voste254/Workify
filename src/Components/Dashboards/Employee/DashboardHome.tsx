@@ -23,20 +23,7 @@ const stageColorMap: Record<string, string> = {
   withdrawn: "bg-gray-100 text-gray-500 border-gray-200",
 };
 
-const ALERTS = [
-  { icon: <AlertCircle size={14} className="text-amber-500 flex-shrink-0" />, text: "Portfolio task due tomorrow — Nation Media Group" },
-  { icon: <Bell size={14} className="text-blue-500 flex-shrink-0" />, text: "Interview confirmed: Safaricom PLC · Thu 10:00 AM" },
-  { icon: <CheckCircle size={14} className="text-green-600 flex-shrink-0" />, text: "Andela sent you an offer letter to review" },
-];
-
-const MISSING: { label: string; done: boolean }[] = [
-  { label: "Upload your CV", done: true },
-  { label: "Add a profile photo", done: true },
-  { label: "List at least 3 skills", done: true },
-  { label: "Set expected pay rate", done: false },
-  { label: "Write a bio", done: false },
-  { label: "Add your available days", done: false },
-];
+// Logic moved inside the component to use live profile data
 
 // ── Primitives ────────────────────────────────────────────────────────────────
 const SectionHeader = ({ title, action, onActionClick }: { title: string; action?: string; onActionClick?: () => void }) => (
@@ -63,6 +50,23 @@ export default function Dashboard({ setActivePage }: { setActivePage: (page: str
   const firstName = profile?.first_name;
   const profession = profile?.profession;
   const location = profile?.seeker_location;
+
+  // Derive Profile Strength & Action Items
+  const missingItems = [
+    { label: "Add a professional bio", done: !!profile?.bio },
+    { label: "List at least 3 skills", done: (profile?.skills?.length || 0) >= 3 },
+    { label: "Set your location", done: !!profile?.seeker_location },
+    { label: "Specify your profession", done: !!profile?.profession },
+    { label: "Add your contact phone", done: !!profile?.phone },
+  ];
+
+  const profileStrength = Math.round((missingItems.filter(m => m.done).length / missingItems.length) * 100);
+
+  const dynamicAlerts = [
+    !profile?.bio && { icon: <AlertCircle size={14} className="text-amber-500 flex-shrink-0" />, text: "Your profile is missing a bio. Add one to stand out to employers." },
+    (profile?.skills?.length || 0) < 3 && { icon: <Award size={14} className="text-blue-500 flex-shrink-0" />, text: "Add more skills to your profile to improve job matching." },
+    stats.offers > 0 && { icon: <CheckCircle size={14} className="text-green-600 flex-shrink-0" />, text: `You have ${stats.offers} pending job offer(s) to review!` },
+  ].filter(Boolean) as { icon: JSX.Element, text: string }[];
 
   // Fetch stats + recent applications + recommended jobs
   useEffect(() => {
@@ -217,7 +221,12 @@ export default function Dashboard({ setActivePage }: { setActivePage: (page: str
           <div className="lg:col-span-2">
             <SectionHeader title="Action required" />
             <Card>
-              {ALERTS.map((a, i) => (
+              {dynamicAlerts.length === 0 ? (
+                <div className="flex items-center gap-3 px-4 py-8 text-center justify-center text-sm text-gray-500 italic">
+                  <CheckCircle size={18} className="text-green-500" />
+                  You're all caught up! No urgent actions required.
+                </div>
+              ) : dynamicAlerts.map((a, i) => (
                 <div key={i} className="flex items-start gap-3 px-4 py-3.5 border-b border-gray-100 last:border-0">
                   {a.icon}
                   <p className="text-base text-gray-700 leading-snug">{a.text}</p>
@@ -232,14 +241,14 @@ export default function Dashboard({ setActivePage }: { setActivePage: (page: str
             <SectionHeader title="Profile strength" action="Edit profile" onActionClick={() => setActivePage("profile")} />
             <Card className="p-4">
               <div className="flex items-end justify-between mb-2">
-                <p className="text-4xl font-bold text-gray-900 font-mono">50%</p>
-                <p className="text-sm text-gray-400 mb-1">{MISSING.filter(m => m.done).length}/{MISSING.length} complete</p>
+                <p className="text-4xl font-bold text-gray-900 font-mono">{profileStrength}%</p>
+                <p className="text-sm text-gray-400 mb-1">{missingItems.filter(m => m.done).length}/{missingItems.length} complete</p>
               </div>
               <div className="w-full h-1.5 bg-gray-100 mb-4">
-                <div className="h-full bg-gray-900 transition-all" style={{ width: `50%` }} />
+                <div className="h-full bg-gray-900 transition-all" style={{ width: `${profileStrength}%` }} />
               </div>
               <div className="space-y-2">
-                {MISSING.map(({ label, done }) => (
+                {missingItems.map(({ label, done }) => (
                   <div key={label} className={`flex items-center gap-2 text-sm ${done ? "text-gray-400 line-through" : "text-gray-700"}`}>
                     <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center flex-shrink-0 ${done ? "bg-green-600" : "border border-gray-300"}`}>
                       {done && <svg width="8" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" /></svg>}
